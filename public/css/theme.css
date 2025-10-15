@@ -1,0 +1,145 @@
+/* Cores Globais */
+:root {
+    --primary-color: #f0b354;    /* Dourado */
+    --primary-hover: #d9a24a;   /* Dourado mais escuro para hover */
+    --primary-light: #f8e0b7;   /* Dourado claro para fundos */
+    --secondary-color: #041a31; /* Azul Royal */
+    --secondary-hover: #031425; /* Azul Royal mais escuro */
+    --light-color: #f8f9fa;
+    --dark-color: #212529;
+    --border-color: rgba(240, 179, 84, 0.2);
+    --text-on-primary: #ffffff;
+    --text-on-secondary: #ffffff;
+}
+
+/* Estilos Globais */
+body {
+    color: var(--dark-color);
+    background-color: #f5f5f5;
+}
+
+a {
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: var(--primary-hover);
+    text-decoration: none;
+}
+
+/* Botões */
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: var(--secondary-color);
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-hover);
+    border-color: var(--primary-hover);
+    color: var(--secondary-color);
+}
+
+.btn-outline-primary {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: var(--secondary-color);
+}
+
+/* Cabeçalhos */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--secondary-color);
+}
+
+/* Links de navegação */
+.nav-link {
+    color: var(--dark-color);
+}
+
+.nav-link:hover,
+.nav-link:focus {
+    color: var(--primary-color);
+}
+
+/* Cards */
+.card {
+    border: 1px solid var(--border-color);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.card-header {
+    background-color: var(--secondary-color);
+    color: var(--text-on-secondary);
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* Formulários */
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(240, 179, 84, 0.25);
+}
+
+/* Tabelas */
+.table thead th {
+    background-color: var(--secondary-color);
+    color: var(--text-on-secondary);
+    border-color: var(--border-color);
+}
+
+.table-hover tbody tr:hover {
+    background-color: var(--primary-light);
+}
+
+/* Alertas */
+.alert-primary {
+    background-color: var(--primary-light);
+    border-color: var(--primary-color);
+    color: var(--dark-color);
+}
+
+/* Badges */
+.badge-primary {
+    background-color: var(--primary-color);
+    color: var(--secondary-color);
+}
+
+/* Paginação */
+.page-item.active .page-link {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: var(--secondary-color);
+}
+
+.page-link {
+    color: var(--primary-color);
+}
+
+.page-link:hover {
+    color: var(--primary-hover);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-hover);
+}

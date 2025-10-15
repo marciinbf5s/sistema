@@ -1,0 +1,431 @@
+/* Estilos para barras de rolagem */
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #c1c1c1 #f1f1f1;
+}
+
+/* Chrome, Edge e Safari */
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: #c1c1c1;
+  border-radius: 4px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: #a8a8a8;
+}
+
+/* Estilos para o menu suspenso */
+.nav-item.dropdown .dropdown-menu {
+  border: none;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+  border-radius: 0.5rem;
+  padding: 0.5rem 0;
+  margin-top: 0.25rem;
+  background-color: #fff;
+}
+
+.nav-item.dropdown .dropdown-menu .dropdown-item {
+  padding: 0.5rem 1.5rem;
+  color: #4a5568;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+}
+
+.nav-item.dropdown .dropdown-menu .dropdown-item i {
+  margin-right: 0.75rem;
+  font-size: 1rem;
+  width: 20px;
+  text-align: center;
+}
+
+.nav-item.dropdown .dropdown-menu .dropdown-item:hover {
+  background-color: rgba(240, 179, 84, 0.1);
+  color: #d9a24a;
+}
+
+.nav-item.dropdown .dropdown-menu .dropdown-item.active {
+  background-color: rgba(240, 179, 84, 0.1);
+  color: #d9a24a;
+  font-weight: 500;
+}
+
+/* Estilo para o item de menu ativo com subitens */
+.nav-item.dropdown.show > .nav-link,
+.nav-item.dropdown .nav-link.active {
+  color: #d9a24a;
+  background-color: rgba(240, 179, 84, 0.1);
+}
+
+/* Estilo para o ícone de seta */
+.nav-item.dropdown .nav-link::after {
+  transition: transform 0.2s ease;
+  margin-left: auto;
+  display: inline-block;
+  vertical-align: 0.255em;
+  content: "";
+  border-top: 0.3em solid;
+  border-right: 0.3em solid transparent;
+  border-bottom: 0;
+  border-left: 0.3em solid transparent;
+}
+
+.nav-item.dropdown.show .nav-link::after {
+  transform: rotate(180deg);
+}
+
+/* Garante que o dropdown fique visível quando o item estiver ativo */
+.nav-item.dropdown.show .dropdown-menu {
+  display: block;
+}
+
+/* Estilo para itens ativos dentro do dropdown */
+.dropdown-item.active, 
+.dropdown-item:active {
+  background-color: rgba(240, 179, 84, 0.1);
+  color: #d9a24a;
+}
+
+/* Melhora a aparência do dropdown em telas menores */
+@media (max-width: 991.98px) {
+  .sidebar .dropdown-menu {
+    position: static !important;
+    transform: none !important;
+    width: 100%;
+    margin-top: 0;
+    border: none;
+    box-shadow: none;
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+  
+  .sidebar .dropdown-item {
+    padding-left: 3rem;
+    color: rgba(255, 255, 255, 0.8);
+  }
+  
+  .sidebar .dropdown-item:hover {
+    background-color: rgba(240, 179, 84, 0.1);
+  }
+}
+
+/* Estilos para o menu expansível */
+.sidebar .menu-toggle {
+    display: flex;
+    align-items: center;
+    position: relative;
+    padding-right: 2.5rem !important;
+}
+
+.sidebar .toggle-icon {
+    position: absolute;
+    right: 1rem;
+    transition: transform 0.3s ease;
+    font-size: 0.75rem;
+}
+
+.sidebar .menu-toggle[aria-expanded="true"] .toggle-icon {
+    transform: rotate(180deg);
+}
+
+.sidebar .submenu {
+    padding-left: 1.5rem;
+    list-style: none;
+    margin: 0;
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 0.3rem;
+    margin: 0 0.5rem 0.5rem 1.5rem;
+    overflow: hidden;
+}
+
+.sidebar .submenu .nav-link {
+    padding: 0.5rem 1rem !important;
+    margin: 0.1rem 0 !important;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.8) !important;
+    border-radius: 0.25rem !important;
+}
+
+.sidebar .submenu .nav-link:hover {
+    background-color: rgba(240, 179, 84, 0.2) !important;
+    color: #f0b354 !important;
+    transform: none;
+}
+
+.sidebar .submenu .nav-link.active {
+    background-color: rgba(240, 179, 84, 0.3) !important;
+    color: #f0b354 !important;
+    font-weight: 500;
+    border-left: 2px solid #f0b354;
+}
+
+/* Estilos do Menu Lateral */
+.sidebar {
+    min-height: 100vh;
+    width: 250px;
+    background: #041a31; /* Azul Royal */
+    color: #f0b354; /* Dourado */
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    transition: all 0.3s;
+    overflow-y: auto;
+    padding-bottom: 20px;
+}
+
+.sidebar .nav-link {
+    color: #ffffff; /* Texto branco */
+    padding: 0.8rem 1.5rem;
+    margin: 0.2rem 1rem;
+    border-radius: 0.3rem;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+}
+
+.sidebar .nav-link:hover {
+    background: rgba(240, 179, 84, 0.1);
+    color: #f0b354; /* Dourado */
+    text-decoration: none;
+    transform: translateX(5px);
+}
+
+.sidebar .nav-link.active {
+    background: rgba(240, 179, 84, 0.2);
+    color: #f0b354; /* Dourado */
+    border-left: 3px solid #f0b354; /* Dourado */
+    font-weight: 500;
+}
+
+.sidebar .nav-link i {
+    margin-right: 10px;
+    width: 20px;
+    text-align: center;
+    color: #f0b354; /* Dourado */
+}
+
+.sidebar-header {
+    padding: 1.5rem 1.5rem 1rem;
+    border-bottom: 1px solid rgba(240, 179, 84, 0.1);
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+/* Estilos para a seção de perfil do usuário */
+.user-profile {
+    padding: 0.75rem 1rem !important;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    background: none !important;
+    border: none !important;
+    position: relative;
+    margin-top: 0.5rem;
+}
+
+/* Linha separadora acima do perfil do usuário */
+.user-profile::before {
+    content: '';
+    position: absolute;
+    top: -0.4rem;
+    left: 1rem;
+    right: 1rem;
+    height: 1.5px;
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(240, 179, 84, 0.4) 20%, 
+        rgba(240, 179, 84, 0.6) 50%, 
+        rgba(240, 179, 84, 0.4) 80%, 
+        transparent
+    );
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+}
+
+.user-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #e0e0e0;
+    background-color: rgba(240, 179, 84, 0.15) !important;
+    font-size: 0.9rem;
+}
+
+.user-info {
+    margin-left: 0.5rem;
+    line-height: 1.3;
+    overflow: hidden;
+}
+
+.user-name {
+    color: #f0b354; /* Cor dourada para o nome do usuário */
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: 0.2px;
+    text-shadow: 0 0 5px rgba(240, 179, 84, 0.3);
+}
+
+.user-role {
+    color: #a0a0a0;
+    font-size: 0.65rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-top: 1px;
+}
+
+.sidebar-brand {
+    color: #f0b354; /* Dourado */
+    text-decoration: none;
+    font-size: 1.25rem;
+    font-weight: 600;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    padding: 0.5rem 0;
+    transition: all 0.3s;
+}
+
+.sidebar-brand i {
+    font-size: 1.5rem;
+    color: #f0b354; /* Dourado */
+    transition: all 0.3s;
+}
+
+.sidebar-brand:hover {
+    color: #f0b354; /* Dourado */
+    transform: scale(1.02);
+}
+
+.sidebar-divider {
+    height: 1px;
+    margin: 1rem 1.5rem;
+    background-color: rgba(240, 179, 84, 0.1);
+}
+
+/* Responsividade */
+@media (max-width: 767.98px) {
+    .sidebar {
+        margin-left: -250px;
+    }
+    
+    .sidebar.active {
+        margin-left: 0;
+    }
+    
+    .main-content {
+        margin-left: 0 !important;
+    }
+    
+    .navbar {
+        padding-left: 1rem !important;
+    }
+}
+
+/* Animações */
+@keyframes slideIn {
+    from {
+        transform: translateX(-100%);
+    }
+    to {
+        transform: translateX(0);
+    }
+}
+
+.sidebar {
+    animation: slideIn 0.3s ease-out;
+}
+
+/* Estilo para o botão de toggle em telas pequenas */
+#sidebarToggle {
+    display: none;
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 1050;
+    background: #f0b354; /* Dourado */
+    border: none;
+    color: #041a31; /* Azul Royal */
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s;
+    align-items: center;
+    justify-content: center;
+}
+
+#sidebarToggle:hover {
+    background: #d9a24a; /* Dourado mais escuro */
+    transform: scale(1.05);
+    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.3);
+}
+
+#sidebarToggle i {
+    font-size: 1.25rem;
+}
+
+@media (max-width: 767.98px) {
+    #sidebarToggle {
+        display: block;
+    }
+}
+
+/* Ajustes para o conteúdo principal */
+.main-content {
+    margin-left: 250px;
+    padding: 1.5rem;
+    transition: all 0.3s;
+    min-height: 100vh;
+    background: #f8f9fa;
+    overflow: visible;
+    height: auto;
+}
+
+/* Ajustes para a navbar */
+.navbar {
+    transition: all 0.3s;
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 250px;
+    z-index: 1030;
+    background: #041a31; /* Azul Royal */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    height: 4rem;
+    display: flex;
+    align-items: center;
+    padding: 0 1.5rem;
+    color: #f0b354; /* Dourado */
+}
+
+/* Ajustes para o rodapé */
+.footer {
+    margin-left: 250px;
+    transition: all 0.3s;
+}
+
+@media (max-width: 767.98px) {
+    .footer {
+        margin-left: 0;
+    }
+}

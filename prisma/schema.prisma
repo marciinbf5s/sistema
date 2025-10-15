@@ -1,0 +1,159 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            Int            @id @default(autoincrement())
+  name          String
+  email         String         @unique
+  password      String
+  role          RoleName       @default(USER)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  status        UserStatus     @default(ATIVO)
+  clientes      Cliente[]
+  profissionais Profissional[]
+}
+
+model ConvenioProcedimento {
+  id             Int           @id @default(autoincrement())
+  convenioId     Int
+  procedimentoId Int
+  valor          Float
+  ativo          Boolean       @default(true)
+  criadoEm       DateTime      @default(now()) @map("createdAt")
+  atualizadoEm   DateTime      @updatedAt @map("updatedAt")
+  convenio       convenios     @relation(fields: [convenioId], references: [id])
+  procedimento   procedimentos @relation(fields: [procedimentoId], references: [id])
+
+  @@unique([convenioId, procedimentoId])
+  @@map("convenios_procedimentos")
+}
+
+model Cliente {
+  id             Int            @id @default(autoincrement())
+  nome           String         @db.VarChar(100)
+  cpf            String?        @unique @db.VarChar(14)
+  telefone       String?        @db.VarChar(20)
+  email          String?        @db.VarChar(100)
+  dataNascimento DateTime?
+  rua            String?        @db.VarChar(255)
+  numero         String?        @db.VarChar(20)
+  complemento    String?        @db.VarChar(100)
+  bairro         String?        @db.VarChar(100)
+  cidade         String?        @db.VarChar(100)
+  estado         String?        @db.VarChar(2)
+  cep            String?        @db.VarChar(9)
+  status         StatusCliente  @default(ATIVO)
+  observacoes    String?
+  usuarioId      Int
+  criadoEm       DateTime       @default(now()) @map("createdAt")
+  atualizadoEm   DateTime       @updatedAt @map("updatedAt")
+  agendamentos   agendamentos[]
+  usuario        User           @relation(fields: [usuarioId], references: [id])
+
+  @@map("clientes")
+}
+
+model Profissional {
+  id             Int            @id @default(autoincrement())
+  nome           String         @db.VarChar(100)
+  cpf            String?        @unique @db.VarChar(14)
+  rg             String?        @db.VarChar(20)
+  telefone       String?        @db.VarChar(20)
+  celular        String?        @db.VarChar(20)
+  email          String?        @unique @db.VarChar(100)
+  dataNascimento DateTime?
+  especialidade  String?        @db.VarChar(100)
+  registro       String?        @db.VarChar(50)
+  rua            String?        @db.VarChar(255)
+  numero         String?        @db.VarChar(20)
+  complemento    String?        @db.VarChar(100)
+  bairro         String?        @db.VarChar(100)
+  cidade         String?        @db.VarChar(100)
+  estado         String?        @db.VarChar(2)
+  cep            String?        @db.VarChar(9)
+  status         StatusCliente  @default(ATIVO)
+  usuarioId      Int
+  criadoEm       DateTime       @default(now()) @map("createdAt")
+  atualizadoEm   DateTime       @updatedAt @map("updatedAt")
+  especialidades String[]       @default([])
+  agendamentos   agendamentos[]
+  usuario        User           @relation(fields: [usuarioId], references: [id])
+
+  @@map("profissionais")
+}
+
+model agendamentos {
+  id             Int           @id @default(autoincrement())
+  clienteId      Int
+  procedimentoId Int
+  convenioId     Int?
+  valorCobrado   Float
+  startTime      DateTime
+  endTime        DateTime
+  status         Status        @default(AGENDADO)
+  observacoes    String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime
+  profissionalId Int?
+  clientes       Cliente       @relation(fields: [clienteId], references: [id])
+  convenios      convenios?    @relation(fields: [convenioId], references: [id])
+  procedimentos  procedimentos @relation(fields: [procedimentoId], references: [id])
+  profissionais  Profissional? @relation(fields: [profissionalId], references: [id])
+}
+
+model convenios {
+  id            Int                    @id @default(autoincrement())
+  nome          String                 @unique
+  descricao     String?
+  ativo         Boolean                @default(true)
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime
+  agendamentos  agendamentos[]
+  procedimentos ConvenioProcedimento[]
+}
+
+model procedimentos {
+  id           Int                    @id @default(autoincrement())
+  name         String
+  descricao    String?
+  durationMins Int
+  defaultPrice Float?
+  ativo        Boolean                @default(true)
+  createdAt    DateTime               @default(now())
+  updatedAt    DateTime
+  agendamentos agendamentos[]
+  convenios    ConvenioProcedimento[]
+}
+
+enum UserStatus {
+  ATIVO
+  INATIVO
+  PENDENTE
+  BLOQUEADO
+}
+
+enum RoleName {
+  USER
+  ADMIN
+}
+
+enum StatusCliente {
+  ATIVO
+  INATIVO
+  PENDENTE
+  BLOQUEADO
+}
+
+enum Status {
+  AGENDADO
+  EM_ANDAMENTO
+  FINALIZADO
+  CANCELADO
+}

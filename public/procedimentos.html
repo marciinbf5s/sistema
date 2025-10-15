@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Procedimentos - Sistema de Gestão Clínica</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link href="css/sidebar.css" rel="stylesheet">
+    <link href="css/theme.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #f0b354;    /* Dourado */
+            --primary-hover: #d9a24a;   /* Dourado mais escuro */
+            --secondary-color: #041a31; /* Azul Royal */
+            --secondary-hover: #031425; /* Azul Royal mais escuro */
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --border-color: rgba(240, 179, 84, 0.2);
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .btn-primary:hover, .btn-primary:focus {
+            background-color: var(--primary-hover);
+            border-color: var(--primary-hover);
+        }
+        
+        /* Botão Editar - Amarelo suave */
+        .action-buttons .btn-outline-warning {
+            color: #ed6c02;
+            border-color: #ffe082;
+            background-color: #fff8e1;
+            transition: all 0.2s ease-in-out;
+        }
+        
+        .action-buttons .btn-outline-warning:hover {
+            background-color: #ed6c02;
+            color: white;
+            border-color: #ed6c02;
+        }
+        
+        /* Botão Excluir - Vermelho suave */
+        .action-buttons .btn-outline-danger {
+            color: #c62828;
+            border-color: #ffcdd2;
+            background-color: #ffebee;
+            transition: all 0.2s ease-in-out;
+        }
+        
+        .action-buttons .btn-outline-danger:hover {
+            background-color: #c62828;
+            color: white;
+            border-color: #c62828;
+        }
+        
+        /* Ajustes para os botões de ação */
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            flex-wrap: nowrap;
+        }
+        
+        .action-buttons .btn {
+            width: 32px;
+            height: 32px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            border-radius: 4px;
+        }
+        
+        .table-hover > tbody > tr:hover {
+            background-color: #f5f7fa !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+        }
+        
+        .page-title {
+            color: var(--secondary-color);
+            font-weight: 600;
+        }
+        
+        .table > :not(:last-child) > :last-child > * {
+            border-bottom-color: #e0e0e0;
+            border-bottom-width: 2px;
+        }
+        
+        .table-striped > tbody > tr:nth-of-type(odd) {
+            background-color: #f9fafb;
+        }
+        
+        .table-striped > tbody > tr:nth-of-type(even) {
+            background-color: #ffffff;
+        }
+        
+        .table > thead th {
+            border-top: none;
+            border-bottom: 2px solid #e0e0e0 !important;
+            padding: 1.1rem 1.5rem;
+            background-color: #f8f9fa;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
+        }
+        
+        .table > tbody > tr {
+            border-bottom: 1px solid #e8e9ea;
+            transition: background-color 0.15s ease;
+        }
+        
+        .table > tbody > tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .table td {
+            padding: 1.1rem 1.5rem;
+            vertical-align: middle;
+            border-top: 1px solid #f0f0f0;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+        }
+        
+        .action-buttons .btn {
+            width: 32px;
+            height: 32px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            border-radius: 4px;
+            margin: 0 2px;
+        }
+        
+        .badge {
+            font-weight: 500;
+            padding: 0.4em 0.75em;
+        }
+        
+        .badge-success {
+            background-color: #28a74520 !important;
+            color: #28a745 !important;
+            font-weight: 500;
+            padding: 0.4em 0.75em;
+            border-radius: 4px;
+        }
+        
+        .badge-warning {
+            background-color: #ffc10720;
+            color: #ffc107;
+        }
+        
+        .form-control, .form-select {
+            border-radius: 0.375rem;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #dee2e6;
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(240, 179, 84, 0.25);
+        }
+        
+        .search-box {
+            position: relative;
+            max-width: 100%;
+        }
+        
+        .page-header {
+            padding: 1.5rem 0;
+            background-color: transparent;
+        }
+        
+        .page-title {
+            font-weight: 800 !important;
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        /* Estilo para os nomes dos procedimentos na tabela */
+        #procedimentosTable tbody td:nth-child(2) {
+            font-weight: 600;
+            color: #041a31; /* Mesma cor do título da página */
+            font-size: 0.95rem;
+        }
+        
+        /* Estilo para os cabeçalhos da tabela */
+        #procedimentosTable thead th {
+            font-weight: 700 !important; /* Negrito mais forte */
+            color: #000000 !important; /* Texto preto */
+            background-color: #e9ecef !important; /* Tom de cinza mais escuro */
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #ced4da;
+        }
+        
+        .search-box {
+            position: relative;
+            width: 100%;
+            max-width: 300px;
+        }
+        
+        .search-box .input-group-text {
+            background-color: #fff;
+            border-right: 0;
+        }
+        
+        .search-box .form-control {
+            border-left: 0;
+            padding-left: 0;
+            background-color: #fff;
+        }
+        
+        .search-box .form-control:focus {
+            border-color: #dee2e6;
+            box-shadow: none;
+        }
+        
+        /* Estilo do cabeçalho */
+        .page-header {
+            padding: 0 0 1.5rem 0;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .search-box .form-control {
+            padding-left: 2.5rem;
+            border-radius: 20px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .search-box .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+            z-index: 10;
+        }
+        
+        .suggestion-item {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .suggestion-item:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .suggestion-item .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: #f0b354;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .suggestion-item .info {
+            flex: 1;
+        }
+        
+        .suggestion-item .name {
+            font-weight: 500;
+            margin-bottom: 0;
+            line-height: 1.2;
+        }
+        
+        .suggestion-item .email {
+            font-size: 0.8rem;
+            color: #6c757d;
+            margin-bottom: 0;
+        }
+        
+        @media (max-width: 768px) {
+            .action-buttons {
+                flex-direction: column;
+                gap: 0.25rem;
+            }
+            .action-buttons .btn {
+                width: 100%;
+                margin: 0.1rem 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Menu Lateral será carregado dinamicamente via sidebar.js -->
+    
+    <!-- Botão de toggle para o menu lateral em dispositivos móveis -->
+    <button class="btn btn-light d-md-none position-fixed" id="sidebarToggle" style="z-index: 1050; top: 10px; left: 10px;">
+        <i class="bi bi-list"></i>
+    </button>
+    
+    <!-- Conteúdo Principal -->
+    <div class="main-content">
+        <div class="container-fluid p-0">
+            <!-- Cabeçalho da Página -->
+            <div class="page-header">
+                <div class="row align-items-center">
+                    <div class="col-12 col-md-6 mb-3 mb-md-0">
+                        <div>
+                            <h1 class="page-title fw-bolder" style="font-weight: 800 !important; margin-bottom: 10px;">
+                                <i class="bi bi-clipboard2-pulse-fill me-2" style="color: #f0b354;"></i>Procedimentos
+                            </h1>
+                            <p class="text-muted mb-0 mt-2">Gerencie os procedimentos da clínica</p>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <div class="d-flex flex-wrap justify-content-md-end" style="gap: 10px;">
+                            <div class="input-group" style="width: 250px;">
+                                <span class="input-group-text bg-white border-end-0">
+                                    <i class="bi bi-search"></i>
+                                </span>
+                                <input type="text" id="searchInput" class="form-control border-start-0" placeholder="Buscar procedimentos...">
+                            </div>
+                            <button type="button" class="btn btn-primary d-flex align-items-center" id="addProcedimentoBtn" style="height: 38px;">
+                                <i class="bi bi-plus-lg me-1"></i>
+                                <span class="d-none d-sm-inline">Novo Procedimento</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tabela de Procedimentos -->
+            <div class="card">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0" id="procedimentosTable">
+                            <thead>
+                                <tr>
+                                    <th style="width: 5%;">ID</th>
+                                    <th style="width: 35%; text-align: left;">Nome</th>
+                                    <th style="width: 30%;">Descrição</th>
+                                    <th style="width: 10%; text-align: center; white-space: nowrap;">Duração (min)</th>
+                                    <th style="width: 15%; text-align: right;">Valor R$</th>
+                                    <th style="width: 10%; text-align: center;">Status</th>
+                                    <th style="width: 10%; text-align: center;">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="procedimentosTableBody">
+                                <!-- Dados serão carregados via JavaScript -->
+                                <tr>
+                                    <td colspan="7" class="text-center py-4">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Carregando...</span>
+                                        </div>
+                                        <p class="mt-2 mb-0">Carregando procedimentos...</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer bg-white d-flex justify-content-between align-items-center">
+                    <div class="text-muted small">
+                        Mostrando <span id="showingFrom">0</span> a <span id="showingTo">0</span> de <span id="totalProcedimentos">0</span> procedimento(s)
+                    </div>
+                    <nav aria-label="Navegação de páginas">
+                        <ul class="pagination pagination-sm mb-0" id="pagination">
+                            <!-- A navegação será preenchida dinamicamente pelo JavaScript -->
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Adicionar/Editar Procedimento -->
+    <div class="modal fade" id="procedimentoModal" tabindex="-1" aria-labelledby="procedimentoModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="procedimentoModalLabel">Adicionar Novo Procedimento</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <form id="procedimentoForm">
+                    <div class="modal-body">
+                        <input type="hidden" id="procedimentoId">
+                        <div class="mb-3">
+                            <label for="procedimentoNome" class="form-label">Nome do Procedimento</label>
+                            <input type="text" class="form-control" id="procedimentoNome" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="procedimentoDescricao" class="form-label">Descrição</label>
+                            <textarea class="form-control" id="procedimentoDescricao" rows="3"></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="procedimentoDuracao" class="form-label">Duração (minutos)</label>
+                                <input type="number" class="form-control" id="procedimentoDuracao" min="1" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="procedimentoValor" class="form-label">Valor Padrão (R$)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">R$</span>
+                                    <input type="number" class="form-control" id="procedimentoValor" min="0" step="0.01">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="procedimentoAtivo" checked>
+                            <label class="form-check-label" for="procedimentoAtivo">Ativo</label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Salvar Procedimento</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmação de Exclusão -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmar Exclusão</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Tem certeza que deseja excluir este procedimento? Esta ação não pode ser desfeita.</p>
+                    <p class="mb-0"><strong>Procedimento:</strong> <span id="procedimentoToDelete"></span></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" id="confirmDelete">Excluir</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="js/sidebar.js"></script>
+    <script src="js/api.js"></script>
+    
+    <script>
+        // Variáveis globais
+        let procedimentos = [];
+        let currentPage = 1;
+        const itemsPerPage = 10;
+        let procedimentoToDelete = null;
+
+        // Elementos do DOM
+        const procedimentosTableBody = document.getElementById('procedimentosTableBody');
+        const procedimentoForm = document.getElementById('procedimentoForm');
+        const addProcedimentoBtn = document.getElementById('addProcedimentoBtn');
+        const searchInput = document.getElementById('searchInput');
+        const procedimentoModal = new bootstrap.Modal(document.getElementById('procedimentoModal'));
+        const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+        const confirmDeleteBtn = document.getElementById('confirmDelete');
+
+        // Função para formatar valor monetário
+        function formatarMoeda(valor) {
+            if (valor === null || valor === undefined) return 'R$ 0,00';
+            return new Intl.NumberFormat('pt-BR', { 
+                style: 'currency', 
+                currency: 'BRL' 
+            }).format(valor);
+        }
+
+        // Função para obter o token JWT do localStorage
+        function getAuthToken() {
+            return localStorage.getItem('token');
+        }
+
+        // Função para verificar autenticação
+        async function checkAuth() {
+            const token = getAuthToken();
+            if (!token) {
+                return false;
+            }
+            
+            try {
+                const response = await fetchWithAuth('/api/auth/verify');
+                return response.success;
+            } catch (error) {
+                console.error('Erro ao verificar autenticação:', error);
+                return false;
+            }
+        }
+
+        // Função para fazer requisições autenticadas
+        async function fetchWithAuth(url, options = {}) {
+            console.log('Iniciando fetchWithAuth...');
+            const token = getAuthToken();
+            console.log('Token obtido:', token ? 'Token presente' : 'Token ausente');
+            
+            if (!options.headers) {
+                options.headers = {};
+            }
+            
+            if (token) {
+                options.headers['Authorization'] = `Bearer ${token}`;
+                options.credentials = 'include'; // Importante para enviar cookies
+                console.log('Token adicionado ao cabeçalho de autorização');
+            } else {
+                console.error('Nenhum token encontrado, redirecionando para login...');
+                // Se não houver token, redireciona para o login
+                window.location.href = 'login.html';
+                return { success: false, error: 'Não autenticado' };
+            }
+            
+            // Configura o content-type para JSON se não estiver definido e houver body
+            if (options.body && typeof options.body === 'object' && !(options.body instanceof FormData)) {
+                options.headers['Content-Type'] = 'application/json';
+                options.body = JSON.stringify(options.body);
+                console.log('Corpo da requisição configurado como JSON');
+            }
+            
+            try {
+                console.log(`Fazendo requisição para ${url}`, { 
+                    method: options.method || 'GET', 
+                    headers: options.headers,
+                    credentials: options.credentials,
+                    body: options.body ? '*** DADOS DO BODY ***' : undefined
+                });
+                
+                const response = await fetch(url, {
+                    ...options,
+                    headers: {
+                        'Accept': 'application/json',
+                        ...options.headers
+                    },
+                    credentials: 'include' // Importante para enviar cookies
+                });
+                
+                console.log(`Resposta recebida de ${url}:`, { 
+                    status: response.status, 
+                    statusText: response.statusText,
+                    headers: Object.fromEntries(response.headers.entries())
+                });
+                
+                // Verifica se a resposta é JSON
+                const contentType = response.headers.get('content-type');
+                const isJson = contentType && contentType.includes('application/json');
+                console.log('Tipo de conteúdo da resposta:', contentType, 'é JSON?', isJson);
+                
+                // Se não for JSON, retorna o texto da resposta
+                if (!isJson) {
+                    const text = await response.text();
+                    console.log(`Resposta não-JSON de ${url}:`, text);
+                    if (!response.ok) {
+                        console.error('Erro na resposta não-JSON:', text);
+                        throw new Error(text || 'Erro na requisição');
+                    }
+                    return { success: true, data: text };
+                }
+                
+                // Se for JSON, processa normalmente
+                let data;
+                try {
+                    data = await response.json();
+                    console.log(`Resposta JSON de ${url}:`, data);
+                } catch (jsonError) {
+                    console.error('Erro ao fazer parse do JSON:', jsonError);
+                    data = {};
+                }
+                
+                if (!response.ok) {
+                    // Se o token estiver inválido ou expirado
+                    if (response.status === 401 || response.status === 403) {
+                        console.error('Erro de autenticação:', data);
+                        // Remove o token inválido
+                        localStorage.removeItem('token');
+                        // Redireciona para o login com um parâmetro para indicar sessão expirada
+                        window.location.href = 'login.html?session=expired';
+                        return { success: false, error: 'Sessão expirada' };
+                    }
+                    
+                    console.error(`Erro na requisição para ${url}:`, data);
+                    return { 
+                        success: false, 
+                        error: data.error || 'Erro na requisição',
+                        message: data.message || 'Ocorreu um erro ao processar sua solicitação',
+                        details: data.details,
+                        status: response.status
+                    };
+                }
+                
+                console.log('Requisição concluída com sucesso:', { success: true, ...data });
+                return { success: true, ...data };
+            } catch (error) {
+                console.error('Erro na requisição:', error);
+                return { 
+                    success: false, 
+                    error: 'Erro de conexão',
+                    message: 'Não foi possível conectar ao servidor',
+                    details: error.message
+                };
+            }
+        }
+
+        // Função para carregar procedimentos da API
+        async function loadProcedimentos() {
+            try {
+                console.log('Iniciando carregamento de procedimentos...');
+                showLoading();
+                
+                console.log('Fazendo requisição para /api/procedimentos...');
+                const response = await fetchWithAuth('/api/procedimentos');
+                console.log('Resposta da API:', response);
+                
+                if (!response.success) {
+                    console.error('Erro na resposta da API:', response.error);
+                    // Se a resposta for um erro de autenticação, relança para ser tratado no init
+                    if (response.status === 401 || response.status === 403) {
+                        const error = new Error(response.message || 'Não autorizado');
+                        error.status = response.status;
+                        throw error;
+                    }
+                    throw new Error(response.message || 'Erro ao carregar procedimentos');
+                }
+                
+                // A API está retornando os dados diretamente no objeto de resposta
+                // em vez de em uma propriedade 'data'
+                const dados = Array.isArray(response) ? response : 
+                             (response.data || Object.values(response).filter(v => typeof v === 'object' && v !== null && !Array.isArray(v)));
+                
+                console.log('Dados recebidos:', dados);
+                procedimentos = Array.isArray(dados) ? dados : [];
+                console.log('Procedimentos carregados:', procedimentos.length);
+                
+                renderProcedimentosTable();
+                updatePagination();
+                
+            } catch (error) {
+                console.error('Erro ao carregar procedimentos:', error);
+                
+                // Se for erro de autenticação, relança para ser tratado no init
+                if (error.status === 401 || error.status === 403) {
+                    throw error;
+                }
+                
+                // Para outros erros, mostra mensagem ao usuário
+                showError('Erro', error.message || 'Não foi possível carregar os procedimentos');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Função para renderizar a tabela de procedimentos
+        function renderProcedimentosTable() {
+            console.log('Iniciando renderização da tabela de procedimentos...');
+            
+            if (!procedimentosTableBody) {
+                console.error('Elemento procedimentosTableBody não encontrado no DOM');
+                return;
+            }
+            
+            procedimentosTableBody.innerHTML = '';
+            
+            console.log('Procedimentos para renderizar:', procedimentos);
+            
+            if (!procedimentos || procedimentos.length === 0) {
+                console.log('Nenhum procedimento encontrado para exibir');
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td colspan="7" class="text-center py-4">
+                        <i class="bi bi-inbox text-muted" style="font-size: 2rem;"></i>
+                        <p class="mt-2 mb-0">Nenhum procedimento encontrado</p>
+                    </td>
+                `;
+                procedimentosTableBody.appendChild(tr);
+                return;
+            }
+            
+            // Calcular índices para a paginação
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const paginatedProcedimentos = procedimentos.slice(startIndex, endIndex);
+            
+            paginatedProcedimentos.forEach(procedimento => {
+                const tr = document.createElement('tr');
+                
+                tr.innerHTML = `
+                    <td>#${String(procedimento.id).padStart(4, '0')}</td>
+                    <td>${procedimento.name || 'Não informado'}</td>
+                    <td>${procedimento.descricao || 'N/A'}</td>
+                    <td style="text-align: center;">${procedimento.durationMins || '0'}</td>
+                    <td style="text-align: right;">${formatarMoeda(procedimento.defaultPrice)}</td>
+                    <td style="text-align: center;">
+                        <span class="badge ${procedimento.ativo ? 'bg-success' : 'bg-secondary'}">
+                            ${procedimento.ativo ? 'Ativo' : 'Inativo'}
+                        </span>
+                    </td>
+                    <td style="text-align: center;">
+                        <div class="action-buttons">
+                            <button class="btn btn-sm btn-outline-warning edit-procedimento" data-id="${procedimento.id}" title="Editar">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger delete-procedimento" data-id="${procedimento.id}" data-name="${(procedimento.name || '').replace(/\"/g, '&quot;')}" title="Excluir">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                
+                procedimentosTableBody.appendChild(tr);
+            });
+            
+            // Adicionar eventos aos botões
+            addProcedimentoButtonEvents();
+        }
+
+        // Função para adicionar eventos aos botões da tabela
+        function addProcedimentoButtonEvents() {
+            // Botão de editar
+            document.querySelectorAll('.edit-procedimento').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = parseInt(btn.getAttribute('data-id'));
+                    editProcedimento(id);
+                });
+            });
+            
+            // Botão de excluir
+            document.querySelectorAll('.delete-procedimento').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = parseInt(btn.getAttribute('data-id'));
+                    const nome = btn.getAttribute('data-name');
+                    showDeleteConfirmation(id, nome);
+                });
+            });
+        }
+
+        // Função para mostrar o modal de confirmação de exclusão
+        function showDeleteConfirmation(id, nome) {
+            procedimentoToDelete = id;
+            document.getElementById('procedimentoToDelete').textContent = nome || 'Procedimento #' + id;
+            deleteModal.show();
+        }
+
+        // Função para editar um procedimento
+        async function editProcedimento(id) {
+            try {
+                showLoading('Carregando dados do procedimento...');
+                
+                const response = await fetchWithAuth(`/api/procedimentos/${id}`);
+                
+                if (!response || !response.success) {
+                    throw new Error(response?.message || 'Erro ao carregar o procedimento');
+                }
+                
+                // Obtém os dados do procedimento diretamente do response, já que a API retorna os dados no nível superior
+                const procedimento = response.data || response;
+                
+                if (!procedimento || !procedimento.id) {
+                    throw new Error('Dados do procedimento inválidos na resposta da API');
+                }
+                
+                // Preencher o formulário
+                document.getElementById('procedimentoId').value = procedimento.id || '';
+                document.getElementById('procedimentoNome').value = procedimento.name || '';
+                document.getElementById('procedimentoDescricao').value = procedimento.descricao || '';
+                document.getElementById('procedimentoDuracao').value = procedimento.durationMins || '';
+                document.getElementById('procedimentoValor').value = procedimento.defaultPrice || '';
+                document.getElementById('procedimentoAtivo').checked = procedimento.ativo !== false;
+                
+                // Atualizar o título do modal
+                document.getElementById('procedimentoModalLabel').textContent = 'Editar Procedimento';
+                
+                // Mostrar o modal
+                procedimentoModal.show();
+                
+            } catch (error) {
+                console.error('Erro ao carregar procedimento:', error);
+                showError('Erro', error.message || 'Não foi possível carregar o procedimento');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Função para salvar um procedimento (criar ou atualizar)
+        async function saveProcedimento(e) {
+            e.preventDefault();
+            
+            const id = document.getElementById('procedimentoId').value;
+            const procedimentoData = {
+                name: document.getElementById('procedimentoNome').value,
+                descricao: document.getElementById('procedimentoDescricao').value,
+                durationMins: parseInt(document.getElementById('procedimentoDuracao').value) || 0,
+                defaultPrice: parseFloat(document.getElementById('procedimentoValor').value) || 0,
+                ativo: document.getElementById('procedimentoAtivo').checked
+            };
+            
+            // Validação básica
+            if (!procedimentoData.name) {
+                showError('Erro de validação', 'O nome do procedimento é obrigatório');
+                return;
+            }
+            
+            if (isNaN(duracaoMinutos) || duracaoMinutos <= 0) {
+                showError('Erro de validação', 'A duração deve ser um número maior que zero');
+                return;
+            }
+            
+            try {
+                showLoading('Salvando procedimento...');
+                
+                const procedimentoData = {
+                    nome,
+                    descricao: descricao || null,
+                    duracaoMinutos,
+                    valorPadrao: valorPadrao > 0 ? valorPadrao : null,
+                    ativo
+                };
+                
+                let response;
+                
+                if (id) {
+                    // Atualizar procedimento existente
+                    response = await fetchWithAuth(`/api/procedimentos/${id}`, {
+                        method: 'PUT',
+                        body: procedimentoData
+                    });
+                } else {
+                    // Criar novo procedimento
+                    response = await fetchWithAuth('/api/procedimentos', {
+                        method: 'POST',
+                        body: procedimentoData
+                    });
+                }
+                
+                if (!response.success) {
+                    throw new Error(response.message || 'Erro ao salvar o procedimento');
+                }
+                
+                // Fechar o modal e recarregar a lista
+                procedimentoModal.hide();
+                showSuccess('Procedimento salvo com sucesso!');
+                loadProcedimentos();
+                
+            } catch (error) {
+                console.error('Erro ao salvar procedimento:', error);
+                showError('Erro', error.message || 'Não foi possível salvar o procedimento');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Função para excluir um procedimento
+        async function deleteProcedimento() {
+            if (!procedimentoToDelete) return;
+            
+            try {
+                showLoading('Excluindo procedimento...');
+                
+                const response = await fetchWithAuth(`/api/procedimentos/${procedimentoToDelete}`, {
+                    method: 'DELETE'
+                });
+                
+                if (!response.success) {
+                    throw new Error(response.message || 'Erro ao excluir o procedimento');
+                }
+                
+                // Fechar o modal e recarregar a lista
+                deleteModal.hide();
+                showSuccess('Procedimento excluído com sucesso!');
+                loadProcedimentos();
+                
+            } catch (error) {
+                console.error('Erro ao excluir procedimento:', error);
+                showError('Erro', error.message || 'Não foi possível excluir o procedimento');
+            } finally {
+                procedimentoToDelete = null;
+                hideLoading();
+            }
+        }
+
+        // Função para atualizar a paginação
+        function updatePagination() {
+            const totalPages = Math.ceil(procedimentos.length / itemsPerPage);
+            const pagination = document.getElementById('pagination');
+            
+            if (!pagination) return;
+            
+            pagination.innerHTML = '';
+            
+            // Botão Anterior
+            const prevLi = document.createElement('li');
+            prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+            prevLi.innerHTML = `
+                <a class="page-link" href="#" aria-label="Anterior" data-page="${currentPage - 1}">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            `;
+            pagination.appendChild(prevLi);
+            
+            // Números das páginas
+            for (let i = 1; i <= totalPages; i++) {
+                const li = document.createElement('li');
+                li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+                li.innerHTML = `<a class="page-link" href="#" data-page="${i}">${i}</a>`;
+                pagination.appendChild(li);
+            }
+            
+            // Botão Próximo
+            const nextLi = document.createElement('li');
+            nextLi.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
+            nextLi.innerHTML = `
+                <a class="page-link" href="#" aria-label="Próximo" data-page="${currentPage + 1}">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            `;
+            pagination.appendChild(nextLi);
+            
+            // Atualizar contadores
+            const start = (currentPage - 1) * itemsPerPage + 1;
+            const end = Math.min(currentPage * itemsPerPage, procedimentos.length);
+            
+            document.getElementById('showingFrom').textContent = procedimentos.length > 0 ? start : 0;
+            document.getElementById('showingTo').textContent = end;
+            document.getElementById('totalProcedimentos').textContent = procedimentos.length;
+            
+            // Adicionar eventos de clique na paginação
+            document.querySelectorAll('.page-link').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const page = parseInt(link.getAttribute('data-page'));
+                    if (page >= 1 && page <= totalPages && page !== currentPage) {
+                        currentPage = page;
+                        renderProcedimentosTable();
+                        updatePagination();
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                });
+            });
+        }
+
+        // Função para filtrar procedimentos na tabela
+        function filterProcedimentos(searchTerm) {
+            currentPage = 1; // Reset para a primeira página ao filtrar
+            
+            if (!searchTerm || searchTerm.trim() === '') {
+                renderProcedimentosTable();
+                return;
+            }
+            
+            const searchLower = searchTerm.toLowerCase();
+            const filtered = procedimentos.filter(procedimento => {
+                return (
+                    (procedimento.name && procedimento.name.toLowerCase().includes(searchLower)) ||
+                    (procedimento.descricao && procedimento.descricao.toLowerCase().includes(searchLower)) ||
+                    (procedimento.id && String(procedimento.id).includes(searchTerm))
+                );
+            });
+            
+            // Atualizar a lista temporária e renderizar
+            const originalProcedimentos = [...procedimentos];
+            procedimentos = filtered;
+            renderProcedimentosTable();
+            
+            // Restaurar a lista original após a renderização
+            setTimeout(() => {
+                procedimentos = originalProcedimentos;
+            }, 0);
+        }
+
+        // Função para mostrar loading
+        function showLoading(message = 'Carregando...') {
+            const loadingElement = document.getElementById('loading');
+            if (loadingElement) {
+                loadingElement.textContent = message;
+                loadingElement.style.display = 'block';
+            }
+        }
+
+        // Função para esconder loading
+        function hideLoading() {
+            const loadingElement = document.getElementById('loading');
+            if (loadingElement) {
+                loadingElement.style.display = 'none';
+            }
+        }
+
+        // Função para mostrar mensagem de sucesso
+        function showSuccess(message) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Sucesso!',
+                text: message,
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true
+            });
+        }
+
+        // Função para mostrar mensagem de erro
+        function showError(title, message) {
+            Swal.fire({
+                icon: 'error',
+                title: title || 'Erro!',
+                text: message || 'Ocorreu um erro inesperado.',
+                confirmButtonText: 'Entendi'
+            });
+        }
+
+        // Função para configurar os eventos
+        function setupEventListeners() {
+            // Botão para adicionar novo procedimento
+            addProcedimentoBtn?.addEventListener('click', () => {
+                document.getElementById('procedimentoForm').reset();
+                document.getElementById('procedimentoId').value = '';
+                document.getElementById('procedimentoModalLabel').textContent = 'Adicionar Novo Procedimento';
+                document.getElementById('procedimentoAtivo').checked = true;
+                procedimentoModal.show();
+            });
+            
+            // Formulário de procedimento
+            procedimentoForm?.addEventListener('submit', saveProcedimento);
+            
+            // Botão de confirmação de exclusão
+            confirmDeleteBtn?.addEventListener('click', deleteProcedimento);
+            
+            // Busca em tempo real
+            searchInput?.addEventListener('input', (e) => {
+                filterProcedimentos(e.target.value);
+            });
+            
+            // Limpar filtro ao clicar no ícone X do campo de busca
+            searchInput?.addEventListener('search', (e) => {
+                if (e.target.value === '') {
+                    filterProcedimentos('');
+                }
+            });
+        }
+
+        // Inicialização da página
+        async function init() {
+            // Verifica se o token existe
+            const token = getAuthToken();
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            try {
+                // Tenta carregar os procedimentos
+                await loadProcedimentos();
+                setupEventListeners();
+            } catch (error) {
+                console.error('Erro ao inicializar a página:', error);
+                // Se houver erro de autenticação, redireciona para o login
+                if (error.status === 401 || error.status === 403) {
+                    localStorage.removeItem('token');
+                    window.location.href = 'login.html?session=expired';
+                } else {
+                    showError('Erro', 'Não foi possível carregar os procedimentos. Tente novamente mais tarde.');
+                }
+            }
+        }
+
+        // Iniciar a aplicação quando o DOM estiver carregado
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

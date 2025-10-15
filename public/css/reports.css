@@ -1,0 +1,174 @@
+/* Estilos para os relatórios */
+
+/* Estilo para as seções de relatório */
+.report-section {
+    display: none; /* Inicialmente escondido, será mostrado via JavaScript */
+    margin-bottom: 2rem;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Animação de fade in para as seções */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Estilo para os cards de relatório */
+.report-card {
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    margin-bottom: 1.5rem;
+    background-color: #fff;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.report-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+    border-color: var(--primary-color, #f0b354);
+}
+
+.report-card .card-body {
+    padding: 1.5rem;
+}
+
+.report-card .card-title {
+    color: var(--secondary-color, #041a31);
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+}
+
+.report-card .card-text {
+    color: #6c757d;
+    font-size: 0.95rem;
+    margin-bottom: 1.25rem;
+}
+
+/* Estilo para o ícone de relatório */
+.report-icon {
+    font-size: 2.2rem;
+    margin-bottom: 1rem;
+    color: var(--primary-color, #f0b354);
+    background-color: rgba(240, 179, 84, 0.1);
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+}
+
+/* Estilo para o seletor de relatórios em dispositivos móveis */
+#reportSelector {
+    margin-bottom: 1.5rem;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    padding: 0.5rem 1rem;
+    width: 100%;
+}
+
+/* Estilo para a seção de filtros */
+.filter-section {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* Ajustes para dispositivos móveis */
+@media (max-width: 767.98px) {
+    .filter-section {
+        padding: 1rem;
+    }
+    
+    .report-card {
+        margin-bottom: 1rem;
+    }
+    
+    .report-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 1.8rem;
+    }
+}
+
+/* Estilo para o placeholder dos gráficos */
+.chart-placeholder {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 2rem;
+    text-align: center;
+    margin: 1rem 0;
+}
+
+.chart-placeholder i {
+    font-size: 3rem;
+    color: var(--primary-color, #f0b354);
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.chart-placeholder p {
+    color: #6c757d;
+    margin-bottom: 0;
+}
+
+/* Estilo para os botões de ação */
+.btn-report-action {
+    background-color: var(--primary-color, #f0b354);
+    color: #fff;
+    border: none;
+    padding: 0.5rem 1.25rem;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-report-action:hover {
+    background-color: var(--primary-hover, #d9a24a);
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilo para os cards de resumo */
+.summary-card {
+    border-left: 4px solid var(--primary-color, #f0b354);
+    margin-bottom: 1.5rem;
+}
+
+.summary-card .card-body {
+    padding: 1.25rem;
+}
+
+.summary-card .card-title {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #6c757d;
+    margin-bottom: 0.5rem;
+}
+
+.summary-card .card-value {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: var(--secondary-color, #041a31);
+    margin: 0;
+}
+
+.summary-card .card-change {
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+}
+
+.summary-card .card-change.positive {
+    color: #28a745;
+}
+
+.summary-card .card-change.negative {
+    color: #dc3545;
+}

@@ -1,0 +1,182 @@
+<!-- Sidebar -->
+<div class="sidebar">
+    <div class="sidebar-header">
+        <a href="dashboard.html" class="sidebar-brand">
+            <i class="bi bi-calendar-check"></i>
+            <span>Agenda Fácil</span>
+        </a>
+    </div>
+    
+    <ul class="nav flex-column">
+        <li class="nav-item">
+            <a href="dashboard.html" class="nav-link" data-page="dashboard">
+                <i class="bi bi-speedometer2"></i>
+                <span>Dashboard</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="agenda.html" class="nav-link" data-page="agenda">
+                <i class="bi bi-calendar3"></i>
+                <span>Agenda</span>
+            </a>
+        </li>
+        
+        <!-- Menu de Cadastros -->
+        <li class="nav-item">
+            <a href="#" class="nav-link menu-toggle" data-bs-toggle="collapse" data-bs-target="#submenuCadastros" aria-expanded="false" aria-controls="submenuCadastros">
+                <i class="bi bi-folder-plus"></i>
+                <span>Cadastros</span>
+                <i class="bi bi-chevron-down toggle-icon ms-auto"></i>
+            </a>
+            <div class="collapse" id="submenuCadastros">
+                <ul class="nav flex-column submenu">
+                    <li class="nav-item">
+                        <a href="clientes.html" class="nav-link" data-page="clientes">
+                            <i class="bi bi-people me-2"></i>Clientes
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="profissionais.html" class="nav-link" data-page="profissionais">
+                            <i class="bi bi-person-badge me-2"></i>Profissionais
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="procedimentos.html" class="nav-link" data-page="procedimentos">
+                            <i class="bi bi-clipboard2-pulse me-2"></i>Procedimentos
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="usuarios.html" class="nav-link" data-page="usuarios">
+                            <i class="bi bi-person-plus me-2"></i>Usuários
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </li>
+        
+        <li class="nav-item">
+            <a href="#" class="nav-link" data-page="financeiro">
+                <i class="bi bi-cash-coin"></i>
+                <span>Financeiro</span>
+            </a>
+        </li>
+        
+        <!-- Menu de Relatórios -->
+        <li class="nav-item">
+            <a href="#" class="nav-link menu-toggle" data-bs-toggle="collapse" data-bs-target="#submenuRelatorios" aria-expanded="false" aria-controls="submenuRelatorios">
+                <i class="bi bi-graph-up"></i>
+                <span>Relatórios</span>
+                <i class="bi bi-chevron-down toggle-icon ms-auto"></i>
+            </a>
+            <div class="collapse" id="submenuRelatorios">
+                <ul class="nav flex-column submenu">
+                    <li class="nav-item">
+                        <a href="relatorios.html?tipo=faturamento" class="nav-link" data-page="relatorios-faturamento">
+                            <i class="bi bi-graph-up me-2"></i>Faturamento
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="relatorios.html?tipo=contas" class="nav-link" data-page="relatorios-contas">
+                            <i class="bi bi-wallet2 me-2"></i>Contas a Receber/Pagar
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="relatorios.html?tipo=fluxo-caixa" class="nav-link" data-page="relatorios-fluxo-caixa">
+                            <i class="bi bi-arrow-left-right me-2"></i>Fluxo de Caixa
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="relatorios.html?tipo=agendamentos" class="nav-link" data-page="relatorios-agendamentos">
+                            <i class="bi bi-calendar-check me-2"></i>Agendamentos
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="relatorios.html?tipo=procedimentos" class="nav-link" data-page="relatorios-procedimentos">
+                            <i class="bi bi-clipboard2-pulse me-2"></i>Procedimentos Executados
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </li>
+        
+        <li class="nav-item">
+            <a href="configuracoes.html" class="nav-link" data-page="configuracoes">
+                <i class="bi bi-gear"></i>
+                <span>Configurações</span>
+            </a>
+        </li>
+        
+    </ul>
+    
+    <!-- User Section -->
+    <div class="user-section">
+        <!-- User Profile -->
+        <div class="user-profile">
+            <div class="user-avatar">
+                <i class="bi bi-person"></i>
+            </div>
+            <div class="user-info">
+                <div class="user-name" id="userName">Usuário</div>
+                <div class="user-role" id="userRole">Perfil</div>
+            </div>
+            <!-- Logout Button -->
+            <a href="index.html" class="logout-btn" id="logoutBtn" title="Sair">
+                <i class="bi bi-box-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Botão de toggle para o menu lateral em dispositivos móveis -->
+<button class="btn btn-light d-md-none position-fixed" id="sidebarToggle" style="z-index: 1050; top: 10px; left: 10px;">
+    <i class="bi bi-list"></i>
+</button>
+
+<style>
+.user-section {
+    padding: 1rem;
+    margin-top: 1rem;
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    position: relative;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    transition: background-color 0.2s;
+}
+
+.user-profile:hover {
+    background-color: rgba(240, 179, 84, 0.1);
+}
+
+.logout-btn {
+    margin-left: auto;
+    padding: 0.5rem;
+    color: #f0b354;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    width: 36px;
+    height: 36px;
+}
+
+.logout-btn:hover {
+    background-color: rgba(240, 179, 84, 0.2);
+    color: #f0b354;
+    transform: scale(1.1);
+}
+
+.logout-btn i {
+    font-size: 1.1rem;
+}
+
+.user-info {
+    margin-left: 0.75rem;
+    flex: 1;
+    min-width: 0;
+}
+</style>
