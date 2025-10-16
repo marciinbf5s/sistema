@@ -24,8 +24,9 @@ yarn-error.log*
 *.sln
 *.sw?
 
-# Configurações e constantes
-/constants/
+/constants
+
+
 
 # Sistema operacional
 .DS_Store
