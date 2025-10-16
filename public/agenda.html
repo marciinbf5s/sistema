@@ -139,6 +139,122 @@
                 font-size: 0.75rem;
             }
         }
+
+        /* Legenda de status abaixo do calendário */
+        .legend-status {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+            align-items: center;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--dark);
+        }
+
+        .legend-color {
+            width: 18px;
+            height: 18px;
+            border-radius: 4px;
+            border: 1px solid rgba(0,0,0,0.06);
+            box-shadow: 0 0 0 2px rgba(255,255,255,0.6) inset;
+        }
+
+        /* Cores claras para os status */
+        .legend-agendado { background: #cfe8ff; }      /* azul claro */
+        .legend-andamento { background: #fff6d6; }    /* amarelo claro */
+        .legend-finalizado { background: #d8f6dc; }   /* verde claro */
+        .legend-cancelado { background: #f8d7da; }    /* vermelho claro */
+
+        /* Backgrounds para itens de agendamento por status */
+        .list-group-item.status-AGENDADO { background-color: #cfe8ff; }
+        .list-group-item.status-EM_ANDAMENTO { background-color: #fff6d6; }
+        .list-group-item.status-FINALIZADO { background-color: #d8f6dc; }
+        .list-group-item.status-CANCELADO { background-color: #f8d7da; }
+
+        /* Pequena borda e contraste para melhor leitura */
+        .list-group-item.status-AGENDADO,
+        .list-group-item.status-EM_ANDAMENTO,
+        .list-group-item.status-FINALIZADO,
+        .list-group-item.status-CANCELADO {
+            border: 1px solid rgba(0,0,0,0.04);
+        }
+
+        /* Aumentar separação entre itens e adicionar traço mais escuro */
+        .list-group-item.status-AGENDADO,
+        .list-group-item.status-EM_ANDAMENTO,
+        .list-group-item.status-FINALIZADO,
+        .list-group-item.status-CANCELADO {
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.45rem;
+            border-radius: 6px;
+            box-shadow: 0 2px 6px rgba(16,24,40,0.03);
+            position: relative;
+            overflow: visible;
+            border: 1px solid rgba(0,0,0,0.12); /* borda geral mais forte */
+            transition: transform 0.12s ease, box-shadow 0.12s ease, border-left-color 0.12s ease;
+        }
+
+        /* borda esquerda colorida por status para destacar */
+        .list-group-item.status-AGENDADO { border-left: 4px solid rgba(67,97,238,0.95); }
+        .list-group-item.status-EM_ANDAMENTO { border-left: 4px solid rgba(255,193,7,0.95); }
+        .list-group-item.status-FINALIZADO { border-left: 4px solid rgba(75,181,67,0.95); }
+        .list-group-item.status-CANCELADO { border-left: 4px solid rgba(220,53,69,0.95); }
+
+        /* separador consistente: borda-top para itens seguintes (evita traço 'solto') */
+        .list-group-item.status-AGENDADO + .list-group-item.status-AGENDADO,
+        .list-group-item.status-EM_ANDAMENTO + .list-group-item.status-EM_ANDAMENTO,
+        .list-group-item.status-FINALIZADO + .list-group-item.status-FINALIZADO,
+        .list-group-item.status-CANCELADO + .list-group-item.status-CANCELADO,
+        /* também aplicar quando status diferentes entre itens */
+        .list-group-item + .list-group-item {
+            border-top: 1px solid rgba(0,0,0,0.10);
+            margin-top: 0.4rem; /* espaço antes do traço */
+            padding-top: 0.4rem; /* espaço interno após o traço */
+        }
+
+        .list-group-item.status-AGENDADO:last-child,
+        .list-group-item.status-EM_ANDAMENTO:last-child,
+        .list-group-item.status-FINALIZADO:last-child,
+        .list-group-item.status-CANCELADO:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Aplicar o mesmo tom de cinza e estilo de texto da tabela de clientes na aba 'Lista' */
+        /* Usamos selectors com escopo para evitar interferir em outras tabelas */
+        #list-tab-pane .table {
+            --bs-table-striped-bg: #f8f9fa; /* tom de cinza usado na tabela de clientes */
+            --bs-table-hover-bg: #f1f3f5;
+            background-color: transparent;
+        }
+
+        /* Aplicar background aos rows e hover similar à tabela clientes */
+        #list-tab-pane .table tbody tr {
+            background-color: var(--bs-table-striped-bg);
+        }
+
+        #list-tab-pane .table tbody tr:hover {
+            background-color: var(--bs-table-hover-bg);
+        }
+
+        /* Texto preto e negrito nas células */
+        #list-tab-pane .table tbody tr td {
+            color: #000 !important;
+            font-weight: 600 !important;
+        }
+
+        /* Cabeçalho da tabela (linha de títulos) com fundo cinza levemente mais escuro */
+        #list-tab-pane .table thead th {
+            background-color: #e9ecef !important; /* cinza um pouco mais escuro */
+            color: #212529 !important; /* texto escuro */
+            font-weight: 700 !important;
+            border-bottom: 1px solid #e9ecef !important;
+        }
     </style>
 </head>
 <body>
@@ -148,18 +264,33 @@
         
         <!-- Conteúdo principal -->
         <div class="main-content flex-grow-1">
-            <div class="container-fluid p-3 p-md-4">
+            <div class="container-fluid p-0">
                 <!-- Botão para mobile -->
                 <button class="btn btn-primary d-lg-none mb-3" id="sidebarToggle">
                     <i class="bi bi-list"></i> Menu
                 </button>
                 
-                <!-- Cabeçalho -->
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h1 class="h3 mb-0">Agenda</h1>
-                    <button class="btn btn-primary" id="newAgendamentoBtn">
-                        <i class="bi bi-plus-lg me-2"></i>Novo Agendamento
-                    </button>
+                <!-- Cabeçalho (estilo igual à página Clientes) -->
+                <div class="page-header mb-4">
+                    <div class="row align-items-center mb-3">
+                        <div class="col-12 col-md-6 mb-3 mb-md-0">
+                            <div>
+                                <h1 class="page-title fw-bolder" style="font-weight: 800 !important; margin-bottom: 10px;">
+                                    <i class="bi bi-calendar-event-fill me-2" style="color: #f0b354;"></i>Agenda
+                                </h1>
+                                <p class="text-muted mb-0 mt-2">Gerencie os agendamentos do seu negócio</p>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <div class="d-flex flex-wrap justify-content-md-end" style="gap: 10px;">
+                                <button class="btn btn-primary d-flex align-items-center" id="newAgendamentoBtn" style="height: 38px;">
+                                    <i class="bi bi-plus-lg me-1"></i>
+                                    <span class="d-none d-sm-inline">Novo Agendamento</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="border-bottom mt-3"></div>
                 </div>
                 
                 <!-- Abas de Navegação -->
@@ -195,9 +326,33 @@
                                                 <button class="btn btn-sm btn-outline-secondary" id="prevMonth">
                                                     <i class="bi bi-chevron-left"></i>
                                                 </button>
-                                                <button class="btn btn-sm btn-outline-secondary" id="currentMonth">
+                                                <button class="btn btn-sm btn-outline-secondary position-relative" id="currentMonth">
                                                     <span id="currentMonthText">Outubro 2023</span>
                                                 </button>
+                                                <!-- Seletor de mês/ano (inicialmente escondido) -->
+                                                <div id="monthPicker" class="card p-2 position-absolute d-none" style="z-index:1050; min-width:200px; top:40px; left:0">
+                                                    <div class="d-flex gap-2 align-items-center mb-2">
+                                                        <select id="monthSelect" class="form-select form-select-sm">
+                                                            <option value="0">Janeiro</option>
+                                                            <option value="1">Fevereiro</option>
+                                                            <option value="2">Março</option>
+                                                            <option value="3">Abril</option>
+                                                            <option value="4">Maio</option>
+                                                            <option value="5">Junho</option>
+                                                            <option value="6">Julho</option>
+                                                            <option value="7">Agosto</option>
+                                                            <option value="8">Setembro</option>
+                                                            <option value="9">Outubro</option>
+                                                            <option value="10">Novembro</option>
+                                                            <option value="11">Dezembro</option>
+                                                        </select>
+                                                        <input id="yearInput" class="form-control form-control-sm" type="number" style="width:90px" />
+                                                    </div>
+                                                    <div class="d-flex justify-content-end gap-2">
+                                                        <button id="monthPickerCancel" class="btn btn-sm btn-secondary">Cancelar</button>
+                                                        <button id="monthPickerGo" class="btn btn-sm btn-primary">Ir</button>
+                                                    </div>
+                                                </div>
                                                 <button class="btn btn-sm btn-outline-secondary" id="nextMonth">
                                                     <i class="bi bi-chevron-right"></i>
                                                 </button>
@@ -217,6 +372,13 @@
                                             <div class="calendar-days" id="calendarDays">
                                                 <!-- Dias serão preenchidos via JavaScript -->
                                             </div>
+                                            <!-- Legenda de status -->
+                                            <div class="legend-status" aria-hidden="false">
+                                                <div class="legend-item"><span class="legend-color legend-agendado" aria-hidden="true"></span> Agendado</div>
+                                                <div class="legend-item"><span class="legend-color legend-andamento" aria-hidden="true"></span> Em andamento</div>
+                                                <div class="legend-item"><span class="legend-color legend-finalizado" aria-hidden="true"></span> Finalizado</div>
+                                                <div class="legend-item"><span class="legend-color legend-cancelado" aria-hidden="true"></span> Cancelado</div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -226,13 +388,26 @@
                             <div class="col-lg-8">
                                 <div class="card">
                                     <div class="card-body">
-                                        <h5 class="card-title mb-4">Agendamentos para <span id="selectedDate">hoje</span></h5>
+                                        <h5 class="card-title mb-2">Agendamentos para <span id="selectedDate">hoje</span></h5>
+                                        <!-- Separador visual destacado -->
+                                        <div class="appointments-separator-wrapper mb-3">
+                                            <hr class="appointments-separator" />
+                                        </div>
                                         
                                         <div id="appointmentsList">
-                                            <!-- Lista de agendamentos será preenchida via JavaScript -->
-                                            <div class="text-center text-muted py-5">
-                                                <i class="bi bi-calendar-x fs-1 mb-3 d-block"></i>
+                                            <!-- Controles de estado: spinner, mensagem vazia e lista -->
+                                            <div id="appointmentsLoading" class="text-center py-5 d-none" aria-live="polite">
+                                                <div class="spinner-border text-primary" role="status" aria-hidden="true"></div>
+                                                <div class="mt-2 text-muted">Carregando agendamentos...</div>
+                                            </div>
+
+                                            <div id="appointmentsEmpty" class="text-center text-muted py-5 d-none" aria-live="polite">
+                                                <i class="bi bi-calendar-x fs-1 mb-3 d-block" aria-hidden="true"></i>
                                                 <p>Nenhum agendamento encontrado para esta data.</p>
+                                            </div>
+
+                                            <div id="appointmentsContainer" class="list-group d-none">
+                                                <!-- Lista de agendamentos será preenchida via JavaScript -->
                                             </div>
                                         </div>
                                     </div>
@@ -292,7 +467,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
                 </div>
                 <form id="agendamentoForm">
-                    <input type="hidden" id="agendamentoId">
+                    <input type="hidden" id="agendamentoId" name="agendamentoId">
                     <div class="modal-body">
                         <div class="row g-3">
                             <div class="col-md-6">
@@ -413,8 +588,51 @@
             });
             
             document.getElementById('currentMonth')?.addEventListener('click', () => {
-                currentDate = new Date();
-                renderCalendar();
+                // Ao clicar no currentMonth, alternar o picker de mês/ano
+                const picker = document.getElementById('monthPicker');
+                const monthSelect = document.getElementById('monthSelect');
+                const yearInput = document.getElementById('yearInput');
+                if (!picker || !monthSelect || !yearInput) return;
+
+                // preencher com mês/ano atuais
+                monthSelect.value = String(currentDate.getMonth());
+                yearInput.value = currentDate.getFullYear();
+
+                // alternar visibilidade
+                if (picker.classList.contains('d-none')) {
+                    picker.classList.remove('d-none');
+                    picker.focus();
+                } else {
+                    picker.classList.add('d-none');
+                }
+            });
+
+            // Handlers do monthPicker
+            document.getElementById('monthPickerCancel')?.addEventListener('click', (e) => {
+                e.preventDefault();
+                document.getElementById('monthPicker')?.classList.add('d-none');
+            });
+
+            document.getElementById('monthPickerGo')?.addEventListener('click', (e) => {
+                e.preventDefault();
+                const month = parseInt(document.getElementById('monthSelect').value, 10);
+                const year = parseInt(document.getElementById('yearInput').value, 10);
+                if (!isNaN(month) && !isNaN(year)) {
+                    currentDate.setFullYear(year, month, 1);
+                    document.getElementById('monthPicker')?.classList.add('d-none');
+                    renderCalendar();
+                }
+            });
+
+            // Fechar picker ao clicar fora
+            document.addEventListener('click', (ev) => {
+                const picker = document.getElementById('monthPicker');
+                const btn = document.getElementById('currentMonth');
+                if (!picker || !btn) return;
+                const target = ev.target;
+                if (picker.classList.contains('d-none')) return;
+                if (btn.contains(target) || picker.contains(target)) return; // clique dentro
+                picker.classList.add('d-none');
             });
             
             // Botão de novo agendamento
@@ -562,28 +780,35 @@
         // Funções de manipulação de agendamentos
         
         function updateAppointmentsList(appointments) {
-            const container = document.getElementById('appointmentsList');
-            
-            if (!container) return;
-            
-            if (appointments.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center text-muted py-5">
-                        <i class="bi bi-calendar-x fs-1 mb-3 d-block"></i>
-                        <p>Nenhum agendamento encontrado para esta data.</p>
-                    </div>
-                `;
+            const loadingEl = document.getElementById('appointmentsLoading');
+            const emptyEl = document.getElementById('appointmentsEmpty');
+            const container = document.getElementById('appointmentsContainer');
+
+            if (!container || !loadingEl || !emptyEl) return;
+
+            // Garantir que o loading esteja oculto quando chamamos update
+            loadingEl.classList.add('d-none');
+
+            if (!appointments || appointments.length === 0) {
+                // Mostrar mensagem de vazio
+                container.classList.add('d-none');
+                emptyEl.classList.remove('d-none');
+                container.innerHTML = '';
                 return;
             }
+
+            // Há agendamentos: popular container
+            emptyEl.classList.add('d-none');
+            container.classList.remove('d-none');
             
-            let html = '<div class="list-group">';
-            
+            let html = '';
+
             appointments.sort((a, b) => a.dataHora - b.dataHora).forEach(appt => {
                 const time = formatTime(appt.dataHora);
-                const statusClass = `status-${appt.status}`;
+                const statusClass = `status-${(appt.status || '').toString().toUpperCase()}`;
                 
                 html += `
-                    <div class="list-group-item list-group-item-action">
+                    <div class="list-group-item list-group-item-action ${statusClass}">
                         <div class="d-flex w-100 justify-content-between align-items-center">
                             <div class="d-flex align-items-center">
                                 <div class="me-3 text-center" style="min-width: 60px">
@@ -613,7 +838,6 @@
                 `;
             });
             
-            html += '</div>';
             container.innerHTML = html;
         }
         
@@ -679,20 +903,36 @@
                 
                 // Buscar os dados reais do agendamento
                 const response = await fetchWithAuth(`/api/agendamentos/${id}`);
-                if (!response.ok) {
+                if (!response || !response.ok) {
                     throw new Error('Erro ao buscar agendamento');
                 }
+
+                const payload = await response.json();
+                // API pode retornar { success: true, data: {...} } ou diretamente o objeto
+                const agendamento = (payload && payload.success && payload.data) ? payload.data : payload;
+                console.log('Dados do agendamento (normalized):', agendamento);
+
+                // Converter as datas para o formato correto (validação antes de usar toISOString)
+                const safeParseDate = (v) => {
+                    if (!v) return null;
+                    try {
+                        const d = new Date(v);
+                        if (isNaN(d.getTime())) return null;
+                        return d;
+                    } catch (e) {
+                        return null;
+                    }
+                };
+
+                const startDate = safeParseDate(agendamento.startTime || agendamento.start_time || agendamento.data && (agendamento.data + 'T' + (agendamento.horaInicio || '00:00')));
+                const endDate = safeParseDate(agendamento.endTime || agendamento.end_time);
                 
-                const agendamento = await response.json();
-                console.log('Dados do agendamento:', agendamento);
-                
-                // Converter as datas para o formato correto
-                const startDate = new Date(agendamento.startTime);
-                const endDate = new Date(agendamento.endTime);
-                
-                // Calcular a duração em minutos
-                const durationMs = endDate - startDate;
-                const durationMinutes = Math.floor(durationMs / (1000 * 60));
+        // Calcular a duração em minutos (se possível)
+        let durationMinutes = 30;
+        if (startDate && endDate) {
+            const durationMs = endDate - startDate;
+            durationMinutes = Math.floor(durationMs / (1000 * 60));
+        }
                 
                 // Preencher o formulário
                 const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('agendamentoModal'));
@@ -706,21 +946,30 @@
                 if (agendamento.procedimentoId) document.getElementById('procedimentoId').value = agendamento.procedimentoId;
                 if (agendamento.profissionalId) document.getElementById('profissionalId').value = agendamento.profissionalId;
                 
-                // Formatar data e hora
-                const dataFormatada = startDate.toISOString().split('T')[0];
-                const horaFormatada = startDate.getHours().toString().padStart(2, '0') + ':' + 
-                                    startDate.getMinutes().toString().padStart(2, '0');
-                
-                document.getElementById('data').value = dataFormatada;
-                document.getElementById('horaInicio').value = horaFormatada;
+        // Formatar data e hora (usar valores originais se parsing falhar)
+        if (startDate) {
+            const dataFormatada = startDate.toISOString().split('T')[0];
+            const horaFormatada = startDate.getHours().toString().padStart(2, '0') + ':' + 
+                                startDate.getMinutes().toString().padStart(2, '0');
+            document.getElementById('data').value = dataFormatada;
+            document.getElementById('horaInicio').value = horaFormatada;
+        } else {
+            // Tentar preencher com campos enviados pelo backend (data/horaInicio)
+            if (agendamento.data) document.getElementById('data').value = agendamento.data;
+            if (agendamento.horaInicio) document.getElementById('horaInicio').value = agendamento.horaInicio;
+        }
                 document.getElementById('duracao').value = durationMinutes;
                 
-                if (agendamento.valorCobrado) document.getElementById('valorCobrado').value = agendamento.valorCobrado;
-                if (agendamento.observacoes) document.getElementById('observacoes').value = agendamento.observacoes;
+    if (agendamento.valorCobrado) document.getElementById('valorCobrado').value = agendamento.valorCobrado;
+    if (agendamento.observacoes) document.getElementById('observacoes').value = agendamento.observacoes;
                 
-                // Disparar eventos de mudança para atualizar campos dependentes
-                document.getElementById('data').dispatchEvent(new Event('change'));
-                document.getElementById('horaInicio').dispatchEvent(new Event('change'));
+        // Disparar eventos de mudança para atualizar campos dependentes
+        try {
+            document.getElementById('data').dispatchEvent(new Event('change'));
+            document.getElementById('horaInicio').dispatchEvent(new Event('change'));
+        } catch(e) {
+            console.warn('Erro ao disparar eventos de change no modal:', e);
+        }
                 
                 modal.show();
                 
@@ -1173,8 +1422,12 @@ async function submitAgendamentoForm(form, isEdit = false) {
         
         const formData = new FormData(form);
         
-        // Obter valores do formulário
-        const agendamentoId = formData.get('agendamentoId');
+        // Obter valores do formulário (fallback para valor diretamente do DOM se o FormData estiver vazio)
+        let agendamentoId = formData.get('agendamentoId');
+        if (!agendamentoId) {
+            const idEl = document.getElementById('agendamentoId');
+            if (idEl) agendamentoId = idEl.value || '';
+        }
         const clienteId = parseInt(formData.get('clienteId'));
         const procedimentoId = parseInt(formData.get('procedimentoId'));
         const profissionalIdStr = formData.get('profissionalId');
@@ -1267,7 +1520,8 @@ async function submitAgendamentoForm(form, isEdit = false) {
             ? `/api/agendamentos/${agendamentoId}`
             : '/api/agendamentos';
             
-        const method = isEdit ? 'PUT' : 'POST';
+    // Usar PATCH para edição parcial (mais seguro) e POST para criação
+    const method = isEdit ? 'PATCH' : 'POST';
         
         // Fazer a requisição para a API
         const response = await fetch(url, {
@@ -1279,7 +1533,15 @@ async function submitAgendamentoForm(form, isEdit = false) {
             body: JSON.stringify(data)
         });
         
-        const responseData = await response.json();
+        // Tentar ler JSON; se o servidor retornar HTML (404/500), lançar erro informativo
+        let responseData = null;
+        const text = await response.text();
+        try {
+            responseData = text ? JSON.parse(text) : null;
+        } catch (e) {
+            console.error('Resposta não-JSON da API ao criar/atualizar agendamento:', text);
+            throw new Error(`Resposta inválida do servidor: ${response.status} ${response.statusText}`);
+        }
 
         if (!response.ok) {
             console.error('Resposta de erro da API ao criar/agendar:', response.status, responseData);
@@ -1429,6 +1691,17 @@ async function submitAgendamentoForm(form, isEdit = false) {
         async function loadAppointmentsForDate(date) {
             try {
                 console.log('Carregando agendamentos para:', date);
+                // Exibir spinner
+                try {
+                    const loadingEl = document.getElementById('appointmentsLoading');
+                    const emptyEl = document.getElementById('appointmentsEmpty');
+                    const containerEl = document.getElementById('appointmentsContainer');
+                    if (loadingEl) loadingEl.classList.remove('d-none');
+                    if (emptyEl) emptyEl.classList.add('d-none');
+                    if (containerEl) containerEl.classList.add('d-none');
+                } catch (e) {
+                    console.warn('Não foi possível manipular elementos de loading/empty/container:', e);
+                }
                 
                 // Construir start/end ISO para o dia (usando componentes locais para evitar shifts de timezone)
                 const year = date.getFullYear();
@@ -1514,6 +1787,7 @@ async function submitAgendamentoForm(form, isEdit = false) {
                     };
                 }).filter(a => a.dataHora);
 
+                // Atualizar a UI com os resultados
                 updateAppointmentsList(mapped);
                 updateAppointmentsTable(mapped);
 
@@ -1521,6 +1795,17 @@ async function submitAgendamentoForm(form, isEdit = false) {
             } catch (error) {
                 console.error('Erro ao carregar agendamentos:', error);
                 showToast('Erro ao carregar agendamentos', true);
+                // Garantir que o spinner seja escondido e mostrar mensagem vazia
+                try {
+                    const loadingEl = document.getElementById('appointmentsLoading');
+                    const emptyEl = document.getElementById('appointmentsEmpty');
+                    const containerEl = document.getElementById('appointmentsContainer');
+                    if (loadingEl) loadingEl.classList.add('d-none');
+                    if (containerEl) containerEl.classList.add('d-none');
+                    if (emptyEl) emptyEl.classList.remove('d-none');
+                } catch (e) {
+                    console.warn('Erro ao esconder spinner após falha:', e);
+                }
                 return [];
             }
         }

@@ -11,6 +11,9 @@ router.post('/', agendamentoController.criarAgendamento);
 router.get('/disponibilidade', agendamentoController.verificarDisponibilidade);
 router.get('/meus-agendamentos', agendamentoController.listarMeusAgendamentos);
 router.patch('/:id/status', isAdmin, agendamentoController.atualizarStatusAgendamento);
+router.put('/:id', isOwnerOrAdmin, agendamentoController.atualizarAgendamento);
+// Permitir atualização parcial via PATCH (útil para editar apenas alguns campos)
+router.patch('/:id', isOwnerOrAdmin, agendamentoController.atualizarAgendamento);
 router.delete('/:id', isOwnerOrAdmin, agendamentoController.cancelarAgendamento);
 
 // Rotas de busca de agendamentos

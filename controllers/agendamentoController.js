@@ -363,6 +363,134 @@ const atualizarStatusAgendamento = async (req, res) => {
 };
 
 /**
+ * Atualiza um agendamento (edição)
+ */
+const atualizarAgendamento = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const body = req.body || {};
+
+        console.log('Iniciando atualizarAgendamento - id:', id);
+        console.log('Payload recebido (tipos):', Object.keys(body).reduce((acc, k) => { acc[k] = typeof body[k]; return acc; }, {}));
+        console.log('Payload recebido (amostra):', JSON.stringify(body).slice(0, 1000));
+
+        if (!id || isNaN(parseInt(id))) {
+            return res.status(400).json({ success: false, error: 'ID inválido' });
+        }
+
+        // Campos que podem ser atualizados (validação limpa)
+        const updatable = {};
+
+        const safeParseInt = (v) => {
+            if (v === null || v === undefined || v === '') return null;
+            const n = parseInt(v);
+            return isNaN(n) ? null : n;
+        };
+
+        if (body.clienteId !== undefined) {
+            const n = safeParseInt(body.clienteId);
+            if (n === null) return res.status(400).json({ success: false, error: 'clienteId inválido' });
+            updatable.clienteId = n;
+        }
+
+        if (body.profissionalId !== undefined) {
+            if (body.profissionalId === null || body.profissionalId === 'null' || body.profissionalId === '') {
+                updatable.profissionalId = null;
+            } else {
+                const n = safeParseInt(body.profissionalId);
+                if (n === null) return res.status(400).json({ success: false, error: 'profissionalId inválido' });
+                updatable.profissionalId = n;
+            }
+        }
+
+        if (body.procedimentoId !== undefined) {
+            const n = safeParseInt(body.procedimentoId);
+            if (n === null) return res.status(400).json({ success: false, error: 'procedimentoId inválido' });
+            updatable.procedimentoId = n;
+        }
+
+        if (body.convenioId !== undefined) {
+            if (body.convenioId === null || body.convenioId === 'null' || body.convenioId === '') {
+                updatable.convenioId = null;
+            } else {
+                const n = safeParseInt(body.convenioId);
+                if (n === null) return res.status(400).json({ success: false, error: 'convenioId inválido' });
+                updatable.convenioId = n;
+            }
+        }
+
+        if (body.valorCobrado !== undefined) {
+            const v = parseFloat(body.valorCobrado);
+            if (isNaN(v)) return res.status(400).json({ success: false, error: 'valorCobrado inválido' });
+            updatable.valorCobrado = v;
+        }
+
+        const safeParseDate = (v) => {
+            if (!v) return null;
+            const d = new Date(v);
+            return isNaN(d.getTime()) ? null : d;
+        };
+
+        if (body.startTime !== undefined) {
+            const d = safeParseDate(body.startTime);
+            if (!d) {
+                console.warn('startTime fornecido é inválido:', body.startTime);
+                return res.status(400).json({ success: false, error: 'startTime inválido', received: body.startTime });
+            }
+            updatable.startTime = d;
+        }
+
+        if (body.endTime !== undefined) {
+            const d2 = safeParseDate(body.endTime);
+            if (!d2) {
+                console.warn('endTime fornecido é inválido:', body.endTime);
+                return res.status(400).json({ success: false, error: 'endTime inválido', received: body.endTime });
+            }
+            updatable.endTime = d2;
+        }
+
+        if (body.observacoes !== undefined) updatable.observacoes = body.observacoes;
+        if (body.status !== undefined) updatable.status = body.status;
+        updatable.updatedAt = new Date();
+
+        const existing = await prisma.agendamentos.findUnique({ where: { id: parseInt(id) } });
+        if (!existing) return res.status(404).json({ success: false, error: 'Agendamento não encontrado' });
+
+        // Se procedimentoId foi alterado, verificar existência
+        if (updatable.procedimentoId) {
+            const proc = await prisma.procedimentos.findUnique({ where: { id: updatable.procedimentoId } });
+            if (!proc) return res.status(400).json({ success: false, error: 'Procedimento não encontrado' });
+        }
+
+        let updated;
+        try {
+            updated = await prisma.agendamentos.update({
+            where: { id: parseInt(id) },
+            data: updatable,
+            include: {
+                clientes: true,
+                profissionais: true,
+                procedimentos: true,
+                convenios: true
+            }
+            });
+        } catch (prismaErr) {
+            console.error('Erro Prisma ao atualizar agendamento:', { message: prismaErr.message, code: prismaErr.code, stack: prismaErr.stack });
+            // Fornecer detalhes em ambiente de desenvolvimento para facilitar debug
+            return res.status(500).json({ success: false, error: 'Erro no banco ao atualizar agendamento', details: process.env.NODE_ENV === 'development' ? prismaErr.message : undefined });
+        }
+
+        const dataField = body.data || (updated.startTime ? updated.startTime.toISOString().split('T')[0] : null);
+        const horaInicioField = body.horaInicio || (updated.startTime ? updated.startTime.toISOString().split('T')[1].split('.')[0].slice(0,5) : null);
+
+        return res.json({ success: true, data: { ...updated, data: dataField, horaInicio: horaInicioField } });
+    } catch (error) {
+        console.error('Erro ao atualizar agendamento:', error);
+        return res.status(500).json({ success: false, error: 'Erro interno ao atualizar agendamento', details: error.message });
+    }
+};
+
+/**
  * Cancela um agendamento
  */
 const cancelarAgendamento = async (req, res) => {
@@ -969,6 +1097,7 @@ module.exports = {
     verificarDisponibilidade,
     listarMeusAgendamentos,
     atualizarStatusAgendamento,
+    atualizarAgendamento,
     cancelarAgendamento,
     listarAgendamentos,
     buscarAgendamentosPorPeriodo,

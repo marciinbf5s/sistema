@@ -136,20 +136,27 @@ const isAdmin = (req, res, next) => {
 const isOwnerOrAdmin = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const appointment = await prisma.agendamento.findUnique({
+        // Buscar o agendamento usando o nome correto do modelo e incluir o cliente
+        const appointment = await prisma.agendamentos.findUnique({
             where: { id: parseInt(id) },
-            include: { cliente: true }
+            include: { clientes: true }
         });
 
         if (!appointment) {
+            console.log(`Agendamento ${id} não encontrado ao verificar propriedade.`);
             return res.status(404).json({ error: 'Agendamento não encontrado' });
         }
 
-        if (req.user.role === 'ADMIN' || appointment.cliente.userId === req.user.id) {
+        // O relacionamento do cliente pode usar 'usuarioId' ou 'userId' dependendo do schema
+        const ownerUserId = appointment.clientes ? (appointment.clientes.usuarioId || appointment.clientes.userId || null) : null;
+
+        console.log('Verificando propriedade do agendamento:', { id: appointment.id, ownerUserId, currentUser: req.user.id, currentRole: req.user.role });
+
+        if (req.user.role === 'ADMIN' || ownerUserId === req.user.id) {
             req.appointment = appointment;
             next();
         } else {
-            res.status(403).json({ error: AUTH.FORBIDDEN });
+            return res.status(403).json({ error: AUTH.FORBIDDEN });
         }
     } catch (error) {
         console.error('Erro na verificação de permissão:', error);
