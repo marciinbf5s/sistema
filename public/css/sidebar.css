@@ -180,7 +180,7 @@
     top: 0;
     left: 0;
     z-index: 1000;
-    transition: all 0.3s;
+    transition: none; /* Removida transição para evitar reabrir animado */
     overflow-y: auto;
     padding-bottom: 20px;
 }
@@ -351,8 +351,9 @@
     }
 }
 
+/* Desativado para evitar reabertura animada a cada navegação de página */
 .sidebar {
-    animation: slideIn 0.3s ease-out;
+    animation: none;
 }
 
 /* Estilo para o botão de toggle em telas pequenas */

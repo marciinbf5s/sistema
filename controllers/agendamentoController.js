@@ -4,6 +4,27 @@ const prisma = new PrismaClient({
   errorFormat: 'pretty'
 });
 
+/**
+ * Middleware para validar se a data do agendamento não está no passado
+ * @param {Date} dateTime - Data e hora do agendamento
+ * @returns {Object} - Objeto com validação e mensagem de erro (se houver)
+ */
+const validarDataAgendamento = (dateTime) => {
+    const agora = new Date();
+    
+    // Remover segundos e milissegundos para comparação
+    agora.setSeconds(0, 0);
+    
+    if (new Date(dateTime) < agora) {
+        return {
+            valido: false,
+            mensagem: 'Não é possível agendar para uma data/hora que já passou.'
+        };
+    }
+    
+    return { valido: true };
+};
+
 // Add error handling for Prisma client
 prisma.$on('error', (e) => {
   console.error('Prisma Client Error:', e);
@@ -83,19 +104,19 @@ const criarAgendamento = async (req, res) => {
         if (!dataInicio) {
             return res.status(400).json({ success: false, error: 'Data/hora de início inválida', receivedStartTime: startTime });
         }
-
+              
         if (!dataFim || dataFim <= dataInicio) {
             return res.status(400).json({ success: false, error: 'Data/hora de término inválida ou anterior à data de início', received: { startTime, endTime } });
         }
 
-        // Verificar se a data de início não é no passado (com margem de 30 minutos)
-        const margemMinima = 30 * 60 * 1000; // 30 minutos em milissegundos
-        if (dataInicio.getTime() < (agora.getTime() - margemMinima)) {
+        // Validar se a data não está no passado
+        const validacaoData = validarDataAgendamento(startTime);
+        if (!validacaoData.valido) {
             return res.status(400).json({
                 success: false,
-                error: 'Não é possível agendar para um horário que já passou. Por favor, selecione um horário futuro.',
-                receivedStartTime: dataInicio.toISOString(),
-                now: agora.toISOString()
+                error: validacaoData.mensagem,
+                receivedStartTime: startTime,
+                now: new Date().toISOString()
             });
         }
 
@@ -497,7 +518,7 @@ const cancelarAgendamento = async (req, res) => {
     try {
         const { id } = req.params;
         
-        // Verifica se o agendamento existe e se o usuário tem permissão
+        // Verifica se o agendamento existe
         const agendamento = await prisma.agendamentos.findUnique({
             where: { id: parseInt(id) },
             include: {
@@ -514,9 +535,24 @@ const cancelarAgendamento = async (req, res) => {
             return res.status(404).json({ error: 'Agendamento não encontrado' });
         }
 
-        // Verifica se o usuário é o dono do agendamento ou um administrador
-        if (agendamento.clientes.usuarioId !== req.user.id && !req.user.isAdmin) {
-            return res.status(403).json({ error: 'Sem permissão para cancelar este agendamento' });
+        // Log para depuração
+        console.log('Usuário logado - ID:', req.user.id, 'Tipo:', typeof req.user.id);
+        console.log('Dono do agendamento - ID:', agendamento.clientes?.usuarioId, 'Tipo:', typeof agendamento.clientes?.usuarioId);
+        console.log('É admin?', req.user.role === 'ADMIN');
+
+        // Verifica se o usuário é um administrador
+        if (req.user.role === 'ADMIN') {
+            console.log('Acesso permitido: usuário é administrador');
+        } else {
+            // Verifica se o usuário é o dono do agendamento
+            if (String(req.user.id) !== String(agendamento.clientes?.usuarioId)) {
+                console.log('Acesso negado: usuário não é o dono do agendamento');
+                return res.status(403).json({ 
+                    error: 'Sem permissão para cancelar este agendamento',
+                    details: 'Você só pode cancelar seus próprios agendamentos.'
+                });
+            }
+            console.log('Acesso permitido: usuário é o dono do agendamento');
         }
 
         // Atualiza o status para CANCELADO em vez de deletar
@@ -606,11 +642,7 @@ const listarAgendamentos = async (req, res) => {
                     startTime: {
                         gte: startOfDay,
                         lte: endOfDay
-                    },
-                    NOT: [
-                        { status: 'CANCELADO' },
-                        { status: 'FINALIZADO' }
-                    ]
+                    }
                 },
                 include: {
                     clientes: {
@@ -672,11 +704,19 @@ const listarAgendamentos = async (req, res) => {
                         duracaoMinutos: duracaoMinutos
                     } : null;
 
+                    // Formatar dados do profissional
+                    const profissional = agendamento.profissionais ? {
+                        id: agendamento.profissionais.id,
+                        nome: agendamento.profissionais.nome
+                    } : null;
+
                     // Criar objeto formatado
                     const formatted = {
                         id: agendamento.id,
                         cliente: cliente,
                         procedimento: procedimento,
+                        profissional: profissional,
+                        profissionalId: profissional?.id || null,
                         data: agendamento.startTime.toISOString().split('T')[0],
                         horaInicio: agendamento.startTime.toLocaleTimeString('pt-BR', { 
                             hour: '2-digit', 
@@ -832,11 +872,15 @@ const buscarAgendamentosPorPeriodo = async (req, res) => {
                     const startTime = agendamento.startTime ? new Date(agendamento.startTime) : null;
                     const endTime = agendamento.endTime ? new Date(agendamento.endTime) : null;
                     
+                    const profissionalObj = profissional || { nome: 'Não atribuído', id: null };
+                    
                     return {
                         ...agendamento,
+                        // Incluir o ID do profissional no objeto principal
+                        profissionalId: profissionalObj.id,
                         // Relacionamentos
                         cliente: cliente || { nome: 'Cliente não encontrado', telefone: '', email: '' },
-                        profissional: profissional || { nome: 'Não atribuído', id: null },
+                        profissional: profissionalObj,
                         procedimento: procedimento || { name: 'Procedimento não encontrado', duracaoMinutos: 30, id: null },
                         convenio: convenio || { nome: 'Particular', id: null },
                         

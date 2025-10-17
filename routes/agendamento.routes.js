@@ -14,7 +14,8 @@ router.patch('/:id/status', isAdmin, agendamentoController.atualizarStatusAgenda
 router.put('/:id', isOwnerOrAdmin, agendamentoController.atualizarAgendamento);
 // Permitir atualização parcial via PATCH (útil para editar apenas alguns campos)
 router.patch('/:id', isOwnerOrAdmin, agendamentoController.atualizarAgendamento);
-router.delete('/:id', isOwnerOrAdmin, agendamentoController.cancelarAgendamento);
+// Rota para cancelar agendamento - qualquer usuário autenticado pode cancelar
+router.delete('/:id', agendamentoController.cancelarAgendamento);
 
 // Rotas de busca de agendamentos
 router.get('/', authenticateToken, agendamentoController.listarAgendamentos);

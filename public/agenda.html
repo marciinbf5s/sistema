@@ -90,50 +90,82 @@
         }
         
         .status-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
             display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
-            padding: 0.25rem 0.75rem;
-            border-radius: 1rem;
-            font-size: 0.8rem;
+            gap: 0.25rem;
             font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         
-        .status-pendente {
-            background-color: #fff3cd;
-            color: #856404;
+        /* Cores e estilos para cada status */
+        .status-agendado, .status-AGENDADO {
+            background-color: #e3f2fd;
+            color: #0d6efd;
+            border: 1px solid rgba(13, 110, 253, 0.2);
         }
         
-        .status-confirmado {
-            background-color: #d4edda;
-            color: #155724;
+        .status-confirmado, .status-CONFIRMADO {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid rgba(46, 125, 50, 0.2);
         }
         
-        .status-cancelado {
+        .status-cancelado, .status-CANCELADO {
             background-color: #f8d7da;
-            color: #721c24;
+            color: #b02a37;
+            border: 1px solid rgba(211, 47, 47, 0.2);
+            text-decoration: line-through;
+            opacity: 0.8;
         }
         
-        .status-finalizado {
-            background-color: #e2e3e5;
-            color: #383d41;
+        .status-finalizado, .status-FINALIZADO {
+            background-color: #e8f5e9;
+            color: #0f5132;
+            border: 1px solid rgba(46, 125, 50, 0.2);
         }
         
-        @media (max-width: 1199.98px) {
-            .main-content {
-                margin-left: 0;
-                width: 100%;
-            }
+        .status-em_andamento, .status-EM_ANDAMENTO {
+            background-color: #fff3e0;
+            color: #d46a08;
+            border: 1px solid rgba(237, 108, 2, 0.2);
+            font-weight: 600;
         }
         
-        @media (max-width: 768px) {
-            .calendar-day {
-                max-width: 2rem;
-                font-size: 0.8rem;
-            }
+        .status-faltou, .status-FALTOU {
+            background-color: #f3e5f5;
+            color: #7b1fa2;
+            border: 1px solid rgba(123, 31, 162, 0.2);
+        }
+        
+        /* Estilo para os itens da lista com status de cancelado */
+        .list-group-item.status-cancelado,
+        .list-group-item.status-CANCELADO {
+            background-color: #fff9f9;
+            opacity: 0.8;
+        }
+        
+        .list-group-item.status-cancelado .text-muted,
+        .list-group-item.status-CANCELADO .text-muted {
+            opacity: 0.7;
+        }
+        
+        .list-group-item.status-cancelado h6,
+        .list-group-item.status-CANCELADO h6,
+        .list-group-item.status-cancelado .mb-1,
+        .list-group-item.status-CANCELADO .mb-1 {
+            text-decoration: line-through;
+            opacity: 0.7;
         }
         
         @media (max-width: 576px) {
+            .calendar-day {
+                max-width: 1.8rem;
+                font-size: 0.75rem;
+            }
             .calendar-day {
                 max-width: 1.8rem;
                 font-size: 0.75rem;
@@ -165,11 +197,11 @@
             box-shadow: 0 0 0 2px rgba(255,255,255,0.6) inset;
         }
 
-        /* Cores claras para os status */
-        .legend-agendado { background: #cfe8ff; }      /* azul claro */
-        .legend-andamento { background: #fff6d6; }    /* amarelo claro */
-        .legend-finalizado { background: #d8f6dc; }   /* verde claro */
-        .legend-cancelado { background: #f8d7da; }    /* vermelho claro */
+        /* Cores mais fortes para a legenda */
+        .legend-agendado { background: #3d8bfd; }      /* azul mais forte */
+        .legend-andamento { background: #ffc107; }     /* amarelo mais forte */
+        .legend-finalizado { background: #198754; }    /* verde mais forte */
+        .legend-cancelado { background: #dc3545; }     /* vermelho mais forte */
 
         /* Backgrounds para itens de agendamento por status */
         .list-group-item.status-AGENDADO { background-color: #cfe8ff; }
@@ -212,10 +244,111 @@
         .list-group-item.status-FINALIZADO + .list-group-item.status-FINALIZADO,
         .list-group-item.status-CANCELADO + .list-group-item.status-CANCELADO,
         /* também aplicar quando status diferentes entre itens */
-        .list-group-item + .list-group-item {
+        .list-group-item.status-CANCELADO + .list-group-item {
             border-top: 1px solid rgba(0,0,0,0.10);
             margin-top: 0.4rem; /* espaço antes do traço */
             padding-top: 0.4rem; /* espaço interno após o traço */
+        }
+
+        /* Ajuste de alinhamento dos ícones dos botões */
+        .btn-group-sm > .btn i {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 1em;
+            height: 1em;
+            line-height: 1;
+        }
+        
+        /* Ajuste específico para o ícone de check no botão de finalizar */
+        /* Estilos para os botões de ação */
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+        }
+        
+        .action-buttons .btn {
+            width: 32px;
+            height: 32px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            border-radius: 4px;
+        }
+        
+        /* Botão Finalizar - Verde suave */
+        .action-buttons .btn-outline-success {
+            color: #2e7d32;
+            border-color: #a5d6a7;
+            background-color: #e8f5e9;
+        }
+        
+        .action-buttons .btn-outline-success:hover {
+            background-color: #2e7d32;
+            color: white;
+            border-color: #2e7d32;
+        }
+        
+        /* Botão Editar - Amarelo suave */
+        .action-buttons .btn-outline-primary {
+            color: #ed6c02;
+            border-color: #ffe082;
+            background-color: #fff8e1;
+        }
+        
+        .action-buttons .btn-outline-primary:hover {
+            background-color: #ed6c02;
+            color: white;
+            border-color: #ed6c02;
+        }
+        
+        /* Botão Cancelar - Vermelho suave */
+        .action-buttons .btn-outline-danger {
+            color: #d32f2f;
+            border-color: #ffcdd2;
+            background-color: #ffebee;
+        }
+        
+        .action-buttons .btn-outline-danger:hover {
+            background-color: #d32f2f;
+            color: white;
+            border-color: #d32f2f;
+        }
+
+        /* Estilo escuro para tooltips */
+        .tooltip {
+            --bs-tooltip-bg: #212529;
+            --bs-tooltip-color: #fff;
+        }
+        
+        .tooltip-inner {
+            background-color: var(--bs-tooltip-bg);
+            color: var(--bs-tooltip-color);
+            font-size: 0.8rem;
+            padding: 0.35rem 0.75rem;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.2);
+        }
+        
+        .bs-tooltip-auto[data-popper-placement^=top] .tooltip-arrow::before,
+        .bs-tooltip-top .tooltip-arrow::before {
+            border-top-color: var(--bs-tooltip-bg);
+        }
+        
+        .bs-tooltip-auto[data-popper-placement^=right] .tooltip-arrow::before,
+        .bs-tooltip-end .tooltip-arrow::before {
+            border-right-color: var(--bs-tooltip-bg);
+        }
+        
+        .bs-tooltip-auto[data-popper-placement^=bottom] .tooltip-arrow::before,
+        .bs-tooltip-bottom .tooltip-arrow::before {
+            border-bottom-color: var(--bs-tooltip-bg);
+        }
+        
+        .bs-tooltip-auto[data-popper-placement^=left] .tooltip-arrow::before,
+        .bs-tooltip-start .tooltip-arrow::before {
+            border-left-color: var(--bs-tooltip-bg);
         }
 
         .list-group-item.status-AGENDADO:last-child,
@@ -248,12 +381,12 @@
             font-weight: 600 !important;
         }
 
-        /* Cabeçalho da tabela (linha de títulos) com fundo cinza levemente mais escuro */
+        /* Cabeçalho da tabela (linha de títulos) com fundo claro que combina com o tema */
         #list-tab-pane .table thead th {
-            background-color: #e9ecef !important; /* cinza um pouco mais escuro */
+            background-color: #fff4de !important; /* dourado bem claro */
             color: #212529 !important; /* texto escuro */
             font-weight: 700 !important;
-            border-bottom: 1px solid #e9ecef !important;
+            border-bottom: 1px solid rgba(240, 179, 84, 0.35) !important;
         }
     </style>
 </head>
@@ -418,14 +551,29 @@
                     
                     <!-- Aba de Lista -->
                     <div class="tab-pane fade" id="list-tab-pane" role="tabpanel" aria-labelledby="list-tab" tabindex="0">
-                        <div class="card">
-                            <div class="card-body">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header py-3 px-4" style="background-color: #dee2e6; border-bottom: 1px solid rgba(0,0,0,0.05);">
+                                <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+                                    <h1 class="h5 mb-0 fw-normal text-dark">Agenda de Atendimentos</h1>
+                                    <div class="d-flex gap-2">
+                                        <button class="btn btn-sm btn-outline-secondary" id="prevDay">
+                                            <i class="bi bi-chevron-left"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-primary text-dark" id="todayBtn">Hoje</button>
+                                        <button class="btn btn-sm btn-outline-secondary" id="nextDay">
+                                            <i class="bi bi-chevron-right"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body p-0">
                                 <div class="table-responsive">
                                     <table class="table table-hover align-middle">
                                         <thead>
                                             <tr>
                                                 <th>Data/Hora</th>
                                                 <th>Cliente</th>
+                                                <th>Profissional</th>
                                                 <th>Procedimento</th>
                                                 <th>Status</th>
                                                 <th class="text-end">Ações</th>
@@ -437,19 +585,13 @@
                                     </table>
                                 </div>
                                 
-                                <nav aria-label="Navegação de páginas" class="mt-4">
-                                    <ul class="pagination justify-content-center">
-                                        <li class="page-item disabled">
-                                            <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Anterior</a>
-                                        </li>
-                                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                                        <li class="page-item"><a class="page-link" href="#">2</a></li>
-                                        <li class="page-item"><a class="page-link" href="#">3</a></li>
-                                        <li class="page-item">
-                                            <a class="page-link" href="#">Próximo</a>
-                                        </li>
-                                    </ul>
-                                </nav>
+                                <div id="paginationContainer" class="mt-4" style="display: none;">
+                                    <nav aria-label="Navegação de páginas">
+                                        <ul class="pagination justify-content-center" id="paginationList">
+                                            <!-- Pagination will be inserted here by JavaScript -->
+                                        </ul>
+                                    </nav>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -501,7 +643,7 @@
                             </div>
                             <div class="col-md-4">
                                 <label for="duracao" class="form-label">Duração (min) <span class="text-danger">*</span></label>
-                                <input type="number" class="form-control" id="duracao" name="duracao" min="15" step="15" value="60" required>
+                                <input type="number" class="form-control" id="duracao" name="duracao" min="1" value="60" required>
                             </div>
                             <div class="col-md-6">
                                 <label for="valorCobrado" class="form-label">Valor Cobrado (R$) <span class="text-danger">*</span></label>
@@ -529,22 +671,41 @@
     </div>
 
     <!-- Modal de Confirmação de Cancelamento -->
-    <div class="modal fade" id="confirmarCancelamentoModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
+    <div class="modal fade" id="confirmarCancelamentoModal" tabindex="-1" aria-labelledby="confirmarCancelamentoLabel" aria-hidden="true">
+        <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header bg-warning text-dark">
-                    <h5 class="modal-title"><i class="bi bi-exclamation-triangle-fill me-2"></i>Cancelar Agendamento</h5>
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmarCancelamentoLabel">Confirmar Cancelamento</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
                 </div>
                 <div class="modal-body">
-                    <p>Tem certeza que deseja cancelar este agendamento? Esta ação não pode ser desfeita.</p>
+                    Tem certeza que deseja cancelar este agendamento?
                     <input type="hidden" id="confirmarCancelamentoId">
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Não, manter agendamento</button>
-                    <button type="button" class="btn btn-danger" id="btnConfirmarCancelamento">
-                        <i class="bi bi-x-circle me-1"></i> Sim, cancelar
-                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Não</button>
+                    <button type="button" class="btn btn-danger" onclick="confirmarCancelamento()">Sim, Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Erro de Validação -->
+    <div class="modal fade" id="erroValidacaoModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="erroValidacaoLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title" id="erroValidacaoLabel">Atenção</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-3">
+                        <i class="bi bi-exclamation-triangle-fill text-warning" style="font-size: 3rem;"></i>
+                    </div>
+                    <p id="erroValidacaoMensagem" class="text-center"></p>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Entendi</button>
                 </div>
             </div>
         </div>
@@ -682,20 +843,27 @@
             const toastElement = document.getElementById('toastSucesso');
             const toastBody = document.getElementById('toastMensagem');
             
-            if (toastElement && toastBody) {
-                const toast = new bootstrap.Toast(toastElement);
-                toastBody.textContent = message;
-                
-                if (isError) {
-                    toastElement.querySelector('.toast-header').classList.remove('bg-success');
-                    toastElement.querySelector('.toast-header').classList.add('bg-danger');
-                } else {
-                    toastElement.querySelector('.toast-header').classList.remove('bg-danger');
-                    toastElement.querySelector('.toast-header').classList.add('bg-success');
-                }
-                
-                toast.show();
+            if (isError) {
+                toastElement.classList.remove('bg-success');
+                toastElement.classList.add('bg-danger');
+                document.querySelector('#toastSucesso .me-auto').textContent = 'Erro';
+            } else {
+                toastElement.classList.remove('bg-danger');
+                toastElement.classList.add('bg-success');
+                document.querySelector('#toastSucesso .me-auto').textContent = 'Sucesso';
             }
+            
+            toastBody.textContent = message;
+            const toast = new bootstrap.Toast(toastElement);
+            toast.show();
+        }
+
+        // Função para exibir mensagem de erro em modal
+        function showErrorModal(message) {
+            const errorModal = new bootstrap.Modal(document.getElementById('erroValidacaoModal'));
+            const errorMessage = document.getElementById('erroValidacaoMensagem');
+            errorMessage.textContent = message;
+            errorModal.show();
         }
         
         // Funções de manipulação do calendário
@@ -777,8 +945,126 @@
             }
         }
         
+        // Funções auxiliares para status
+        function getStatusText(status) {
+            if (!status) return 'Agendado';
+            const statusMap = {
+                'AGENDADO': 'Agendado',
+                'CONFIRMADO': 'Confirmado',
+                'CANCELADO': 'Cancelado',
+                'FINALIZADO': 'Finalizado',
+                'EM_ANDAMENTO': 'Em andamento',
+                'FALTOU': 'Paciente não compareceu'
+            };
+            return statusMap[status.toUpperCase()] || status;
+        }
+
+        function getStatusBadgeIcon(status) {
+            if (!status) return '<i class="bi bi-calendar-check"></i>';
+            
+            const iconMap = {
+                'AGENDADO': 'bi-calendar-check',
+                'CONFIRMADO': 'bi-check-circle',
+                'CANCELADO': 'bi-x-circle',
+                'FINALIZADO': 'bi-check-circle-fill',
+                'EM_ANDAMENTO': 'bi-arrow-repeat',
+                'FALTOU': 'bi-person-x'
+            };
+            
+            const iconClass = iconMap[status.toUpperCase()] || 'bi-question-circle';
+            return `<i class="bi ${iconClass}"></i>`;
+        }
+
+        // Função para escapar caracteres HTML
+        function escapeHtml(unsafe) {
+            if (typeof unsafe !== 'string') return unsafe;
+            return unsafe
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // Mapa de profissionais por ID e helpers
+        let professionalsById = {};
+        function buildProfessionalsMapFromSelect() {
+            const sel = document.getElementById('profissionalId');
+            if (!sel) return;
+            professionalsById = {};
+            Array.from(sel.options).forEach(opt => {
+                const val = (opt.value || '').trim();
+                const label = (opt.textContent || '').trim();
+                if (val) professionalsById[val] = label;
+            });
+        }
+        function getProfessionalNameById(id) {
+            if (!id && id !== 0) {
+                console.log('ID do profissional não fornecido');
+                return '';
+            }
+            
+            const key = String(id);
+            
+            // Se não tivermos o mapa de profissionais, tenta construir
+            if (!professionalsById || Object.keys(professionalsById).length === 0) {
+                console.log('Construindo mapa de profissionais...');
+                buildProfessionalsMapFromSelect();
+                
+                // Se ainda estiver vazio, tenta carregar os profissionais
+                if (Object.keys(professionalsById).length === 0) {
+                    console.log('Nenhum profissional encontrado no mapa, tentando carregar...');
+                    loadProfissionais().then(() => {
+                        // Atualiza a lista de agendamentos após carregar os profissionais
+                        const selectedDate = getSelectedDate();
+                        loadAppointmentsForDate(selectedDate);
+                    });
+                    return 'Carregando...';
+                }
+            }
+            
+            console.log(`Buscando profissional com ID: ${key}`);
+            console.log('Profissionais disponíveis:', professionalsById);
+            
+            const nome = professionalsById[key] || '';
+            console.log(`Nome encontrado para ID ${key}:`, nome || 'Nenhum');
+            
+            return nome;
+        }
+
+        // Funções de formatação de data/hora
+        function formatDate(date) {
+            if (!date) return '';
+            
+            const d = new Date(date);
+            if (isNaN(d.getTime())) return '';
+            
+            const day = d.getDate().toString().padStart(2, '0');
+            const month = (d.getMonth() + 1).toString().padStart(2, '0');
+            const year = d.getFullYear();
+            
+            return `${day}/${month}/${year}`;
+        }
+        
+        function formatTime(date) {
+            if (!date) return '';
+            const d = new Date(date);
+            if (isNaN(d.getTime())) return '';
+            
+            // Usar os métodos locais já que já ajustamos o fuso horário
+            const hours = d.getHours().toString().padStart(2, '0');
+            const minutes = d.getMinutes().toString().padStart(2, '0');
+            
+            return `${hours}:${minutes}`;
+        }
+
         // Funções de manipulação de agendamentos
         
+        // Função para editar um agendamento
+        function editarAgendamento(id) {
+            // Lógica de edição será implementada aqui
+        }
+
         function updateAppointmentsList(appointments) {
             const loadingEl = document.getElementById('appointmentsLoading');
             const emptyEl = document.getElementById('appointmentsEmpty');
@@ -786,29 +1072,39 @@
 
             if (!container || !loadingEl || !emptyEl) return;
 
-            // Garantir que o loading esteja oculto quando chamamos update
             loadingEl.classList.add('d-none');
 
             if (!appointments || appointments.length === 0) {
-                // Mostrar mensagem de vazio
                 container.classList.add('d-none');
                 emptyEl.classList.remove('d-none');
                 container.innerHTML = '';
                 return;
             }
 
-            // Há agendamentos: popular container
             emptyEl.classList.add('d-none');
             container.classList.remove('d-none');
             
             let html = '';
 
-            appointments.sort((a, b) => a.dataHora - b.dataHora).forEach(appt => {
+            // Ordenar agendamentos por data/hora
+            const sortedAppointments = [...appointments].sort((a, b) => {
+                return (a.dataHora || 0) - (b.dataHora || 0);
+            });
+
+            sortedAppointments.forEach(appt => {
+                if (!appt.dataHora) return;
+
+                // Log para depuração
+                console.log('Estrutura completa do appt:', JSON.parse(JSON.stringify(appt)));
+                console.log('Profissional:', appt.profissional);
+                console.log('Profissional ID:', appt.profissionalId || appt.profissional_id);
+                
                 const time = formatTime(appt.dataHora);
-                const statusClass = `status-${(appt.status || '').toString().toUpperCase()}`;
+                const statusClass = `status-${(appt.status || 'AGENDADO').toString().toUpperCase()}`;
+                const statusText = getStatusText(appt.status || 'AGENDADO');
                 
                 html += `
-                    <div class="list-group-item list-group-item-action ${statusClass}">
+                    <div class="list-group-item list-group-item-action ${statusClass}" data-appointment-id="${appt.id}">
                         <div class="d-flex w-100 justify-content-between align-items-center">
                             <div class="d-flex align-items-center">
                                 <div class="me-3 text-center" style="min-width: 60px">
@@ -816,30 +1112,127 @@
                                     <small class="text-muted">${formatDate(appt.dataHora)}</small>
                                 </div>
                                 <div>
-                                    <h6 class="mb-1">${appt.cliente}</h6>
-                                    <p class="mb-1">${appt.procedimento}</p>
+                                <h6 class="mb-1">${escapeHtml(appt.cliente || 'Cliente não informado')}</h6>
+                                <p class="mb-1"><strong>Profissional:</strong> 
+                                    ${(() => {
+                                        // Tenta obter o nome do profissional de várias fontes
+                                        const nomeProfissional = 
+                                            (appt.profissional && (appt.profissional.nome || appt.profissional.name)) ||
+                                            appt.profissionalNome || 
+                                            appt.nomeProfissional ||
+                                            (appt.profissionalId ? getProfessionalNameById(appt.profissionalId) : '') ||
+                                            (appt.profissional_id ? getProfessionalNameById(appt.profissional_id) : '') ||
+                                            'Não informado';
+                                        return escapeHtml(nomeProfissional);
+                                    })()}
+                                </p>
+                                <p class="mb-1">${escapeHtml(appt.procedimento || 'Procedimento não informado')}</p>
                                 </div>
                             </div>
-                            <div>
-                                <span class="status-badge ${statusClass}">
-                                    ${getStatusBadgeIcon(appt.status)} ${getStatusText(appt.status)}
+                            <div class="d-flex align-items-center">
+                                <span class="status-badge ${statusClass} me-2">
+                                    ${getStatusBadgeIcon(appt.status || 'AGENDADO')} ${statusText}
                                 </span>
-                                <div class="btn-group btn-group-sm ms-2">
-                                    <button class="btn btn-outline-primary btn-sm" onclick="editAppointment(${appt.id})">
+                                <div class="action-buttons btn-group">
+                                    <button class="btn btn-sm btn-outline-primary me-1" 
+                                            onclick="editAppointment('${appt.id}')"
+                                            data-bs-toggle="tooltip" 
+                                            title="Editar agendamento">
                                         <i class="bi bi-pencil"></i>
                                     </button>
-                                    <button class="btn btn-outline-danger btn-sm" onclick="cancelAppointment(${appt.id})">
+                                    <button class="btn btn-sm btn-outline-success me-1" 
+                                            onclick="finalizeAppointment('${appt.id}')"
+                                            ${appt.status === 'FINALIZADO' ? 'disabled' : ''}
+                                            data-bs-toggle="tooltip" 
+                                            title="Finalizar agendamento">
+                                        <i class="bi bi-check-lg"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" 
+                                            onclick="cancelAppointment('${appt.id}')"
+                                            ${appt.status === 'CANCELADO' ? 'disabled' : ''}
+                                            data-bs-toggle="tooltip" 
+                                            title="Cancelar agendamento">
                                         <i class="bi bi-x-lg"></i>
                                     </button>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                `;
+                    </div>`;
+            });
+
+            container.innerHTML = html || '<div class="p-3 text-center text-muted">Nenhum agendamento para exibir</div>';
+            
+            // Atualizar tooltips do Bootstrap
+            const tooltipTriggerList = [].slice.call(container.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+                try {
+                    new bootstrap.Tooltip(tooltipTriggerEl);
+                } catch (e) {
+                    // Ignorar erros de tooltip
+                }
+            });
+        }
+        
+        // Variável para controlar a data atual na lista
+        let currentListDate = new Date();
+        
+        // Função para formatar a data como YYYY-MM-DD
+        function formatDateForFilter(date) {
+            const d = new Date(date);
+            return d.toISOString().split('T')[0];
+        }
+        
+        // Função para filtrar agendamentos por data
+        function filterAppointmentsByDate(date, appointmentsList = []) {
+            if (!appointmentsList || !appointmentsList.length) {
+                console.log('Nenhum agendamento disponível para filtrar');
+                return [];
+            }
+            
+            const dateStr = formatDateForFilter(date);
+            console.log(`Filtrando agendamentos para a data: ${dateStr}`);
+            
+            const filtered = appointmentsList.filter(appt => {
+                if (!appt || !appt.dataHora) return false;
+                const apptDate = formatDateForFilter(appt.dataHora);
+                return apptDate === dateStr;
             });
             
-            container.innerHTML = html;
+            console.log(`Encontrados ${filtered.length} agendamentos para ${dateStr}`);
+            return filtered;
         }
+        
+        // Função para atualizar a tabela com a data selecionada
+        function updateTableForDate(date) {
+            currentListDate = new Date(date);
+            loadAppointmentsForDate(currentListDate).then(appointments => {
+                const filtered = filterAppointmentsByDate(currentListDate, appointments);
+                updateAppointmentsTable(filtered);
+            });
+        }
+        
+        // Configurar os botões de navegação
+        document.addEventListener('DOMContentLoaded', function() {
+            // Botão Anterior
+            document.getElementById('prevDay').addEventListener('click', function() {
+                currentListDate.setDate(currentListDate.getDate() - 1);
+                updateTableForDate(currentListDate);
+            });
+            
+            // Botão Hoje
+            document.getElementById('todayBtn').addEventListener('click', function() {
+                updateTableForDate(new Date());
+            });
+            
+            // Botão Próximo
+            document.getElementById('nextDay').addEventListener('click', function() {
+                currentListDate.setDate(currentListDate.getDate() + 1);
+                updateTableForDate(currentListDate);
+            });
+            
+            // Inicializa a tabela com a data atual
+            updateTableForDate(new Date());
+        });
         
         function updateAppointmentsTable(appointments) {
             const tbody = document.getElementById('appointmentsTableBody');
@@ -851,19 +1244,43 @@
             appointments.forEach(appt => {
                 const row = document.createElement('tr');
                 const statusClass = `status-${appt.status}`;
+                const professional = appt.profissional || appt.professional || appt.profissionalNome || appt.nomeProfissional || '';
                 
                 row.innerHTML = `
                     <td>${formatDate(appt.dataHora)} ${formatTime(appt.dataHora)}</td>
                     <td>${appt.cliente}</td>
+                    <td>${
+                        (appt.profissional || appt.professional || appt.profissionalNome || appt.nomeProfissional ||
+                         getProfessionalNameById(appt.profissionalId || appt.profissional_id || appt.professionalId || appt.professional_id)) || ''
+                    }</td>
                     <td>${appt.procedimento}</td>
                     <td><span class="status-badge ${statusClass}">${getStatusText(appt.status)}</span></td>
                     <td class="text-end">
-                        <button class="btn btn-sm btn-outline-primary me-1" onclick="editAppointment(${appt.id})">
-                            <i class="bi bi-pencil"></i>
-                        </button>
-                        <button class="btn btn-sm btn-outline-danger" onclick="cancelAppointment(${appt.id})">
-                            <i class="bi bi-x-lg"></i>
-                        </button>
+                        <div class="action-buttons justify-content-end">
+                            <button class="btn btn-sm btn-outline-success" 
+                                    onclick="finalizeAppointment(${appt.id})" 
+                                    ${appt.status === 'finalizado' ? 'disabled' : ''}
+                                    data-bs-toggle="tooltip" 
+                                    data-bs-placement="top" 
+                                    title="Finalizar">
+                                <i class="bi bi-check-lg"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-primary" 
+                                    onclick="editAppointment(${appt.id})"
+                                    data-bs-toggle="tooltip" 
+                                    data-bs-placement="top" 
+                                    title="Editar">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" 
+                                    onclick="cancelAppointment(${appt.id})" 
+                                    ${appt.status === 'finalizado' ? 'disabled' : ''}
+                                    data-bs-toggle="tooltip" 
+                                    data-bs-placement="top" 
+                                    title="Cancelar">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
+                        </div>
                     </td>
                 `;
                 
@@ -871,15 +1288,165 @@
             });
         }
         
+        // Variáveis de paginação
+        let currentPage = 1;
+        const itemsPerPage = 10; // Número de itens por página
+        let totalPages = 1;
+        
+        // Função para atualizar a paginação
+        function updatePagination(totalItems) {
+            const paginationContainer = document.getElementById('paginationContainer');
+            const paginationList = document.getElementById('paginationList');
+            
+            // Calcular o número total de páginas
+            totalPages = Math.ceil(totalItems / itemsPerPage);
+            
+            // Mostrar ou esconder a paginação com base no número de páginas
+            if (totalPages <= 1) {
+                paginationContainer.style.display = 'none';
+                return;
+            }
+            
+            paginationContainer.style.display = 'block';
+            paginationList.innerHTML = '';
+            
+            // Botão Anterior
+            const prevLi = document.createElement('li');
+            prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+            prevLi.innerHTML = `
+                <a class="page-link" href="#" ${currentPage === 1 ? 'tabindex="-1" aria-disabled="true"' : ''}>
+                    Anterior
+                </a>
+            `;
+            prevLi.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (currentPage > 1) {
+                    currentPage--;
+                    updateTableForDate(currentListDate);
+                }
+            });
+            paginationList.appendChild(prevLi);
+            
+            // Números das páginas
+            const maxVisiblePages = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+            
+            if (endPage - startPage + 1 < maxVisiblePages) {
+                startPage = Math.max(1, endPage - maxVisiblePages + 1);
+            }
+            
+            // Primeira página
+            if (startPage > 1) {
+                const firstLi = document.createElement('li');
+                firstLi.className = 'page-item';
+                firstLi.innerHTML = '<a class="page-link" href="#">1</a>';
+                firstLi.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    currentPage = 1;
+                    updateTableForDate(currentListDate);
+                });
+                paginationList.appendChild(firstLi);
+                
+                if (startPage > 2) {
+                    const ellipsisLi = document.createElement('li');
+                    ellipsisLi.className = 'page-item disabled';
+                    ellipsisLi.innerHTML = '<span class="page-link">...</span>';
+                    paginationList.appendChild(ellipsisLi);
+                }
+            }
+            
+            // Páginas do meio
+            for (let i = startPage; i <= endPage; i++) {
+                const pageLi = document.createElement('li');
+                pageLi.className = `page-item ${i === currentPage ? 'active' : ''}`;
+                pageLi.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+                
+                if (i !== currentPage) {
+                    pageLi.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        currentPage = i;
+                        updateTableForDate(currentListDate);
+                    });
+                }
+                
+                paginationList.appendChild(pageLi);
+            }
+            
+            // Última página
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    const ellipsisLi = document.createElement('li');
+                    ellipsisLi.className = 'page-item disabled';
+                    ellipsisLi.innerHTML = '<span class="page-link">...</span>';
+                    paginationList.appendChild(ellipsisLi);
+                }
+                
+                const lastLi = document.createElement('li');
+                lastLi.className = 'page-item';
+                lastLi.innerHTML = `<a class="page-link" href="#">${totalPages}</a>`;
+                lastLi.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    currentPage = totalPages;
+                    updateTableForDate(currentListDate);
+                });
+                paginationList.appendChild(lastLi);
+            }
+            
+            // Botão Próximo
+            const nextLi = document.createElement('li');
+            nextLi.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
+            nextLi.innerHTML = `
+                <a class="page-link" href="#" ${currentPage === totalPages ? 'tabindex="-1" aria-disabled="true"' : ''}>
+                    Próximo
+                </a>
+            `;
+            nextLi.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    updateTableForDate(currentListDate);
+                }
+            });
+            paginationList.appendChild(nextLi);
+        }
+        
+        // Função para obter os itens da página atual
+        function getPaginatedItems(items) {
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            return items.slice(startIndex, startIndex + itemsPerPage);
+        }
+        
+        // Atualizar a função updateTableForDate para suportar paginação
+        function updateTableForDate(date) {
+            currentListDate = new Date(date);
+            const filtered = filterAppointmentsByDate(currentListDate);
+            
+            // Resetar para a primeira página ao mudar de data
+            currentPage = 1;
+            
+            // Atualizar a paginação
+            updatePagination(filtered.length);
+            
+            // Obter apenas os itens da página atual
+            const paginatedItems = getPaginatedItems(filtered);
+            
+            // Atualizar a tabela com os itens da página atual
+            updateAppointmentsTable(paginatedItems);
+            
+            // Rolar para o topo da tabela
+            document.querySelector('#list-tab-pane .table-responsive')?.scrollIntoView({ behavior: 'smooth' });
+        }
+        
         // As funções reais para carregar clientes/procedimentos via API estão definidas mais abaixo
         
         // Funções auxiliares de interface
         function getStatusBadgeIcon(status) {
             const icons = {
-                'pendente': 'bi-hourglass-split',
-                'confirmado': 'bi-check-circle',
-                'cancelado': 'bi-x-circle',
-                'finalizado': 'bi-check2-all'
+                'AGENDADO': 'bi-calendar-check',
+                'EM_ANDAMENTO': 'bi-hourglass-split',
+                'FINALIZADO': 'bi-check2-all',
+                'CANCELADO': 'bi-x-circle'
             };
             
             return `<i class="bi ${icons[status] || 'bi-question-circle'}"></i>`;
@@ -887,134 +1454,355 @@
         
         function getStatusText(status) {
             const statusMap = {
-                'pendente': 'Pendente',
-                'confirmado': 'Confirmado',
-                'cancelado': 'Cancelado',
-                'finalizado': 'Finalizado'
+                'AGENDADO': 'Agendado',
+                'EM_ANDAMENTO': 'Em Andamento',
+                'FINALIZADO': 'Finalizado',
+                'CANCELADO': 'Cancelado'
             };
             
-            return statusMap[status] || status;
-        }
-        
-        // Funções globais para acesso via HTML
-        window.editAppointment = async function(id) {
-            try {
-                console.log('Buscando detalhes do agendamento:', id);
-                
-                // Buscar os dados reais do agendamento
-                const response = await fetchWithAuth(`/api/agendamentos/${id}`);
-                if (!response || !response.ok) {
-                    throw new Error('Erro ao buscar agendamento');
-                }
 
-                const payload = await response.json();
-                // API pode retornar { success: true, data: {...} } ou diretamente o objeto
-                const agendamento = (payload && payload.success && payload.data) ? payload.data : payload;
-                console.log('Dados do agendamento (normalized):', agendamento);
-
-                // Converter as datas para o formato correto (validação antes de usar toISOString)
-                const safeParseDate = (v) => {
-                    if (!v) return null;
-                    try {
-                        const d = new Date(v);
-                        if (isNaN(d.getTime())) return null;
-                        return d;
-                    } catch (e) {
-                        return null;
-                    }
-                };
-
-                const startDate = safeParseDate(agendamento.startTime || agendamento.start_time || agendamento.data && (agendamento.data + 'T' + (agendamento.horaInicio || '00:00')));
-                const endDate = safeParseDate(agendamento.endTime || agendamento.end_time);
-                
-        // Calcular a duração em minutos (se possível)
-        let durationMinutes = 30;
-        if (startDate && endDate) {
-            const durationMs = endDate - startDate;
-            durationMinutes = Math.floor(durationMs / (1000 * 60));
-        }
-                
-                // Preencher o formulário
-                const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('agendamentoModal'));
-                const form = document.getElementById('agendamentoForm');
-                
-                form.reset();
-                
-                // Preencher os campos com os dados do agendamento
-                document.getElementById('agendamentoId').value = agendamento.id;
-                if (agendamento.clienteId) document.getElementById('clienteId').value = agendamento.clienteId;
-                if (agendamento.procedimentoId) document.getElementById('procedimentoId').value = agendamento.procedimentoId;
-                if (agendamento.profissionalId) document.getElementById('profissionalId').value = agendamento.profissionalId;
-                
-        // Formatar data e hora (usar valores originais se parsing falhar)
-        if (startDate) {
-            const dataFormatada = startDate.toISOString().split('T')[0];
-            const horaFormatada = startDate.getHours().toString().padStart(2, '0') + ':' + 
-                                startDate.getMinutes().toString().padStart(2, '0');
-            document.getElementById('data').value = dataFormatada;
-            document.getElementById('horaInicio').value = horaFormatada;
-        } else {
-            // Tentar preencher com campos enviados pelo backend (data/horaInicio)
-            if (agendamento.data) document.getElementById('data').value = agendamento.data;
-            if (agendamento.horaInicio) document.getElementById('horaInicio').value = agendamento.horaInicio;
-        }
-                document.getElementById('duracao').value = durationMinutes;
-                
-    if (agendamento.valorCobrado) document.getElementById('valorCobrado').value = agendamento.valorCobrado;
-    if (agendamento.observacoes) document.getElementById('observacoes').value = agendamento.observacoes;
-                
-        // Disparar eventos de mudança para atualizar campos dependentes
+    container.innerHTML = html || '<div class="p-3 text-center text-muted">Nenhum agendamento para exibir</div>';
+            
+    // Atualizar tooltips do Bootstrap
+    const tooltipTriggerList = [].slice.call(container.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.forEach(function (tooltipTriggerEl) {
         try {
-            document.getElementById('data').dispatchEvent(new Event('change'));
-            document.getElementById('horaInicio').dispatchEvent(new Event('change'));
-        } catch(e) {
-            console.warn('Erro ao disparar eventos de change no modal:', e);
+            new bootstrap.Tooltip(tooltipTriggerEl);
+        } catch (e) {
+            // Ignorar erros de tooltip
         }
+    });
+}
+
+function updateAppointmentsTable(appointments) {
+    const tbody = document.getElementById('appointmentsTableBody');
+            
+    if (!tbody) return;
+            
+    tbody.innerHTML = '';
+            
+    appointments.forEach(appt => {
+        const row = document.createElement('tr');
+        const statusClass = `status-${appt.status}`;
+        const professional = appt.profissional || appt.professional || appt.profissionalNome || appt.nomeProfissional || '';
                 
-                modal.show();
+        row.innerHTML = `
+            <td>${formatDate(appt.dataHora)} ${formatTime(appt.dataHora)}</td>
+            <td>${appt.cliente}</td>
+            <td>${
+                (appt.profissional || appt.professional || appt.profissionalNome || appt.nomeProfissional ||
+                 getProfessionalNameById(appt.profissionalId || appt.profissional_id || appt.professionalId || appt.professional_id)) || ''
+            }</td>
+            <td>${appt.procedimento}</td>
+            <td><span class="status-badge ${statusClass}">${getStatusText(appt.status)}</span></td>
+            <td class="text-end">
+                <div class="action-buttons justify-content-end">
+                    <button class="btn btn-sm btn-outline-success" 
+                            onclick="finalizeAppointment(${appt.id})" 
+                            ${appt.status === 'finalizado' ? 'disabled' : ''}
+                            data-bs-toggle="tooltip" 
+                            data-bs-placement="top" 
+                            title="Finalizar">
+                        <i class="bi bi-check-lg"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-primary" 
+                            onclick="editAppointment(${appt.id})"
+                            data-bs-toggle="tooltip" 
+                            data-bs-placement="top" 
+                            title="Editar">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" 
+                            onclick="cancelAppointment(${appt.id})" 
+                            ${appt.status === 'finalizado' ? 'disabled' : ''}
+                            data-bs-toggle="tooltip" 
+                            data-bs-placement="top" 
+                            title="Cancelar">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+            </td>
+        `;
                 
-            } catch (error) {
-                console.error('Erro ao carregar agendamento:', error);
-                showToast('Erro ao carregar agendamento: ' + (error.message || 'Tente novamente'), true);
+        tbody.appendChild(row);
+    });
+}
+
+// As funções reais para carregar clientes/procedimentos via API estão definidas mais abaixo
+        
+// Funções auxiliares de interface
+function getStatusBadgeIcon(status) {
+    const icons = {
+        'pendente': 'bi-hourglass-split',
+        'confirmado': 'bi-check-circle',
+        'cancelado': 'bi-x-circle',
+        'finalizado': 'bi-check2-all'
+    };
+            
+    return `<i class="bi ${icons[status] || 'bi-question-circle'}"></i>`;
+}
+
+function getStatusText(status) {
+    const statusMap = {
+        'pendente': 'Pendente',
+        'confirmado': 'Confirmado',
+        'cancelado': 'Cancelado',
+        'finalizado': 'Finalizado'
+    };
+            
+    return statusMap[status] || status;
+}
+
+// Funções globais para acesso via HTML
+window.editAppointment = async function(id) {
+    const loadingToast = showToast('Carregando agendamento...', false, 0); // Toast sem timeout
+            
+    try {
+        console.log('Buscando detalhes do agendamento:', id);
+                
+        // Buscar os dados reais do agendamento
+        const response = await fetchWithAuth(`/api/agendamentos/${id}`);
+        if (!response || !response.ok) {
+            throw new Error('Erro ao buscar agendamento: ' + (response?.statusText || 'Sem resposta do servidor'));
+        }
+
+        const payload = await response.json();
+        // API pode retornar { success: true, data: {...} } ou diretamente o objeto
+        const agendamento = (payload && payload.success && payload.data) ? payload.data : payload;
+        console.log('Dados do agendamento (normalized):', agendamento);
+
+        // Converter as datas para o formato correto
+        const safeParseDate = (v) => {
+            if (!v) return null;
+            try {
+                const d = new Date(v);
+                if (isNaN(d.getTime())) return null;
+                return d;
+            } catch (e) {
+                console.warn('Erro ao fazer parse da data:', v, e);
+                return null;
             }
         };
+
+        // Tentar obter a data de início de várias fontes possíveis
+        let startDate = safeParseDate(agendamento.startTime || agendamento.start_time);
+        if (!startDate && agendamento.data) {
+            const dateStr = agendamento.data;
+            const timeStr = agendamento.horaInicio || '00:00';
+            startDate = safeParseDate(`${dateStr}T${timeStr}:00`);
+        }
+
+        // Calcular duração
+        const endDate = safeParseDate(agendamento.endTime || agendamento.end_time);
+        let durationMinutes = agendamento.duracao || 30;
+                
+        if (startDate && endDate) {
+            const durationMs = endDate - startDate;
+            durationMinutes = Math.max(1, Math.floor(durationMs / (1000 * 60)));
+        }
+                
+        // Preencher o formulário
+        const modalEl = document.getElementById('agendamentoModal');
+        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+        const form = document.getElementById('agendamentoForm');
+                
+        // Resetar o formulário
+        form.reset();
+                
+        // Preencher campos básicos
+        form.querySelector('[name="agendamentoId"]').value = agendamento.id || '';
+                
+        // Preencher selects com valores atuais
+        const fillSelect = (id, value) => {
+            const select = document.getElementById(id);
+            if (select && value !== undefined && value !== null) {
+                const option = Array.from(select.options).find(opt => opt.value == value);
+                if (option) {
+                    select.value = value;
+                } else {
+                    console.warn(`Valor não encontrado no select ${id}:`, value);
+                }
+            }
+        };
+                
+        fillSelect('clienteId', agendamento.clienteId);
+        fillSelect('procedimentoId', agendamento.procedimentoId);
+        fillSelect('profissionalId', agendamento.profissionalId);
+                
+        // Preencher data e hora
+        if (startDate) {
+            // Ajustar para o fuso horário local
+            const localDate = new Date(startDate.getTime() - (startDate.getTimezoneOffset() * 60000));
+            document.getElementById('data').value = localDate.toISOString().split('T')[0];
+            document.getElementById('horaInicio').value = 
+                String(startDate.getHours()).padStart(2, '0') + ':' + 
+                String(startDate.getMinutes()).padStart(2, '0');
+        }
+                
+        // Preencher demais campos
+        document.getElementById('duracao').value = durationMinutes;
+        document.getElementById('valorCobrado').value = agendamento.valorCobrado || '';
+        document.getElementById('observacoes').value = agendamento.observacoes || '';
+                
+        // Disparar eventos de mudança para atualizar campos dependentes
+        ['data', 'horaInicio', 'procedimentoId'].forEach(field => {
+            const el = document.getElementById(field);
+            if (el) {
+                try {
+                    el.dispatchEvent(new Event('change'));
+                } catch(e) {
+                    console.warn(`Erro ao disparar evento change em ${field}:`, e);
+                }
+            }
+        });
+
+        // Mostrar o modal
+        modal.show();
         
+        // Fechar o toast de carregamento
+        if (loadingToast && loadingToast.hide) loadingToast.hide();
+        
+    } catch (error) {
+        console.error('Erro ao carregar agendamento:', error);
+        showErrorModal('Erro ao carregar agendamento: ' + (error.message || 'Tente novamente'));
+        if (loadingToast && loadingToast.hide) loadingToast.hide();
+    }
+};
+
+        window.finalizeAppointment = async function(id) {
+            try {
+                if (!id) {
+                    throw new Error('ID do agendamento não informado');
+                }
+
+                // Mostrar toast de carregamento
+                const loadingToast = showToast('Finalizando agendamento...', false, true);
+                
+                // Enviar requisição para atualizar o status do agendamento
+                const response = await fetchWithAuth(`/api/agendamentos/${id}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        status: 'FINALIZADO',
+                        // Incluir outros campos necessários para evitar validações
+                        data: new Date().toISOString().split('T')[0],
+                        horaInicio: '00:00',
+                        horaFim: '23:59',
+                        procedimentoId: 1 // ID padrão, será sobrescrito pelo backend
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.message || 'Erro ao finalizar agendamento');
+                }
+
+                // Fechar o toast de carregamento
+                if (loadingToast && loadingToast.hide) loadingToast.hide();
+                
+                showToast('Agendamento finalizado com sucesso!');
+                
+                // Recarregar os agendamentos
+                const selectedDate = currentDate || new Date();
+                loadAppointmentsForDate(selectedDate);
+                
+            } catch (error) {
+                console.error('Erro ao finalizar agendamento:', error);
+                showErrorModal('Erro ao finalizar agendamento: ' + (error.message || 'Tente novamente'));
+            }
+        };
+
         window.cancelAppointment = function(id) {
-            // Armazenar o ID no modal
-            const confirmId = document.getElementById('confirmarCancelamentoId');
-            if (confirmId) {
+            try {
+                if (!id) {
+                    throw new Error('ID do agendamento não informado');
+                }
+                
+                // Armazenar o ID no modal
+                const confirmId = document.getElementById('confirmarCancelamentoId');
+                if (!confirmId) {
+                    throw new Error('Elemento de confirmação não encontrado');
+                }
+                
                 confirmId.value = id;
                 
+                // Atualizar a mensagem do modal com o ID
+                const modalMessage = document.getElementById('confirmarCancelamentoMessage');
+                if (modalMessage) {
+                    modalMessage.textContent = `Tem certeza que deseja cancelar o agendamento #${id}?`;
+                }
+                
                 // Mostrar o modal de confirmação
-                const modal = new bootstrap.Modal(document.getElementById('confirmarCancelamentoModal'));
+                const modal = new bootstrap.Modal(document.getElementById('confirmarCancelamentoModal'), {
+                    backdrop: 'static',
+                    keyboard: false
+                });
                 modal.show();
+                
+                // Focar no botão de confirmação para melhor acessibilidade
+                setTimeout(() => {
+                    const confirmBtn = document.getElementById('btnConfirmarCancelamento');
+                    if (confirmBtn) confirmBtn.focus();
+                }, 100);
+                
+            } catch (error) {
+                console.error('Erro ao iniciar cancelamento:', error);
+                showErrorModal('Erro ao preparar o cancelamento: ' + (error.message || 'Tente novamente'));
             }
         };
         
         async function confirmarCancelamento() {
             const id = document.getElementById('confirmarCancelamentoId')?.value;
+            const btnConfirmar = document.getElementById('btnConfirmarCancelamento');
+            const btnCancelar = document.getElementById('btnCancelarCancelamento');
             
-            if (!id) {
-                showToast('ID do agendamento não informado', true);
-                return;
-            }
+            // Desabilitar botões durante o processamento
+            if (btnConfirmar) btnConfirmar.disabled = true;
+            if (btnCancelar) btnCancelar.disabled = true;
             
             try {
-                // Implementar lógica para cancelar o agendamento na API
-                console.log('Cancelando agendamento:', id);
+                if (!id) {
+                    throw new Error('ID do agendamento não informado');
+                }
                 
-                // Fechar o modal
+                // Mostrar loading
+                const loadingToast = showToast('Cancelando agendamento...', false, 0);
+                
+                // Chamar a API para cancelar o agendamento
+                const response = await fetchWithAuth(`/api/agendamentos/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                // Fechar o toast de loading
+                if (loadingToast && loadingToast.hide) loadingToast.hide();
+                
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.message || 'Erro ao cancelar agendamento');
+                }
+                
+                // Fechar o modal de confirmação
                 const modal = bootstrap.Modal.getInstance(document.getElementById('confirmarCancelamentoModal'));
                 if (modal) modal.hide();
                 
                 // Recarregar os agendamentos
-                loadAppointmentsForDate(currentDate);
+                await loadAppointmentsForDate(currentDate);
                 
-                showToast('Agendamento cancelado com sucesso');
+                // Mostrar mensagem de sucesso
+                showToast('Agendamento cancelado com sucesso!', false);
                 
             } catch (error) {
                 console.error('Erro ao cancelar agendamento:', error);
-                showToast('Erro ao cancelar agendamento', true);
+                showErrorModal('Erro ao cancelar agendamento: ' + (error.message || 'Tente novamente'));
+            } finally {
+                // Reabilitar botões
+                if (btnConfirmar) btnConfirmar.disabled = false;
+                if (btnCancelar) btnCancelar.disabled = false;
             }
         }
         
@@ -1249,9 +2037,14 @@
                 }
                 
                 const result = await response.json();
-                // A API retorna { data: [...], pagination: {...} }
-                const profissionais = Array.isArray(result) ? result : (Array.isArray(result.data) ? result.data : []);
-                console.log('Profissionais carregados:', profissionais.length);
+                console.log('Resposta da API de profissionais:', result);
+                
+                // A API pode retornar { data: [...], pagination: {...} } ou um array direto
+                const profissionais = Array.isArray(result) 
+                    ? result 
+                    : (Array.isArray(result.data) ? result.data : []);
+                    
+                console.log(`Profissionais carregados: ${profissionais.length}`, profissionais);
                 
                 const select = document.getElementById('profissionalId');
                 if (!select) {
@@ -1264,20 +2057,31 @@
                     select.remove(1);
                 }
                 
-                // Adicionar profissionais ao select
+                // Resetar o mapa de profissionais
+                professionalsById = {};
+                
+                // Adicionar profissionais ao select e ao mapa
                 profissionais.forEach(prof => {
-                    if (prof && (prof.id || prof._id)) {
-                        const id = prof.id || prof._id;
+                    if (prof) {
+                        const id = prof.id || prof._id || '';
                         const nome = prof.nome || prof.name || `Profissional ${id}`;
                         
-                        const option = new Option(nome, id);
-                        // Adicionar dados adicionais como data attributes, se necessário
-                        if (prof.especialidade) {
-                            option.dataset.especialidade = prof.especialidade;
+                        // Adicionar ao select
+                        if (id) {
+                            const option = new Option(nome, id);
+                            // Adicionar dados adicionais como data attributes, se necessário
+                            if (prof.especialidade) {
+                                option.dataset.especialidade = prof.especialidade;
+                            }
+                            select.add(option);
+                            
+                            // Adicionar ao mapa de profissionais
+                            professionalsById[id.toString()] = nome;
                         }
-                        select.add(option);
                     }
                 });
+                
+                console.log('Mapa de profissionais atualizado:', professionalsById);
                 
                 // Disparar evento de mudança para preencher os campos iniciais
                 if (select.options.length > 1) {
@@ -1286,127 +2090,259 @@
                 
                 return profissionais;
                 
-            } catch (error) {
-                console.error('Erro ao carregar profissionais:', error);
-                showToast('Erro ao carregar a lista de profissionais', true);
-                return [];
+    } catch (error) {
+        console.error('Erro ao carregar profissionais:', error);
+        showToast('Erro ao carregar a lista de profissionais', true);
+        return [];
+    }
+}
+
+// Função para carregar procedimentos
+async function loadProcedimentos() {
+    try {
+        console.log('Carregando procedimentos...');
+        const response = await fetchWithAuth('/api/procedimentos');
+        
+        // Verificar se a resposta é válida
+        if (!response) {
+            console.error('Resposta vazia da API de procedimentos');
+            return [];
+        }
+        
+        let data = response;
+        
+        // Se for um objeto Response, extrair o JSON
+        if (response instanceof Response) {
+            console.log('Convertendo resposta para JSON...');
+            data = await response.json();
+        }
+        
+        // Verificar se os dados são um array
+        if (!Array.isArray(data)) {
+            console.error('Resposta inesperada da API de procedimentos:', data);
+            return [];
+        }
+        
+        console.log(`${data.length} procedimentos recebidos`);
+        
+        // Obter o elemento select
+        const select = document.getElementById('procedimentoId');
+        if (!select) {
+            console.error('Elemento select#procedimentoId não encontrado');
+            return [];
+        }
+        
+        // Limpar opções existentes (exceto a primeira)
+        while (select.options.length > 1) {
+            select.remove(1);
+        }
+        
+        // Adicionar procedimentos ao select
+        data.forEach(proc => {
+            if (proc && (proc.id || proc._id)) {
+                const id = proc.id || proc._id;
+                // Usando o campo 'name' que vem da API, com fallback para 'descricao' e depois para um valor padrão
+                let nome = proc.name || proc.descricao || `Procedimento ${id}`;
+                
+                // Remover prefixos mantendo a formatação original
+                if (nome.toLowerCase().startsWith('de ')) {
+                    nome = nome.substring(3);
+                } else if (nome.toLowerCase().startsWith('descrição do procedimento')) {
+                    nome = nome.substring('descrição do procedimento'.length);
+                }
+                
+                // Remover espaços extras e garantir que a primeira letra seja maiúscula
+                nome = nome.trim();
+                const duracao = proc.durationMins || proc.duracaoMinutos || proc.duracao || 60;
+                const valor = proc.defaultPrice || proc.valor || proc.preco || 0;
+                
+                const option = new Option(nome, id);
+                option.dataset.duracao = duracao;
+                option.dataset.valor = valor;
+                select.add(option);
+                
+                console.log(`Adicionado: ${nome} (ID: ${id}, Duração: ${duracao} min, Valor: R$ ${valor})`);
             }
+        });
+        
+        // Configurar evento de mudança
+        const updateFields = function() {
+            const selectedOption = select.options[select.selectedIndex];
+            if (selectedOption && selectedOption.dataset.duracao) {
+                const duracaoInput = document.getElementById('duracao');
+                if (duracaoInput) duracaoInput.value = selectedOption.dataset.duracao;
+            }
+            if (selectedOption && selectedOption.dataset.valor) {
+                const valorInput = document.getElementById('valorCobrado');
+                if (valorInput) valorInput.value = selectedOption.dataset.valor;
+            }
+        };
+        
+        // Adicionar evento de mudança
+        select.removeEventListener('change', updateFields);
+        select.addEventListener('change', updateFields);
+        
+        // Disparar evento de mudança para preencher os campos iniciais
+        if (select.options.length > 1) {
+            select.dispatchEvent(new Event('change'));
+        }
+        
+        return response;
+        
+    } catch (error) {
+        console.error('Erro ao carregar procedimentos:', error);
+        showToast('Erro ao carregar a lista de procedimentos', true);
+        return [];
+    }
+}
+
+// Função para carregar profissionais
+async function loadProfissionais() {
+    try {
+        console.log('Carregando lista de profissionais...');
+        const response = await fetchWithAuth('/api/profissionais/my-professionals');
+        
+        // Se não houver resposta (usuário redirecionado para login)
+        if (!response) {
+            console.log('Usuário não autenticado, redirecionando...');
+            return [];
+        }
+        
+        const result = await response.json();
+        // A API retorna { data: [...], pagination: {...} }
+        const profissionais = Array.isArray(result) ? result : (Array.isArray(result.data) ? result.data : []);
+        console.log('Profissionais carregados:', profissionais.length);
+        
+        const select = document.getElementById('profissionalId');
+        if (!select) {
+            console.warn('Elemento select de profissionais não encontrado');
+            return [];
+        }
+        
+        // Limpar opções existentes (exceto a primeira)
+        while (select.options.length > 1) {
+            select.remove(1);
+        }
+        
+        // Adicionar profissionais ao select
+        profissionais.forEach(prof => {
+            if (prof && (prof.id || prof._id)) {
+                const id = prof.id || prof._id;
+                const nome = prof.nome || prof.name || `Profissional ${id}`;
+                
+                const option = new Option(nome, id);
+                // Adicionar dados adicionais como data attributes, se necessário
+                if (prof.especialidade) {
+                    option.dataset.especialidade = prof.especialidade;
+                }
+                select.add(option);
+            }
+        });
+        
+        // Disparar evento de mudança para preencher os campos iniciais
+        if (select.options.length > 1) {
+            select.dispatchEvent(new Event('change'));
+        }
+        
+        return profissionais;
+        
+    } catch (error) {
+        console.error('Erro ao carregar profissionais:', error);
+        showToast('Erro ao carregar a lista de profissionais', true);
+        return [];
+    }
+}
+
+// Função para formatar data e hora para o formato ISO 8601
+function formatDateTime(dateStr, timeStr) {
+    try {
+        if (!dateStr || !timeStr) {
+            console.error('Data ou hora não fornecida:', { dateStr, timeStr });
+            return null;
+        }
+        
+        // Extrair dia, mês e ano da data
+        let day, month, year;
+        
+        if (dateStr.includes('/')) {
+            // Formato DD/MM/YYYY
+            [day, month, year] = dateStr.split('/');
+        } else if (dateStr.includes('-')) {
+            // Formato YYYY-MM-DD
+            [year, month, day] = dateStr.split('-');
+        } else {
+            console.error('Formato de data não suportado:', dateStr);
+            return null;
+        }
+        
+        // Garantir que o tempo tenha minutos
+        let hours, minutes;
+        if (timeStr.includes(':')) {
+            [hours, minutes] = timeStr.split(':');
+        } else {
+            hours = timeStr;
+            minutes = '00';
+        }
+        
+        // Criar string no formato YYYY-MM-DDTHH:MM:SS
+        const pad = num => num.toString().padStart(2, '0');
+        const date = new Date(
+            parseInt(year, 10),
+            parseInt(month, 10) - 1,
+            parseInt(day, 10),
+            parseInt(hours, 10),
+            parseInt(minutes, 10),
+            0
+        );
+        
+        if (isNaN(date.getTime())) {
+            console.error('Data/hora inválida:', { dateStr, timeStr });
+            return null;
+        }
+        
+        // Formatar para ISO 8601 sem timezone (o servidor vai tratar o timezone)
+        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}` +
+               `T${pad(date.getHours())}:${pad(date.getMinutes())}:00`;
+    } catch (error) {
+        console.error('Erro ao formatar data/hora:', error);
+        return null;
+    }
+}
+
+// Função para calcular o horário de término
+function calculateEndTime(startTime, durationMinutes) {
+    try {
+        let startDate;
+        
+        if (typeof startTime === 'string') {
+            // Se for uma string, assumir que está no formato YYYY-MM-DDTHH:MM:SS
+            startDate = new Date(startTime);
+        } else if (startTime instanceof Date) {
+            startDate = new Date(startTime);
+        } else {
+            console.error('Formato de data de início inválido:', startTime);
+            return null;
         }
 
-        // Função para formatar data e hora para o formato ISO 8601
-        function formatDateTime(dateStr, timeStr) {
-            try {
-                if (!dateStr || !timeStr) {
-                    console.error('Data ou hora não fornecida:', { dateStr, timeStr });
-                    return null;
-                }
-                
-                // Extrair dia, mês e ano da data
-                let day, month, year;
-                
-                if (dateStr.includes('/')) {
-                    // Formato DD/MM/YYYY
-                    [day, month, year] = dateStr.split('/');
-                } else if (dateStr.includes('-')) {
-                    // Formato YYYY-MM-DD
-                    [year, month, day] = dateStr.split('-');
-                } else {
-                    console.error('Formato de data não suportado:', dateStr);
-                    return null;
-                }
-                
-                // Garantir que o tempo tenha minutos
-                let hours, minutes;
-                if (timeStr.includes(':')) {
-                    [hours, minutes] = timeStr.split(':');
-                } else {
-                    hours = timeStr;
-                    minutes = '00';
-                }
-                
-                // Criar string no formato YYYY-MM-DDTHH:MM:SS
-                const pad = num => num.toString().padStart(2, '0');
-                const date = new Date(
-                    parseInt(year, 10),
-                    parseInt(month, 10) - 1,
-                    parseInt(day, 10),
-                    parseInt(hours, 10),
-                    parseInt(minutes, 10),
-                    0
-                );
-                
-                if (isNaN(date.getTime())) {
-                    console.error('Data/hora inválida:', { dateStr, timeStr });
-                    return null;
-                }
-                
-                // Formatar para ISO 8601 sem timezone (o servidor vai tratar o timezone)
-                return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}` +
-                       `T${pad(date.getHours())}:${pad(date.getMinutes())}:00`;
-            } catch (error) {
-                console.error('Erro ao formatar data/hora:', error);
-                return null;
-            }
+        if (isNaN(startDate.getTime())) {
+            console.error('Hora de início inválida:', startTime);
+            return null;
         }
+        
+        // Adicionar a duração
+        const endDate = new Date(startDate.getTime() + (durationMinutes * 60 * 1000));
+        
+        // Retornar no mesmo formato que formatDateTime
+        const pad = num => num.toString().padStart(2, '0');
+        return `${endDate.getFullYear()}-${pad(endDate.getMonth() + 1)}-${pad(endDate.getDate())}` +
+               `T${pad(endDate.getHours())}:${pad(endDate.getMinutes())}:00`;
+    } catch (error) {
+        console.error('Erro ao calcular horário de término:', error);
+        return null;
+    }
+}
 
-        // Função para calcular o horário de término
-        function calculateEndTime(startTime, duration) {
-            try {
-                if (!startTime) {
-                    console.error('Hora de início não fornecida');
-                    return null;
-                }
-                
-                const durationMinutes = parseInt(duration, 10);
-                if (isNaN(durationMinutes)) {
-                    console.error('Duração inválida:', duration);
-                    return null;
-                }
-                
-                // Converter a string de data/hora para objeto Date
-                let startDate;
-                if (typeof startTime === 'string') {
-                    // Se for uma string ISO, converter diretamente
-                    if (startTime.includes('T')) {
-                        startDate = new Date(startTime);
-                    } else {
-                        // Se for apenas hora, assumir data atual
-                        const [hours, minutes] = startTime.split(':');
-                        const now = new Date();
-                        startDate = new Date(
-                            now.getFullYear(),
-                            now.getMonth(),
-                            now.getDate(),
-                            parseInt(hours, 10),
-                            parseInt(minutes || '0', 10),
-                            0
-                        );
-                    }
-                } else if (startTime instanceof Date) {
-                    startDate = new Date(startTime);
-                } else {
-                    console.error('Formato de data de início inválido:', startTime);
-                    return null;
-                }
-                
-                if (isNaN(startDate.getTime())) {
-                    console.error('Hora de início inválida:', startTime);
-                    return null;
-                }
-                
-                // Adicionar a duração
-                const endDate = new Date(startDate.getTime() + (durationMinutes * 60 * 1000));
-                
-                // Retornar no mesmo formato que formatDateTime
-                const pad = num => num.toString().padStart(2, '0');
-                return `${endDate.getFullYear()}-${pad(endDate.getMonth() + 1)}-${pad(endDate.getDate())}` +
-                       `T${pad(endDate.getHours())}:${pad(endDate.getMinutes())}:00`;
-            } catch (error) {
-                console.error('Erro ao calcular horário de término:', error);
-                return null;
-            }
-        }
-
+// Função para salvar ou atualizar um agendamento
         // Função para salvar ou atualizar um agendamento
         // Função para salvar ou atualizar um agendamento
 async function submitAgendamentoForm(form, isEdit = false) {
@@ -1456,21 +2392,41 @@ async function submitAgendamentoForm(form, isEdit = false) {
             throw new Error('Preencha todos os campos obrigatórios');
         }
         
-        // Formatar data e hora
-        const startTime = new Date(`${dataInicio}T${horaInicio}`);
-        const endTime = new Date(startTime.getTime() + (duracao * 60000));
+        // Usar a data e hora exatamente como foram informadas, sem conversão
+        // Formatar a data para o padrão YYYY-MM-DD
+        const dataFormatada = dataInicio; // Já está no formato YYYY-MM-DD
+        const horaFormatada = horaInicio; // Já está no formato HH:mm
         
-    // Formatar para ISO string
-    const startTimeISO = startTime.toISOString();
-    const endTimeISO = endTime.toISOString();
+        // Criar objeto com os dados formatados
+        const start = {
+            date: dataFormatada,
+            time: horaFormatada,
+            // Criar um timestamp local para cálculos internos
+            timestamp: new Date(`${dataFormatada}T${horaFormatada}:00`).getTime()
+        };
+        
+        // Calcular horário de término baseado na duração
+        const endTimestamp = start.timestamp + (duracao * 60000);
+        const endDate = new Date(endTimestamp);
+        const end = {
+            date: endDate.toISOString().split('T')[0], // Formato YYYY-MM-DD
+            time: `${String(endDate.getHours()).padStart(2, '0')}:${String(endDate.getMinutes()).padStart(2, '0')}`,
+            timestamp: endTimestamp
+        };
+        
+        // Criar datas ISO para a API (usando o fuso horário local sem conversão)
+        const startISO = new Date(start.timestamp).toISOString();
+        const endISO = new Date(end.timestamp).toISOString();
         
         console.log('Dados do agendamento:', {
             clienteId,
             procedimentoId,
             profissionalId,
             valorCobrado,
-            startTime: startTimeISO,
-            endTime: endTimeISO,
+            data: start.date,
+            horaInicio: start.time,
+            startTime: startISO,
+            endTime: endISO,
             observacoes
         });
 
@@ -1478,8 +2434,8 @@ async function submitAgendamentoForm(form, isEdit = false) {
         console.log('Verificando disponibilidade...');
         const disponivel = await verificarDisponibilidade(
             profissionalId,
-            startTimeISO,
-            endTimeISO,
+            startISO,
+            endISO,
             agendamentoId ? parseInt(agendamentoId) : null
         );
         
@@ -1503,14 +2459,19 @@ async function submitAgendamentoForm(form, isEdit = false) {
             procedimentoId,
             profissionalId,
             valorCobrado,
-            // incluir data e hora originais para que o backend possa retornar o wall-clock
-            data: dataInicio,
-            horaInicio: horaInicio,
-            startTime: startTimeISO,
-            endTime: endTimeISO,
+            // Usar as datas formatadas corretamente
+            data: start.date,
+            horaInicio: start.time,
+            startTime: startISO,
+            endTime: endISO,
             observacoes: observacoes || null,
             status: 'AGENDADO',
-            procedimentoNome
+            procedimentoNome,
+            // Incluir timestamp para referência
+            timestamp: start.timestamp,
+            // Incluir data e hora de término formatadas
+            dataFim: end.date,
+            horaFim: end.time
         };
 
         console.log('Enviando dados para a API:', data);
@@ -1591,7 +2552,13 @@ async function submitAgendamentoForm(form, isEdit = false) {
         
     } catch (error) {
         console.error('Erro ao salvar agendamento:', error);
-        showToast(error.message || 'Erro ao salvar agendamento. Verifique os dados e tente novamente.', true);
+        
+        // Verifica se o erro é relacionado a data no passado
+        if (error.message && error.message.includes('já passou')) {
+            showErrorModal(error.message);
+        } else {
+            showErrorModal(error.message || 'Ocorreu um erro ao salvar o agendamento. Por favor, verifique os dados e tente novamente.');
+        }
     } finally {
         // Restaurar o botão
         btnSalvar.disabled = false;
@@ -1599,19 +2566,7 @@ async function submitAgendamentoForm(form, isEdit = false) {
         btnText.textContent = 'Salvar';
     }
 }
-        // Função para mostrar mensagem de sucesso
-        function showSuccess(message) {
-            Swal.fire({
-                title: 'Sucesso!',
-                text: message,
-                icon: 'success',
-                confirmButtonColor: '#f0b354',
-                timer: 2000,
-                timerProgressBar: true
-            });
-        }
 
-        // Função para formatar data para string ISO sem milissegundos
         function formatDateForAPI(dateString) {
             if (!dateString) return null;
             const date = new Date(dateString);
@@ -1634,179 +2589,165 @@ async function submitAgendamentoForm(form, isEdit = false) {
             return true;
         }
         
-        // Função original comentada
-        /*
-        async function verificarDisponibilidade(profissionalId, startTime, endTime, agendamentoId = null) {
-            try {
-                console.log('Verificando disponibilidade para:', {
-                    profissionalId,
-                    startTime,
-                    endTime,
-                    agendamentoId: agendamentoId || 'Novo agendamento'
-                });
-
-                if (!profissionalId) {
-                    console.log('Nenhum profissional selecionado, considerando horário disponível');
-                    return true;
-                }
-
-                const url = `/api/agendamentos/verificar-disponibilidade?` +
-                           `profissionalId=${profissionalId}&` +
-                           `dataInicio=${encodeURIComponent(startTime)}&` +
-                           `dataFim=${encodeURIComponent(endTime)}`;
-
-                console.log('Enviando parâmetros de disponibilidade:', url);
-
-                const response = await fetchWithAuth(url, {
-                    method: 'GET',
-                    headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    }
-                });
-                
-                if (!response) {
-                    console.error('Resposta inválida ao verificar disponibilidade');
-                    return false;
-                }
-
-                const result = await response.json();
-                
-                if (response.status === 200 && result.success === true) {
-                    console.log('Disponibilidade verificada:', result.disponivel);
-                    return result.disponivel === true;
-                }
-                
-                console.error('Erro ao verificar disponibilidade:', result?.error || 'Erro desconhecido');
-                return false;
-                
-            } catch (error) {
-                console.error('Erro na verificação de disponibilidade:', error);
-                return false;
-            }
-        }
-        */
         
         // Função para carregar agendamentos
         async function loadAppointmentsForDate(date) {
             try {
-                console.log('Carregando agendamentos para:', date);
                 // Exibir spinner
-                try {
-                    const loadingEl = document.getElementById('appointmentsLoading');
-                    const emptyEl = document.getElementById('appointmentsEmpty');
-                    const containerEl = document.getElementById('appointmentsContainer');
-                    if (loadingEl) loadingEl.classList.remove('d-none');
-                    if (emptyEl) emptyEl.classList.add('d-none');
-                    if (containerEl) containerEl.classList.add('d-none');
-                } catch (e) {
-                    console.warn('Não foi possível manipular elementos de loading/empty/container:', e);
-                }
+                const loadingEl = document.getElementById('appointmentsLoading');
+                const emptyEl = document.getElementById('appointmentsEmpty');
+                const containerEl = document.getElementById('appointmentsContainer');
                 
-                // Construir start/end ISO para o dia (usando componentes locais para evitar shifts de timezone)
+                if (loadingEl) loadingEl.classList.remove('d-none');
+                if (emptyEl) emptyEl.classList.add('d-none');
+                if (containerEl) containerEl.classList.add('d-none');
+                
+                // Formatar data para YYYY-MM-DD
                 const year = date.getFullYear();
-                const month = date.getMonth(); // 0-based
-                const day = date.getDate();
-
-                const start = new Date(year, month, day, 0, 0, 0, 0);
-                const end = new Date(year, month, day, 23, 59, 59, 999);
-
-                const startISO = start.toISOString();
-                const endISO = end.toISOString();
-
-                console.log('Buscando agendamentos para intervalo local:', { startISO, endISO, date });
-                const response = await fetchWithAuth(`/api/agendamentos?start=${encodeURIComponent(startISO)}&end=${encodeURIComponent(endISO)}`);
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                const dateStr = `${year}-${month}-${day}`;
+                
+                // Buscar agendamentos para a data
+                const response = await fetchWithAuth(`/api/agendamentos?data=${dateStr}`);
                 
                 if (!response) {
+                    updateAppointmentsList([]);
                     return [];
                 }
                 
                 const body = await response.json();
-
-                // Backend retorna { success: true, data: [...] } em várias rotas
+                console.log('Resposta da API de agendamentos:', body);
+                
+                // Processar resposta da API
                 let agendamentos = [];
-
                 if (Array.isArray(body)) {
                     agendamentos = body;
                 } else if (body && Array.isArray(body.data)) {
                     agendamentos = body.data;
-                } else if (body && Array.isArray(body)) {
-                    agendamentos = body;
-                } else {
-                    console.warn('Resposta de agendamentos inesperada:', body);
                 }
-
-                // Mapear cada agendamento para o formato esperado pela UI
+                
+                console.log('Agendamentos processados:', agendamentos);
+                
+                // Mapear para o formato esperado
                 const mapped = agendamentos.map(ag => {
-                    // Priorizar campos formatados do backend (data e horaInicio) para preservar o wall-clock
-                    let start = null;
-                    try {
-                        if (ag.data && ag.horaInicio) {
-                            // Construir data/hora local por componentes (evita shift ao interpretar ISO UTC)
-                            try {
-                                const [y, m, d] = ag.data.split('-').map(s => parseInt(s, 10));
-                                const [hh, mm] = ag.horaInicio.split(':').map(s => parseInt(s, 10));
-                                if (!isNaN(y) && !isNaN(m) && !isNaN(d) && !isNaN(hh) && !isNaN(mm)) {
-                                    start = new Date(y, m - 1, d, hh, mm, 0, 0);
-                                } else {
-                                    // fallback para parsing direto
-                                    start = new Date(`${ag.data}T${ag.horaInicio}`);
-                                }
-                            } catch (e) {
-                                console.warn('Erro ao construir data por componentes, fallback para new Date(string):', e);
-                                start = new Date(`${ag.data}T${ag.horaInicio}`);
-                            }
-                        } else if (ag.startTime) {
-                            start = new Date(ag.startTime);
-                        }
-                    } catch (e) {
-                        console.warn('Erro ao construir data do agendamento:', e, ag);
-                        start = ag.startTime ? new Date(ag.startTime) : null;
+                    if (!ag.data || !ag.horaInicio) {
+                        console.log('Agendamento sem data ou hora:', ag);
+                        return null;
                     }
-                    // Debug: log valores de entrada e data construída
-                    console.debug('Map agendamento:', {
-                        id: ag.id,
-                        data: ag.data,
-                        horaInicio: ag.horaInicio,
-                        startTimeRaw: ag.startTime,
-                        constructedStart: start ? start.toString() : null,
-                        constructedStartISO: start ? start.toISOString() : null,
-                        formattedDate: start ? start.toLocaleDateString('pt-BR') : null,
-                        formattedTime: start ? start.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : null
-                    });
-                    const duracao = ag.duracao || (ag.procedimento?.duracaoMinutos) || ag.procedimentos?.durationMins || 30;
-                    return {
-                        id: ag.id,
-                        cliente: ag.cliente?.nome || ag.clientes?.nome || ag.clienteNome || (ag.clientes && ag.clientes.nome) || 'Cliente',
-                        procedimento: ag.procedimento?.name || ag.procedimentos?.name || ag.procedimentoNome || 'Procedimento',
-                        dataHora: start,
-                        status: ag.status || 'AGENDADO',
-                        duracao: duracao,
-                        valorCobrado: ag.valorCobrado || 0,
-                        observacoes: ag.observacoes || ag.observacoes || ''
-                    };
-                }).filter(a => a.dataHora);
-
-                // Atualizar a UI com os resultados
+                    
+                    try {
+                        // Obter data e hora diretamente do banco de dados
+                        const [y, m, d] = ag.data.split('-').map(Number);
+                        const [hh, mm] = ag.horaInicio.split(':');
+                        
+                        // Criar a data local diretamente sem ajustes de fuso horário
+                        const localDate = new Date(y, m - 1, d, hh, mm || 0, 0, 0);
+                        
+                        // Debug: Verificar estrutura do objeto ag
+                        console.log('Processando agendamento - Estrutura completa:', ag);
+                        console.log('Chaves disponíveis no objeto agendamento:', Object.keys(ag));
+                        
+                        // Verificar se há um objeto profissional aninhado
+                        if (ag.profissional) {
+                            console.log('Objeto profissional encontrado:', ag.profissional);
+                            console.log('Tipo do objeto profissional:', typeof ag.profissional);
+                            console.log('Chaves do objeto profissional:', Object.keys(ag.profissional));
+                        }
+                        
+                        // Verificar se há um ID de profissional direto no objeto
+                        const possibleIds = ['profissionalId', 'profissional_id', 'professionalId', 'professional_id'];
+                        const foundId = possibleIds.find(id => ag[id] !== undefined);
+                        console.log('ID de profissional encontrado:', foundId ? `${foundId}: ${ag[foundId]}` : 'Nenhum ID encontrado');
+                        
+                        // Extrair informações do cliente
+                        const clienteNome = ag.cliente?.nome || ag.cliente?.name || 'Cliente não informado';
+                        
+                        // Extrair informações do procedimento
+                        const procedimentoNome = ag.procedimento?.name || ag.procedimento?.nome || 'Procedimento não informado';
+                        const duracao = ag.duracao || ag.procedimento?.duracao || 30;
+                        
+                        // Extrair informações do profissional
+                        console.log('Objeto profissional bruto:', ag.profissional);
+                        console.log('IDs disponíveis:', {
+                            profissionalId: ag.profissionalId,
+                            profissional_id: ag.profissional_id,
+                            professionalId: ag.professionalId,
+                            professional_id: ag.professional_id
+                        });
+                        
+                        let profissionalId = ag.profissionalId || ag.profissional_id || ag.professionalId || ag.professional_id || null;
+                        let profissionalNome = 'Não informado';
+                        
+                        // Primeiro tenta pegar do objeto profissional aninhado
+                        if (ag.profissional) {
+                            console.log('Objeto profissional encontrado, tipo:', typeof ag.profissional);
+                            console.log('Chaves do objeto profissional:', Object.keys(ag.profissional));
+                            
+                            profissionalId = ag.profissional.id || ag.profissional._id || profissionalId;
+                            profissionalNome = ag.profissional.nome || ag.profissional.name || 
+                                             ag.profissionalNome || ag.nomeProfissional || 'Não informado';
+                            
+                            console.log('Após extração do objeto profissional:', { profissionalId, profissionalNome });
+                        } else {
+                            console.log('Nenhum objeto profissional encontrado no agendamento');
+                        }
+                        
+                        // Se ainda não encontrou, tenta buscar pelo ID no mapa de profissionais
+                        if (profissionalId && (!profissionalNome || profissionalNome === 'Não informado')) {
+                            console.log('Tentando buscar profissional por ID:', profissionalId);
+                            console.log('Mapa de profissionais:', professionalsById);
+                            
+                            const nome = getProfessionalNameById(profissionalId);
+                            console.log('Nome do profissional encontrado pelo ID:', nome);
+                            
+                            if (nome) {
+                                profissionalNome = nome;
+                                console.log('Nome do profissional atualizado para:', profissionalNome);
+                            } else {
+                                console.log('Não foi possível encontrar o nome do profissional pelo ID');
+                            }
+                        }
+                        
+                        console.log(`Agendamento ${ag.id}:`, {
+                            cliente: clienteNome,
+                            procedimento: procedimentoNome,
+                            data: ag.data,
+                            hora: ag.horaInicio,
+                            status: ag.status
+                        });
+                        
+                        return {
+                            id: ag.id,
+                            cliente: clienteNome,
+                            profissional: profissionalNome,
+                            profissionalId: profissionalId,
+                            procedimento: procedimentoNome,
+                            dataHora: localDate,
+                            status: (ag.status || 'AGENDADO').toUpperCase(),
+                            duracao: duracao,
+                            valorCobrado: ag.valorCobrado || 0,
+                            observacoes: ag.observacoes || ''
+                        };
+                    } catch (e) {
+                        return null;
+                    }
+                }).filter(Boolean);
+                
+                // Atualizar a UI
                 updateAppointmentsList(mapped);
                 updateAppointmentsTable(mapped);
-
+                
                 return mapped;
+                
             } catch (error) {
-                console.error('Erro ao carregar agendamentos:', error);
                 showToast('Erro ao carregar agendamentos', true);
-                // Garantir que o spinner seja escondido e mostrar mensagem vazia
-                try {
-                    const loadingEl = document.getElementById('appointmentsLoading');
-                    const emptyEl = document.getElementById('appointmentsEmpty');
-                    const containerEl = document.getElementById('appointmentsContainer');
-                    if (loadingEl) loadingEl.classList.add('d-none');
-                    if (containerEl) containerEl.classList.add('d-none');
-                    if (emptyEl) emptyEl.classList.remove('d-none');
-                } catch (e) {
-                    console.warn('Erro ao esconder spinner após falha:', e);
-                }
+                updateAppointmentsList([]);
                 return [];
+            } finally {
+                // Garantir que o loading seja escondido
+                const loadingEl = document.getElementById('appointmentsLoading');
+                if (loadingEl) loadingEl.classList.add('d-none');
             }
         }
 
@@ -1823,6 +2764,15 @@ async function submitAgendamentoForm(form, isEdit = false) {
         // Inicialização da página
         document.addEventListener('DOMContentLoaded', function() {
             if (!checkAuth()) return;
+            
+            // Inicializar tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl, {
+                    trigger: 'hover',
+                    delay: {show: 300, hide: 100}
+                });
+            });
             
             // Inicializar a barra lateral
             if (window.initSidebar) {

@@ -127,6 +127,19 @@ function updateUserInfo(userData) {
         const role = isAdmin ? 'Administrador' : 'Usuário';
         userRoleElement.textContent = role;
     }
+
+    // Atualiza também o cabeçalho do dashboard, se existir
+    const topUserNameEl = document.getElementById('topUserName');
+    if (topUserNameEl) {
+        const displayNameTop = userData.nome || userData.email || 'Usuário';
+        topUserNameEl.textContent = displayNameTop.split('@')[0];
+    }
+    const topUserRoleEl = document.getElementById('topUserRole');
+    if (topUserRoleEl) {
+        const isAdminTop = userData.admin || userData.role === 'ADMIN' || userData.role === 'admin';
+        const roleTop = isAdminTop ? 'Administrador' : 'Usuário';
+        topUserRoleEl.textContent = roleTop;
+    }
 }
 
 // Função para configurar o botão de logout
@@ -209,24 +222,14 @@ function initSidebarEvents() {
         }
     });
     
-    // Fechar o menu ao clicar em um link do menu (apenas em dispositivos móveis)
-    const navLinks = document.querySelectorAll('.sidebar .nav-link');
-    navLinks.forEach(link => {
-        // Pula o botão de logout para evitar conflito
-        if (link.id === 'logoutBtn') return;
-        
-        link.addEventListener('click', function() {
-            if (window.innerWidth < 768) {
-                if (sidebarElement) {
-                    sidebarElement.classList.remove('active');
-                }
-                if (sidebarOverlay) {
-                    sidebarOverlay.style.display = 'none';
-                }
-                document.body.style.overflow = '';
-            }
-        });
-    });
+    // Comportamento desativado: manter o menu lateral aberto ao clicar em links (mobile e desktop)
+    // const navLinks = document.querySelectorAll('.sidebar .nav-link');
+    // navLinks.forEach(link => {
+    //     if (link.id === 'logoutBtn') return;
+    //     link.addEventListener('click', function() {
+    //         // Antes fechava o sidebar no mobile; agora mantemos aberto
+    //     });
+    // });
 }
 
 // Função para destacar o item de menu ativo

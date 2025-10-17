@@ -16,8 +16,9 @@ model User {
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   status        UserStatus     @default(ATIVO)
-  clientes      Cliente[]
-  profissionais Profissional[]
+  clientes             Cliente[]
+  profissionais        Profissional[]
+  historicoAgendamentos HistoricoAgendamento[]
 }
 
 model ConvenioProcedimento {
@@ -89,10 +90,31 @@ model Profissional {
   @@map("profissionais")
 }
 
+model HistoricoAgendamento {
+  id             Int       @id @default(autoincrement())
+  agendamentoId  Int
+  statusAnterior String?    // Pode ser nulo para o primeiro registro
+  statusNovo     String
+  dataAlteracao  DateTime  @default(now())
+  usuarioId      Int?      // Quem fez a alteração
+  motivo         String?   // Motivo da alteração (opcional)
+  dadosCompletos Json      // Cópia completa dos dados no momento da alteração
+
+  // Relacionamentos
+  agendamento    agendamentos @relation(fields: [agendamentoId], references: [id], onDelete: Cascade)
+  usuario        User?        @relation(fields: [usuarioId], references: [id])
+
+  @@index([agendamentoId])
+  @@index([dataAlteracao])
+  @@index([statusNovo])
+  @@map("historico_agendamentos")
+}
+
 model agendamentos {
-  id             Int           @id @default(autoincrement())
+  id             Int                    @id @default(autoincrement())
   clienteId      Int
   procedimentoId Int
+  historico      HistoricoAgendamento[] // Relação com o histórico
   convenioId     Int?
   valorCobrado   Float
   startTime      DateTime

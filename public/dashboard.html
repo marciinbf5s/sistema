@@ -1,1417 +1,399 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Sistema de Gestão Clínica</title>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Clínica Bem-Estar - Dashboard</title>
+
+    <!-- Fonts/Icons -->
+    <link crossorigin href="https://fonts.gstatic.com/" rel="preconnect"/>
+    <link as="style" href="https://fonts.googleapis.com/css2?display=swap&family=Inter:wght@400;500;700;900" onload="this.rel='stylesheet'" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+
+    <!-- Libraries CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="sha512-1ycn6IcaQQ40/MKBW2W4Rhis/DbILU74C1vSrLJxCq57o941Ym01SwNsOMqvEBFlcgUa6xLiPY/NS5R+E6ztJQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <!-- Project CSS (menu lateral unificado) -->
     <link href="css/sidebar.css" rel="stylesheet">
     <link href="css/theme.css" rel="stylesheet">
-    <style>
-        /* Estilo para o overlay do menu móvel */
-        .sidebar-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 900;
-            transition: opacity 0.3s ease;
-        }
-        
-        /* Ajustes para o botão de toggle em dispositivos móveis */
-        @media (max-width: 991.98px) {
-            .main-content {
-                padding-top: 70px !important;
-            }
-            
-            #sidebarToggle {
-                background: var(--primary-color);
-                border: none;
-                width: 45px;
-                height: 45px;
-                display: flex !important;
-                align-items: center;
-                justify-content: center;
-                border-radius: 50%;
-                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-                z-index: 1050;
-            }
-            
-            #sidebarToggle i {
-                color: white;
-                font-size: 1.5rem;
-            }
-            
-            /* Ajustes para os cards em telas pequenas */
-            .card {
-                margin-bottom: 1rem;
-            }
-            
-            /* Ajustes para o cabeçalho em telas pequenas */
-            .page-header {
-                flex-direction: column;
-                gap: 15px;
-            }
-            
-            .user-profile {
-                width: 100%;
-                justify-content: center;
-            }
-        }
-        
-        /* Ajustes para telas médias */
-        @media (min-width: 768px) and (max-width: 991.98px) {
-            .main-content {
-                padding: 20px 15px !important;
-            }
-            
-            .stat-card {
-                margin-bottom: 1rem;
-            }
-        }
-        :root {
-            --primary-color: #f0b354;    /* Dourado */
-            --primary-hover: #d9a24a;   /* Dourado mais escuro */
-            --secondary-color: #041a31; /* Azul Royal */
-            --secondary-hover: #031425; /* Azul Royal mais escuro */
-            --light-color: #f8f9fa;
-            --dark-color: #212529;
-            --border-color: rgba(240, 179, 84, 0.2);
-            --today-bg: rgba(240, 179, 84, 0.1);
-        }
-        
-        body {
-            background-color: #f8f9fa;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            min-height: 100vh;
-            transition: all 0.3s ease;
-        }
-        
-        @media (max-width: 991.98px) {
-            body {
-                padding-left: 0;
-            }
-            
-            .sidebar {
-                transform: translateX(-100%);
-                position: fixed;
-                z-index: 1000;
-                height: 100vh;
-                overflow-y: auto;
-            }
-            
-            .sidebar.show {
-                transform: translateX(0);
-                box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
-            }
-            
-            .main-content {
-                width: 100% !important;
-                padding: 20px 15px !important;
-            }
-            
-            #sidebarToggle {
-                display: block !important;
-                z-index: 1050;
-                position: fixed;
-                top: 15px;
-                left: 15px;
-            }
-        }
-        
-        .main-content {
-            padding: 25px;
-            margin: 0 0 0 auto;
-            width: calc(100% - 250px);
-            min-height: 100vh;
-            background-color: #f8f9fa;
-            transition: all 0.3s ease;
-        }
-        
-        .page-header {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-bottom: 25px;
-            padding: 20px;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
-            border-left: 4px solid var(--primary-color);
-        }
-        
-        @media (min-width: 768px) {
-            .page-header {
-                flex-direction: row;
-                justify-content: space-between;
-                align-items: center;
-                padding: 20px 25px;
-            }
-        }
-        
-        .page-title {
-            color: var(--secondary-color);
-            font-weight: 700;
-            margin: 0;
-            font-size: 1.75rem;
-            letter-spacing: -0.5px;
-        }
-        
-        .user-profile {
-            display: flex;
-            align-items: center;
-            background: rgba(240, 179, 84, 0.1);
-            padding: 8px 15px;
-            border-radius: 50px;
-            color: var(--secondary-color);
-            font-weight: 500;
+
+    <!-- Tailwind for dashboard layout (usado por esta página) -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style type="text/css">
+        /* Estilos específicos do dashboard (evitar conflito com sidebar.css) */
+        .chart-container {
+            position: relative;
+            height: 300px;
             width: 100%;
-            justify-content: center;
         }
-        
-        @media (min-width: 768px) {
-            .user-profile {
-                width: auto;
-                justify-content: flex-start;
-            }
-        }
-        
-        .user-profile img {
-            border: 2px solid var(--primary-color);
-        }
-        
-        .stat-card {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
-            padding: 20px;
-            height: 100%;
-            border-left: 4px solid var(--primary-color);
-            transition: all 0.3s ease;
-            margin-bottom: 15px;
-        }
-        
-        @media (min-width: 768px) {
-            .stat-card {
-                margin-bottom: 0;
-            }
-        }
-        
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-        }
-        
-        .stat-card .stat-icon {
-            font-size: 2.5rem;
-            color: var(--primary-color);
-            margin-bottom: 15px;
-        }
-        
-        .stat-card .stat-title {
-            font-size: 0.9rem;
-            color: #6c757d;
-            margin-bottom: 5px;
-        }
-        
-        .stat-card .stat-value {
-            font-size: 1.8rem;
-            font-weight: 600;
-            color: var(--secondary-color);
-            margin: 0;
-        }
-        
-        .card {
-            border: none;
-            border-radius: 10px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
-            margin-bottom: 20px;
-            height: 100%;
-        }
-        
-        .card-header {
-            background-color: var(--secondary-color);
-            color: var(--primary-color);
-            border-bottom: none;
-            padding: 15px 20px;
-            border-radius: 10px 10px 0 0 !important;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .card-header h5 {
-            margin: 0;
-            font-weight: 600;
-        }
-        
-        .appointment-card {
-            border-left: 4px solid var(--primary-color);
-            transition: all 0.3s;
-            margin-bottom: 10px;
-            border-radius: 5px;
-        }
-        
-        .appointment-card:hover {
-            transform: translateX(5px);
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-        
-        .status-pending {
-            border-left-color: #ffc107;
-        }
-        
-        .status-confirmed {
-            border-left-color: #198754;
-        }
-        
-        .status-cancelled {
-            border-left-color: #dc3545;
-        }
-        
-        .list-group-item {
-            border: 1px solid rgba(0, 0, 0, 0.05);
-            margin-bottom: 5px;
-            border-radius: 5px !important;
-        }
-        
-        .badge {
-            font-weight: 500;
-            padding: 5px 10px;
-            border-radius: 4px;
-        }
-        
-        .btn-primary {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
-            color: var(--secondary-color);
-            font-weight: 500;
-        }
-        
-        .btn-primary:hover {
-            background-color: var(--primary-hover);
-            border-color: var(--primary-hover);
-            color: var(--secondary-color);
-        }
-        
-        .btn-outline-primary {
-            color: var(--primary-color);
-            border-color: var(--primary-color);
-        }
-        
-        .btn-outline-primary:hover {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
-            color: var(--secondary-color);
-        }
+        /* Melhorar contraste de textos no dashboard */
+        .dashboard-title { color: #041a31; }
+        .dashboard-subtitle { color: #495057; }
+        .stat-label { color: #495057; }
+        .stat-value { color: #0f172a; }
+        .section-title { color: #041a31; }
+        .table thead th { color: #212529 !important; }
+        .table thead { background-color: #f1f3f5; }
+        /* Tabela Próximos Agendamentos */
+        .upcoming-table { border-collapse: separate; border-spacing: 0 4px; width: 100%; }
+        .upcoming-table thead th { background-color: #fff9ec !important; color: #041a31 !important; font-weight: 600; border-bottom: 2px solid rgba(240,179,84,0.4); }
+        .upcoming-table tbody tr { transition: background-color 0.12s ease; }
+        .upcoming-table tbody td { background: #ffffff; border: 1px solid rgba(4,26,49,0.06); }
+        .upcoming-table tbody tr:hover td { background-color: #fffdf7; }
+        .upcoming-table tbody tr td:first-child { border-left: 3px solid #f0b354; border-top-left-radius: 8px; border-bottom-left-radius: 8px; }
+        .upcoming-table tbody tr td:last-child { border-top-right-radius: 8px; border-bottom-right-radius: 8px; }
+        .upcoming-avatar { width: 28px; height: 28px; border-radius: 9999px; background: #e0f2fe; color: #0369a1; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 11px; }
     </style>
 </head>
-<body>
-    <!-- Menu Lateral será carregado dinamicamente via sidebar.js -->
-    
-    <!-- Botão de toggle para o menu lateral em dispositivos móveis -->
-    <button class="btn btn-light d-md-none position-fixed" id="sidebarToggle" style="z-index: 1050; top: 10px; left: 10px;">
-        <i class="bi bi-list"></i>
-    </button>
-    
-    <!-- Overlay para fechar o menu ao clicar fora -->
+<body class="bg-gray-50 dark:bg-gray-900">
+    <!-- Overlay para fechar o menu ao clicar fora (mobile) -->
     <div class="sidebar-overlay"></div>
-    
-    <!-- Conteúdo Principal -->
-    <div class="main-content">
-        <div class="container-fluid p-0">
-            <div class="page-header">
-                <div>
-                    <h1 class="page-title mb-1">
-                        <i class="bi bi-speedometer2 me-2"></i>Painel de Controle
-                    </h1>
-                    <h5 class="card-header d-flex justify-content-between align-items-center">
-                        <span><i class="bi bi-calendar3 me-2"></i>Últimas Consultas (24h)</span>
-                        <button class="btn btn-sm btn-outline-primary" onclick="loadUpcomingAppointments()" title="Atualizar">
-                            <i class="bi bi-arrow-clockwise"></i>
-                        </button>
-                    </h5>
-                    <p class="text-muted mb-0">
-                        <span id="currentDate"></span>
-                    </p>
-                </div>
-                <div class="user-profile">
-                    <img src="https://ui-avatars.com/api/?name=Usuário&background=f0b354&color=fff&size=40" 
-                         alt="Usuário" 
-                         class="rounded-circle me-2">
-                    <span class="d-none d-md-inline">Bem-vindo, Usuário</span>
-                </div>
-            </div>
-        
-        <!-- Statistics Cards -->
-        <div class="row g-4 mb-4">
-            <div class="col-md-3">
-                <div class="card stat-card">
-                    <div class="card-body text-center">
-                        <div class="stat-icon">
-                            <i class="fas fa-users"></i>
-                        </div>
-                        <h6 class="stat-title">Total de Clientes</h6>
-                        <h2 class="stat-value" id="totalClients">0</h2>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card stat-card">
-                    <div class="card-body text-center">
-                        <div class="stat-icon">
-                            <i class="fas fa-calendar-check"></i>
-                        </div>
-                        <h6 class="stat-title">Agendamentos Hoje</h6>
-                        <h2 class="stat-value" id="todayAppointments">0</h2>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card stat-card">
-                    <div class="card-body text-center">
-                        <div class="stat-icon">
-                            <i class="fas fa-dollar-sign"></i>
-                        </div>
-                        <h6 class="stat-title">Faturamento Mensal</h6>
-                        <h2 class="stat-value" id="monthlyRevenue">R$ 0,00</h2>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card stat-card">
-                    <div class="card-body text-center">
-                        <div class="stat-icon">
-                            <i class="fas fa-concierge-bell"></i>
-                        </div>
-                        <h6 class="stat-title">Total de Serviços</h6>
-                        <h2 class="stat-value" id="totalServices">0</h2>
-                    </div>
-                </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl">
+            <div class="flex flex-col items-center">
+                <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mb-4"></div>
+                <p id="loadingText" class="text-gray-700 dark:text-gray-300">Carregando...</p>
             </div>
         </div>
+    </div>
 
-        <div class="row g-4">
-            <!-- Próximos Agendamentos -->
-            <div class="col-lg-8">
-                <div class="card h-100">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">Próximos Agendamentos</h5>
-                        <a href="/appointments" class="btn btn-sm btn-outline-primary">Ver Todos</a>
+    <!-- Conteúdo Principal -->
+    <div class="main-content" id="mainContent">
+        <div class="container-fluid p-0">
+            <!-- Header -->
+            <div class="page-header mb-4">
+                <div class="row align-items-center mb-3">
+                    <div class="col-12 col-md-6 mb-3 mb-md-0">
+                        <div>
+                            <h1 class="page-title fw-bolder fs-1" style="font-weight: 800 !important; margin-bottom: 10px;">
+                                <i class="bi bi-speedometer2 me-2" style="color: #f0b354;"></i>Dashboard
+                            </h1>
+                            <p class="text-muted mb-0 mt-2">Visão geral dos agendamentos e profissionais.</p>
+                        </div>
                     </div>
-                    <div class="card-body p-0">
-                        <div class="list-group list-group-flush" id="upcomingAppointments">
-                            <!-- Appointments will be loaded here by JavaScript -->
-                            <div class="text-center py-5">
-                                <div class="spinner-border text-primary" role="status">
-                                    <span class="visually-hidden">Carregando...</span>
+                    <div class="col-12 col-md-6">
+                        <div class="d-flex flex-wrap justify-content-md-end align-items-center" style="gap: 10px;">
+                            <button class="btn btn-light d-flex align-items-center" title="Notificações">
+                                <i class="bi bi-bell"></i>
+                            </button>
+                            <div class="d-flex align-items-center" style="gap: 8px;">
+                                <div class="text-end">
+                                    <div id="topUserName" class="text-sm fw-semibold text-dark">Usuário</div>
+                                    <div id="topUserRole" class="text-xs text-muted">Perfil</div>
                                 </div>
-                                <p class="mt-2 text-muted">Carregando agendamentos...</p>
+                                <div class="bg-center bg-no-repeat bg-cover rounded-circle" style="width: 36px; height: 36px; background-image: url('https://lh3.googleusercontent.com/a/default-user')"></div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="border-bottom mt-3"></div>
+            </div>
+
+            <!-- Cards de Estatísticas -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                    <div class="flex items-center">
+                        <div class="mr-3 text-blue-600 dark:text-blue-400">
+                            <i class="bi bi-people text-2xl"></i>
+                        </div>
+                        <div>
+                            <p class="stat-label text-sm">Total de Clientes</p>
+                            <h3 class="stat-value text-2xl font-bold" id="totalClients">0</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                    <div class="flex items-center">
+                        <div class="mr-3 text-green-600 dark:text-green-400">
+                            <i class="bi bi-calendar-check text-2xl"></i>
+                        </div>
+                        <div>
+                            <p class="stat-label text-sm">Consultas Hoje</p>
+                            <h3 class="stat-value text-2xl font-bold" id="todayAppointments">0</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                    <div class="flex items-center">
+                        <div class="mr-3 text-yellow-600 dark:text-yellow-400">
+                            <i class="bi bi-currency-dollar text-2xl"></i>
+                        </div>
+                        <div>
+                            <p class="stat-label text-sm">Faturamento Mensal</p>
+                            <h3 class="stat-value text-2xl font-bold" id="monthlyRevenue">R$ 0,00</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                    <div class="flex items-center">
+                        <div class="mr-3 text-purple-600 dark:text-purple-400">
+                            <i class="bi bi-graph-up text-2xl"></i>
+                        </div>
+                        <div>
+                            <p class="stat-label text-sm">Taxa de Comparecimento</p>
+                            <h3 class="stat-value text-2xl font-bold" id="attendanceRate">0%</h3>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Últimos Clientes -->
-            <div class="col-lg-4">
-                <div class="card h-100">
-                    <div class="card-header">
-                        <h5 class="mb-0">Últimos Clientes</h5>
+            <!-- Charts Row -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                    <h3 class="section-title text-lg font-semibold mb-4">Agendamentos por Status</h3>
+                    <div class="chart-container">
+                        <canvas id="appointmentsChart"></canvas>
                     </div>
-                    <div class="card-body p-0">
-                        <div class="list-group list-group-flush" id="recentClients">
-                            <!-- Recent clients will be loaded here by JavaScript -->
-                            <div class="text-center py-5">
-                                <div class="spinner-border text-primary" role="status">
-                                    <span class="visually-hidden">Carregando...</span>
-                                </div>
-                            </div>
-                        </div>
+                </div>
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                    <h3 class="section-title text-lg font-semibold mb-4">Distribuição por Profissional</h3>
+                    <div class="chart-container">
+                        <canvas id="professionalsChart"></canvas>
                     </div>
+                </div>
+            </div>
+
+            <!-- Próximos Agendamentos -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+                <div class="px-6 py-3 bg-blue-50 border-b border-blue-200 flex justify-between items-center">
+                    <h3 class="section-title text-lg font-semibold text-[#041a31]">Próximos Agendamentos</h3>
+                    <a href="agenda.html" class="text-sm" style="color: var(--primary-color);">Ver todos</a>
+                </div>
+                <div class="overflow-x-auto bg-gray-50 p-2 rounded-b-lg">
+                    <table class="upcoming-table min-w-full table-auto text-sm align-middle">
+                        <thead>
+                            <tr>
+                                <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider">Paciente</th>
+                                <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider">Profissional</th>
+                                <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider">Data/Hora</th>
+                                <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider">Procedimento</th>
+                                <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider">Status</th>
+                                <th class="px-4 py-2 text-right text-xs font-semibold uppercase tracking-wider">Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody id="upcomingAppointments" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                            <!-- Appointments will be loaded here -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Bootstrap JS and dependencies -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="js/api.js"></script>
-    <script src="js/sidebar.js"></script>
-    <script>
-        // Função para formatar valor monetário
-        function formatCurrency(value) {
-            if (value === undefined || value === null) {
-                return 'R$ 0,00';
-            }
-            return new Intl.NumberFormat('pt-BR', {
-                style: 'currency',
-                currency: 'BRL',
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            }).format(Number(value));
-        }
-
-        // Função para atualizar as estatísticas
-        async function updateStatistics() {
-            try {
-                // Usando a função fetchWithAuth do api.js
-                const response = await fetchWithAuth('/dashboard/stats');
-                
-                if (!response) {
-                    throw new Error('Não foi possível conectar ao servidor');
-                }
-                
-                const data = await response.json();
-                
-                if (data.error) {
-                    throw new Error(data.error);
-                }
-                
-                console.log('Dados recebidos:', data);
-                
-                // Atualiza os cards de estatísticas
-                document.getElementById('totalClients').textContent = data.totalClients || '0';
-                document.getElementById('todayAppointments').textContent = data.todayAppointments || '0';
-                document.getElementById('monthlyRevenue').textContent = formatCurrency(data.monthlyRevenue || 0);
-                document.getElementById('totalServices').textContent = data.totalServices || '0';
-                
-                return data; // Retorna os dados para uso posterior se necessário
-                
-            } catch (error) {
-                console.error('Erro ao carregar estatísticas:', error);
-                // Mostrar mensagem de erro no UI
-                const container = document.querySelector('.stat-cards');
-                if (container) {
-                    container.innerHTML += `
-                        <div class="col-12">
-                            <div class="alert alert-warning">
-                                <i class="bi bi-exclamation-triangle me-2"></i>
-                                Erro ao carregar estatísticas: ${error.message}
-                            </div>
-                        </div>`;
-                }
-                throw error; // Rejeita a promessa para que o chamador saiba que houve um erro
-            }
-        }
-
-        // Função para formatar a data e hora no formato brasileiro
-        function formatDateTime(dateTimeString) {
-            if (!dateTimeString) return '';
-            
-            const date = new Date(dateTimeString);
-            
-            // Formata a data como DD/MM/YYYY
-            const day = String(date.getDate()).padStart(2, '0');
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const year = date.getFullYear();
-            
-            // Formata a hora como HH:MM
-            const hours = String(date.getHours()).padStart(2, '0');
-            const minutes = String(date.getMinutes()).padStart(2, '0');
-            
-            return `${day}/${month}/${year}, ${hours}:${minutes}`;
-        }
-
-        // Função para carregar os próximos agendamentos
-        async function loadUpcomingAppointments() {
-            const container = document.getElementById('upcomingAppointments');
-            
-            // Mostrar indicador de carregamento
-            container.innerHTML = `
-                <div class="text-center py-4">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Carregando...</span>
-                    </div>
-                    <p class="mt-2 text-muted">Carregando agendamentos...</p>
-                </div>`;
-            
-            try {
-                // Buscar agendamentos das últimas 24 horas
-                const now = new Date();
-                const yesterday = new Date(now);
-                yesterday.setDate(yesterday.getDate() - 1); // 24 horas atrás
-                
-                const response = await fetchWithAuth(`/api/appointments/by-date-range?startDate=${yesterday.toISOString()}&endDate=${now.toISOString()}`);
-                
-                if (!response) {
-                    throw new Error('Não foi possível conectar ao servidor');
-                }
-                
-                const agendamentos = await response.json();
-                
-                if (agendamentos.error) {
-                    throw new Error(agendamentos.error);
-                }
-                
-                console.log('Agendamentos recebidos:', agendamentos);
-                
-                if (!agendamentos || agendamentos.length === 0) {
-                    container.innerHTML = `
-                        <div class="text-center py-4">
-                            <i class="bi bi-calendar-x text-muted" style="font-size: 2rem;"></i>
-                            <p class="text-muted mt-2">Nenhum agendamento nas últimas 24 horas</p>
-                            <small class="text-muted">${formatDateTime(yesterday)} até agora</small>
-                        </div>`;
-                    return;
-                }
-                
-                // Ordenar agendamentos por data/hora mais próxima
-                agendamentos.sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
-                
-                // Cabeçalho da tabela
-                let tableHTML = `
-                <div class="table-responsive">
-                    <table class="table table-hover table-striped">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Data/Hora</th>
-                                <th>Paciente</th>
-                                <th>Médico</th>
-                                <th>Procedimento</th>
-                                <th>Status</th>
-                                <th class="text-end">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                `;
-
-                // Linhas da tabela
-                agendamentos.forEach(agendamento => {
-                    const dataHora = formatDateTime(agendamento.startTime).split(',');
-                    const statusClass = {
-                        'CONFIRMADA': 'bg-success',
-                        'PENDENTE': 'bg-warning',
-                        'CANCELADA': 'bg-danger',
-                        'REALIZADA': 'bg-info'
-                    }[agendamento.status] || 'bg-secondary';
-
-                    tableHTML += `
-                    <tr>
-                        <td>
-                            <div class="fw-bold">${dataHora[0]}</div>
-                            <small class="text-muted">${dataHora[1]}</small>
-                        </td>
-                        <td>${agendamento.client?.name || '--'}</td>
-                        <td>${agendamento.doctor?.name || '--'}</td>
-                        <td>${agendamento.service?.name || '--'}</td>
-                        <td>
-                            <span class="badge ${statusClass} text-white">
-                                ${getStatusText(agendamento.status)}
-                            </span>
-                        </td>
-                        <td class="text-end">
-                            <button class="btn btn-sm btn-outline-primary me-1" title="Ver detalhes">
-                                <i class="bi bi-eye"></i>
-                            </button>
-                            <button class="btn btn-sm btn-outline-secondary" title="Editar">
-                                <i class="bi bi-pencil"></i>
-                            </button>
-                        </td>
-                    </tr>
-                    `;
-                });
-
-                // Fechamento da tabela
-                tableHTML += `
-                        </tbody>
-                    </table>
+    <!-- Error Modal -->
+    <div class="modal fade" id="errorModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="errorModalTitle">Erro</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
                 </div>
-                `;
+                <div class="modal-body">
+                    <p id="errorModalMessage">Ocorreu um erro ao processar sua solicitação.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    <button type="button" class="btn btn-primary" id="errorModalRetry">Tentar novamente</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-                container.innerHTML = tableHTML;
-                
-            } catch (error) {
-                console.error('Erro ao carregar agendamentos:', error);
-                container.innerHTML = `
-                    <div class="alert alert-warning m-3">
-                        <i class="bi bi-exclamation-triangle me-2"></i>
-                        Erro ao carregar os agendamentos: ${error.message}
-                    </div>`;
-            }
-        }
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/sidebar.js"></script>
 
-        // Função para carregar os clientes recentes
-        async function loadRecentClients() {
-            const container = document.getElementById('recentClients');
-            
-            // Mostrar indicador de carregamento
-            container.innerHTML = `
-                <div class="text-center py-4">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Carregando...</span>
-                    </div>
-                    <p class="mt-2 text-muted">Carregando clientes...</p>
-                </div>`;
-            
-            try {
-                // Usando a função fetchWithAuth do api.js
-                const response = await fetchWithAuth('/dashboard/clients/recent');
-                
-                if (!response) {
-                    throw new Error('Não foi possível conectar ao servidor');
-                }
-                
-                const clients = await response.json();
-                
-                if (clients.error) {
-                    throw new Error(clients.error);
-                }
-                
-                console.log('Clientes recebidos:', clients);
-                
-                if (!clients || clients.length === 0) {
-                    container.innerHTML = `
-                        <div class="text-center py-4">
-                            <i class="bi bi-people text-muted" style="font-size: 2rem;"></i>
-                            <p class="text-muted mt-2">Nenhum cliente encontrado</p>
-                        </div>`;
-                    return;
-                }
-                
-                container.innerHTML = clients.map(client => `
-                    <div class="list-group-item">
-                        <div class="d-flex w-100 justify-content-between">
-                            <h6 class="mb-1">${client.name || 'Cliente sem nome'}</h6>
-                            <small class="text-muted">${client.joinDate || 'Data não disponível'}</small>
-                        </div>
-                        <p class="mb-1 small text-muted">${client.email || 'E-mail não informado'}</p>
-                    </div>
-                `).join('');
-                
-            } catch (error) {
-                console.error('Erro ao carregar clientes recentes:', error);
-                container.innerHTML = `
-                    <div class="alert alert-warning m-3">
-                        <i class="bi bi-exclamation-triangle me-2"></i>
-                        Erro ao carregar os clientes: ${error.message}
-                    </div>`;
-            }
-        }
-
-        // Funções auxiliares
-        function getStatusBadgeClass(status) {
-            const statusClasses = {
-                'PENDING': 'bg-warning text-dark',
-                'CONFIRMED': 'bg-success',
-                'CANCELLED': 'bg-danger'
-            };
-            return statusClasses[status] || 'bg-secondary';
-        }
-
-        function getStatusText(status) {
-            const statusTexts = {
-                'PENDING': 'Pendente',
-                'CONFIRMED': 'Confirmado',
-                'CANCELLED': 'Cancelado'
-            };
-            return statusTexts[status] || status;
-        }
-
-        // Função para formatar a data atual
-        function updateCurrentDate() {
-            const dateElement = document.getElementById('currentDate');
-            if (!dateElement) {
-                console.warn('Elemento currentDate não encontrado no DOM');
-                return;
-            }
-            
-            const options = { 
-                weekday: 'long', 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric',
-                locale: 'pt-BR'
-            };
-            const now = new Date();
-            const formattedDate = now.toLocaleDateString('pt-BR', options);
-            dateElement.textContent = formattedDate;
-        }
-
-        // Função para alternar o menu lateral em dispositivos móveis
-        function setupMobileMenu() {
-            const sidebar = document.querySelector('.sidebar');
-            const sidebarToggle = document.getElementById('sidebarToggle');
-            const sidebarOverlay = document.createElement('div');
-            sidebarOverlay.className = 'sidebar-overlay';
-            document.body.appendChild(sidebarOverlay);
-            
-            // Função para abrir/fechar o menu
-            function toggleSidebar() {
-                sidebar.classList.toggle('show');
-                if (sidebar.classList.contains('show')) {
-                    sidebarOverlay.style.display = 'block';
-                    document.body.style.overflow = 'hidden';
-                } else {
-                    sidebarOverlay.style.display = 'none';
-                    document.body.style.overflow = 'auto';
-                }
-            }
-            
-            // Evento de clique no botão de toggle
-            if (sidebarToggle) {
-                sidebarToggle.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    toggleSidebar();
-                });
-            }
-            
-            // Fechar o menu ao clicar no overlay
-            sidebarOverlay.addEventListener('click', function() {
-                toggleSidebar();
-            });
-            
-            // Fechar o menu ao redimensionar para desktop
-            function handleResize() {
-                if (window.innerWidth >= 992) {
-                    sidebar.classList.remove('show');
-                    sidebarOverlay.style.display = 'none';
-                    document.body.style.overflow = 'auto';
-                }
-            }
-            
-            window.addEventListener('resize', handleResize);
-        }
-
-        // Função para verificar se o token é válido
-        async function validateToken(token) {
-            if (!token) {
-                console.log('Nenhum token fornecido para validação');
-                return { isValid: false, error: 'Nenhum token fornecido' };
-            }
-            
-            try {
-                console.log('Validando token...');
-                const response = await fetch('http://127.0.0.1:3000/api/auth/me', {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
+    <script>
+    // Inicializar gráficos
+    function initCharts() {
+        // Gráfico de agendamentos por status
+        const appointmentsCtx = document.getElementById('appointmentsChart').getContext('2d');
+        window.appointmentsChart = new Chart(appointmentsCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'],
+                datasets: [
+                    {
+                        label: 'Confirmados',
+                        data: [12, 19, 3, 5, 2, 3, 7],
+                        backgroundColor: '#10B981',
+                        borderColor: '#10B981',
+                        borderWidth: 1
                     },
-                    credentials: 'include',
-                    mode: 'cors'
-                });
-                
-                console.log('Status da validação do token:', response.status);
-                
-                if (response.status === 401) {
-                    const errorData = await response.json().catch(() => ({}));
-                    console.log('Token inválido ou expirado:', errorData);
-                    return { 
-                        isValid: false, 
-                        error: errorData.error || 'Token inválido ou expirado',
-                        requiresLogin: true
-                    };
-                }
-                
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    console.error('Erro ao validar token:', errorText);
-                    return { 
-                        isValid: false, 
-                        error: 'Erro ao validar token',
-                        requiresLogin: false
-                    };
-                }
-                
-                const userData = await response.json().catch(() => null);
-                if (!userData) {
-                    console.error('Resposta inválida do servidor');
-                    return { 
-                        isValid: false, 
-                        error: 'Resposta inválida do servidor',
-                        requiresLogin: true
-                    };
-                }
-                
-                console.log('Token válido para o usuário:', userData.email || 'N/A');
-                return { 
-                    isValid: true, 
-                    user: userData 
-                };
-                
-            } catch (error) {
-                console.error('Erro ao validar token:', error);
-                return { 
-                    isValid: false, 
-                    error: error.message || 'Erro ao validar token',
-                    requiresLogin: true
-                };
-            }
-        }
-
-        // Função para carregar os dados do dashboard
-        async function loadDashboardData() {
-            try {
-                console.log('Carregando dados do dashboard...');
-                
-                // Mostrar indicador de carregamento
-                const mainContent = document.querySelector('.main-content');
-                if (mainContent) {
-                    mainContent.innerHTML = `
-                        <div class="text-center py-5">
-                            <div class="spinner-border text-primary" role="status">
-                                <span class="visually-hidden">Carregando...</span>
-                            </div>
-                            <p class="mt-2 text-muted">Carregando dados do dashboard...</p>
-                        </div>`;
-                }
-                
-                console.log('Buscando dados do dashboard...');
-                const dashboardData = await fetchWithAuth('/dashboard/stats');
-                
-                if (!dashboardData) {
-                    throw new Error('Não foi possível conectar ao servidor');
-                }
-                
-                console.log('Dados recebidos:', dashboardData);
-                
-                if (dashboardData.error) {
-                    console.error('Erro no servidor:', dashboardData.details || dashboardData.error);
-                    throw new Error(dashboardData.error);
-                }
-                
-                // Garante que os dados necessários existam
-                if (!dashboardData) {
-                    throw new Error('Dados do dashboard inválidos');
-                }
-                
-                console.log('Dados do dashboard recebidos:', dashboardData);
-                // Adiciona estilo para a animação de brilho
-                const style = document.createElement('style');
-                style.textContent = `
-                    .chart-area {
-                        position: relative;
-                        width: 100%;
-                        height: 200px; /* Altura fixa para o gráfico */
-                        margin: 0 auto;
-                        padding: 0;
+                    {
+                        label: 'Pendentes',
+                        data: [8, 12, 6, 9, 4, 2, 3],
+                        backgroundColor: '#F59E0B',
+                        borderColor: '#F59E0B',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Cancelados',
+                        data: [2, 3, 1, 4, 1, 0, 1],
+                        backgroundColor: '#EF4444',
+                        borderColor: '#EF4444',
+                        borderWidth: 1
                     }
-                    
-                    .chart-area canvas {
-                        display: block;
-                        width: 100% !important;
-                        height: 100% !important;
-                    }
-                    
-                    .card-body {
-                        padding: 1rem !important;
-                        height: auto;
-                    }
-                    
-                    @keyframes shine {
-                        0% { transform: translateX(-100%) rotate(45deg); }
-                        100% { transform: translateX(100%) rotate(45deg); }
-                    }
-                `;
-                
-                document.head.appendChild(style);
-
-                // Atualiza a UI com os dados recebidos
-                if (mainContent) {
-                    mainContent.innerHTML = `
-                        <div class="container-fluid">
-                            <div class="d-flex flex-column mb-4">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div class="d-flex align-items-center position-relative">
-                                    <div class="position-relative">
-                                        <i class="fas fa-chart-line me-3" style="
-                                            font-size: 2.2rem;
-                                            color: #f0b354;
-                                            position: relative;
-                                            z-index: 2;
-                                            opacity: 0.9;
-                                        "></i>
-                                        <div class="position-absolute" style="
-                                            content: '';
-                                            width: 50px;
-                                            height: 50px;
-                                            background: rgba(255, 255, 255, 0.1);
-                                            border-radius: 50%;
-                                            top: 50%;
-                                            left: 50%;
-                                            transform: translate(-50%, -50%);
-                                            filter: blur(5px);
-                                            z-index: 1;
-                                        "></div>
-                                    </div>
-                                    <h1 class="h2 mb-0 ms-3" style="
-                                        font-size: 2rem;
-                                        font-weight: 800;
-                                        color: #0d1b2a;
-                                        position: relative;
-                                        display: inline-block;
-                                        padding: 0 0 15px 0;
-                                        line-height: 1.2;
-                                        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-                                        text-transform: uppercase;
-                                        letter-spacing: 1px;
-                                    ">
-                                        DASHBOARD
-                                    </h1>
-                                    </div>
-                                    <a href="#" class="d-none d-sm-inline-flex align-items-center btn btn-sm btn-primary shadow-sm" style="
-{{ ... }}
-                                        background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
-                                        border: none;
-                                        padding: 0.5rem 1rem;
-                                        border-radius: 0.35rem;
-                                        transition: all 0.3s ease;
-                                        height: fit-content;
-                                    ">
-                                        <i class="fas fa-download fa-sm text-white me-2"></i>
-                                        <span>Gerar Relatório</span>
-                                    </a>
-                                </div>
-                                <div style="
-                                    height: 2px;
-                                    width: 100%;
-                                    background: linear-gradient(90deg, 
-                                        rgba(200, 200, 200, 0.3) 0%, 
-                                        rgba(150, 150, 150, 0.6) 50%, 
-                                        rgba(200, 200, 200, 0.3) 100%);
-                                    margin-top: 12px;
-                                    border-radius: 2px;
-                                    position: relative;
-                                    overflow: hidden;
-                                ">
-                                    <div style="
-                                        position: absolute;
-                                        top: 0;
-                                        left: 0;
-                                        height: 100%;
-                                        width: 100%;
-                                        background: linear-gradient(90deg, 
-                                            transparent, 
-                                            rgba(255, 255, 255, 0.4), 
-                                            transparent);
-                                        animation: shine 3s infinite;
-                                    "></div>
-                                </div>
-                            </div>
-                            
-                            <!-- Cards de Estatísticas -->
-                            <div class="row">
-                                <!-- Total de Clientes -->
-                                <div class="col-12 col-sm-6 col-lg-3 mb-4">
-                                    <div class="card border-left-primary shadow h-100 py-2">
-                                        <div class="card-body">
-                                            <div class="row no-gutters align-items-center">
-                                                <div class="col mr-2">
-                                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                                        Total de Clientes</div>
-                                                    <div class="h5 mb-0 font-weight-bold text-gray-800">${dashboardData.totalClients || 0}</div>
-                                                </div>
-                                                <div class="col-auto">
-                                                    <i class="fas fa-users fa-2x text-gray-300"></i>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <!-- Consultas Hoje -->
-                                <div class="col-12 col-sm-6 col-lg-3 mb-4">
-                                    <div class="card border-left-success shadow h-100 py-2">
-                                        <div class="card-body">
-                                            <div class="row no-gutters align-items-center">
-                                                <div class="col mr-2">
-                                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                                        Consultas Hoje</div>
-                                                    <div class="h5 mb-0 font-weight-bold text-gray-800">${dashboardData.todayAppointments || 0}</div>
-                                                </div>
-                                                <div class="col-auto">
-                                                    <i class="fas fa-calendar-check fa-2x text-gray-300"></i>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <!-- Faturamento Mensal -->
-                                <div class="col-12 col-sm-6 col-lg-3 mb-4">
-                                    <div class="card border-left-info shadow h-100 py-2">
-                                        <div class="card-body">
-                                            <div class="row no-gutters align-items-center">
-                                                <div class="col mr-2">
-                                                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                                                        Faturamento (Mensal)</div>
-                                                    <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                                        ${formatCurrency(dashboardData.monthlyRevenue || 0)}
-                                                    </div>
-                                                </div>
-                                                <div class="col-auto">
-                                                    <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <!-- Consultas Pendentes -->
-                                <div class="col-12 col-sm-6 col-lg-3 mb-4">
-                                    <div class="card border-left-warning shadow h-100 py-2">
-                                        <div class="card-body">
-                                            <div class="row no-gutters align-items-center">
-                                                <div class="col mr-2">
-                                                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                                        Consultas Pendentes</div>
-                                                    <div class="h5 mb-0 font-weight-bold text-gray-800">${dashboardData.pendingAppointments || 0}</div>
-                                                </div>
-                                                <div class="col-auto">
-                                                    <i class="fas fa-clock fa-2x text-gray-300"></i>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Gráficos e Tabelas -->
-                            <div class="row">
-                                <div class="col-12 col-lg-8 mb-4">
-                                    <div class="card shadow mb-4">
-                                        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                                            <h6 class="m-0 font-weight-bold text-white">Consultas da Semana</h6>
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="chart-area">
-                                                <canvas id="weeklyAppointmentsChart"></canvas>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="col-12 col-lg-4 mb-4">
-                                    <div class="card shadow mb-4">
-                                        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                                            <h6 class="m-0 font-weight-bold text-white">Status de Pagamento</h6>
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="chart-pie pt-4 pb-2">
-                                                <canvas id="paymentStatusChart"></canvas>
-                                            </div>
-                                            <div class="mt-4 text-center small">
-                                                <span class="mr-2">
-                                                    <i class="fas fa-circle text-success"></i> Pago
-                                                </span>
-                                                <span class="mr-2">
-                                                    <i class="fas fa-circle text-warning"></i> Pendente
-                                                </span>
-                                                <span class="mr-2">
-                                                    <i class="fas fa-circle text-danger"></i> Atrasado
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Próximas Consultas -->
-                            <div class="card shadow mb-4">
-                                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                                    <h6 class="m-0 font-weight-bold text-white">Próximas Consultas</h6>
-                                    <a href="#" class="btn btn-sm btn-primary">Ver Todas</a>
-                                </div>
-                                <div class="card-body">
-                                    <div class="table-responsive">
-                                        <table class="table table-bordered" id="upcomingAppointmentsTable" width="100%" cellspacing="0">
-                                            <thead>
-                                                <tr>
-                                                    <th>Data/Hora</th>
-                                                    <th>Paciente</th>
-                                                    <th>Médico</th>
-                                                    <th>Procedimento</th>
-                                                    <th>Status</th>
-                                                    <th>Ações</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody id="upcomingAppointmentsBody">
-                                                <!-- Os dados serão preenchidos via JavaScript -->
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>`;
-                    
-                    // Inicializa os componentes do dashboard com os dados recebidos
-                    initializeDashboardComponents(dashboardData);
-                }
-                
-            } catch (error) {
-                console.error('Erro ao carregar dados do dashboard:', error);
-                const mainContent = document.querySelector('.main-content');
-                if (mainContent) {
-                    mainContent.innerHTML = `
-                        <div class="alert alert-danger">
-                            <h4 class="alert-heading">Erro ao carregar o dashboard</h4>
-                            <p>${error.message || 'Ocorreu um erro ao carregar os dados do dashboard.'}</p>
-                            <button class="btn btn-primary" onclick="location.reload()">Tentar novamente</button>
-                        </div>`;
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: 'rgba(0, 0, 0, 0.05)' }
+                    },
+                    x: { grid: { display: false } }
+                },
+                plugins: {
+                    legend: { position: 'top' },
+                    tooltip: { mode: 'index', intersect: false }
                 }
             }
-        }
-        
-        // Função para inicializar componentes do dashboard (gráficos, etc.)
-        function initializeDashboardComponents(dashboardData) {
-            console.log('Inicializando componentes do dashboard com dados:', dashboardData);
-            
-            // Atualiza os cards principais
-            const updateCard = (id, value) => {
-                const element = document.getElementById(id);
-                if (element) {
-                    if (id === 'monthly-revenue') {
-                        element.textContent = formatCurrency(value || 0);
-                    } else {
-                        element.textContent = value || '0';
-                    }
-                }
-            };
-
-            // Atualiza os cards com os dados recebidos
-            updateCard('total-clients', dashboardData.totalClients);
-            updateCard('today-appointments', dashboardData.todayAppointments);
-            updateCard('monthly-revenue', dashboardData.monthlyRevenue);
-            updateCard('pending-tasks', dashboardData.pendingAppointments);
-
-            // Atualiza o gráfico de consultas da semana
-            if (dashboardData.weeklyAppointments) {
-                const ctx = document.getElementById('weeklyAppointmentsChart');
-                if (ctx) {
-                    new Chart(ctx.getContext('2d'), {
-                        type: 'line',
-                        data: {
-                            labels: dashboardData.weeklyAppointments.labels || ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'],
-                            datasets: [{
-                                label: 'Consultas',
-                                data: dashboardData.weeklyAppointments.data || [],
-                                backgroundColor: 'rgba(78, 115, 223, 0.05)',
-                                borderColor: 'rgba(78, 115, 223, 1)',
-                                pointRadius: 3,
-                                pointBackgroundColor: 'rgba(78, 115, 223, 1)',
-                                pointBorderColor: 'rgba(78, 115, 223, 1)',
-                                pointHoverRadius: 3,
-                                pointHoverBackgroundColor: 'rgba(78, 115, 223, 1)',
-                                pointHoverBorderColor: 'rgba(78, 115, 223, 1)',
-                                pointHitRadius: 10,
-                                pointBorderWidth: 2,
-                                tension: 0.3
-                            }]
-                        },
-                        options: {
-                            maintainAspectRatio: false,
-                            scales: {
-                                y: {
-                                    beginAtZero: true,
-                                    ticks: { precision: 0 }
-                                }
-                            },
-                            plugins: {
-                                legend: { display: false },
-                                tooltip: {
-                                    backgroundColor: 'rgb(255,255,255)',
-                                    bodyColor: '#858796',
-                                    titleMarginBottom: 10,
-                                    titleColor: '#6e707e',
-                                    titleFontSize: 14,
-                                    borderColor: '#dddfeb',
-                                    borderWidth: 1,
-                                    xPadding: 15,
-                                    yPadding: 15,
-                                    displayColors: false,
-                                    intersect: false,
-                                    mode: 'index',
-                                    caretPadding: 10
-                                }
-                            }
-                        }
-                    });
-                }
-            }
-
-            // Atualiza a tabela de próximas consultas
-            const tbody = document.getElementById('upcomingAppointmentsBody');
-            if (tbody && dashboardData.upcomingAppointments) {
-                tbody.innerHTML = dashboardData.upcomingAppointments.map(appointment => `
-                    <tr>
-                        <td>${new Date(appointment.date).toLocaleString('pt-BR')}</td>
-                        <td>${appointment.client || 'N/A'}</td>
-                        <td>${appointment.service || 'N/A'}</td>
-                        <td>${appointment.duration || 'N/A'} min</td>
-                        <td><span class="badge ${getStatusBadgeClass(appointment.status)}">${getStatusText(appointment.status)}</span></td>
-                        <td>
-                            <button class="btn btn-sm btn-primary" onclick="viewAppointment('${appointment.id}')">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `).join('');
-            }
-        }
-        
-        // Função para redirecionar para a página de login com mensagem de erro
-        function redirectToLogin(errorType = 'session_expired') {
-            // Limpa os dados de autenticação
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            
-            // Redireciona para a página de login com o parâmetro de erro
-            const loginUrl = `index.html?error=${encodeURIComponent(errorType)}`;
-            console.log(`Redirecionando para: ${loginUrl}`);
-            window.location.href = loginUrl;
-        }
-
-        // Inicialização do dashboard quando o DOM estiver pronto
-        document.addEventListener('DOMContentLoaded', async function() {
-            console.log('Iniciando inicialização do dashboard...');
-            
-            // Mostrar indicador de carregamento
-            const showLoading = (message = 'Verificando autenticação...') => {
-                const loadingIndicator = document.createElement('div');
-                loadingIndicator.className = 'text-center my-5';
-                loadingIndicator.innerHTML = `
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Carregando...</span>
-                    </div>
-                    <p class="mt-2 text-muted">${message}</p>`;
-                
-                const mainContent = document.querySelector('.main-content');
-                if (mainContent) {
-                    mainContent.innerHTML = '';
-                    mainContent.appendChild(loadingIndicator);
-                }
-                return mainContent;
-            };
-            
-            // Mostra o indicador de carregamento inicial
-            const mainContent = showLoading();
-            if (!mainContent) {
-                console.error('Elemento .main-content não encontrado no DOM');
-                redirectToLogin('page_error');
-                return;
-            }
-            
-            // Função para mostrar mensagem de erro
-            const showError = (title, message, showReload = true) => {
-                mainContent.innerHTML = `
-                    <div class="alert alert-danger">
-                        <h4 class="alert-heading">${title}</h4>
-                        <p>${message}</p>
-                        <hr>
-                        <a href="index.html" class="btn btn-primary">Ir para o login</a>
-                        ${showReload ? '<button class="btn btn-outline-secondary ms-2" onclick="location.reload()">Tentar novamente</button>' : ''}
-                    </div>`;
-            };
-            
-            try {
-                // Verifica se o usuário está autenticado
-                const token = localStorage.getItem('token');
-                console.log('Token no localStorage:', token ? 'Encontrado' : 'Não encontrado');
-                
-                if (!token) {
-                    console.log('Nenhum token encontrado no localStorage, redirecionando para login...');
-                    redirectToLogin('no_token');
-                    return;
-                }
-                
-                // Atualiza o indicador de carregamento
-                showLoading('Validando sessão...');
-                
-                try {
-                    // Valida o token no servidor
-                    console.log('Validando token no servidor...');
-                    const validationResult = await validateToken(token);
-                    
-                    if (!validationResult.isValid) {
-                        console.error('Falha na validação do token:', validationResult.error);
-                        
-                        // Se o token for inválido ou expirado, limpa os dados de autenticação
-                        if (validationResult.requiresLogin) {
-                            localStorage.removeItem('token');
-                            localStorage.removeItem('user');
-                        }
-                        
-                        redirectToLogin(validationResult.requiresLogin ? 'session_expired' : 'validation_error');
-                        return;
-                    }
-                    
-                    console.log('Usuário autenticado com sucesso!');
-                    
-                    // Atualiza os dados do usuário no localStorage se necessário
-                    if (validationResult.user) {
-                        localStorage.setItem('user', JSON.stringify(validationResult.user));
-                    }
-                    
-                    // Atualiza o indicador de carregamento
-                    showLoading('Carregando dashboard...');
-                    
-                    // Configura o menu responsivo
-                    try {
-                        setupMobileMenu();
-                        updateCurrentDate();
-                        
-                        // Carrega os dados do dashboard
-                        try {
-                            await loadDashboardData();
-                        } catch (error) {
-                            console.error('Erro ao carregar dados do dashboard:', error);
-                            showError(
-                                'Erro ao carregar o dashboard', 
-                                error.message || 'Ocorreu um erro ao carregar os dados do dashboard.',
-                                true
-                            );
-                        }
-                    } catch (error) {
-                        console.error('Erro na configuração do dashboard:', error);
-                        showError(
-                            'Erro na inicialização', 
-                            'Ocorreu um erro ao configurar o dashboard.',
-                            true
-                        );
-                    }
-                    
-                } catch (validationError) {
-                    console.error('Erro durante a validação do token:', validationError);
-                    showError(
-                        'Erro de autenticação', 
-                        'Não foi possível validar sua sessão. Por favor, faça login novamente.',
-                        false
-                    );
-                    
-                    // Limpa os dados de autenticação em caso de erro
-                    localStorage.removeItem('token');
-                    localStorage.removeItem('user');
-                    
-                    // Redireciona após um curto atraso para permitir que o usuário veja a mensagem
-                    setTimeout(() => {
-                        redirectToLogin('validation_error');
-                    }, 2000);
-                }
-                
-            } catch (error) {
-                console.error('Erro inesperado na inicialização do dashboard:', error);
-                showError(
-                    'Erro inesperado', 
-                    'Ocorreu um erro inesperado ao carregar o dashboard. Por favor, tente novamente.',
-                    true
-                );
-                
-                // Limpa os dados de autenticação em caso de erro inesperado
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
-            }
-            
-            
         });
+
+        // Gráfico de distribuição por profissional
+        const professionalsCtx = document.getElementById('professionalsChart').getContext('2d');
+        window.professionalsChart = new Chart(professionalsCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Dr. Silva', 'Dra. Oliveira', 'Dr. Santos', 'Dra. Costa'],
+                datasets: [{
+                    data: [30, 25, 20, 25],
+                    backgroundColor: ['#3B82F6', '#10B981', '#F59E0B', '#8B5CF6'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'right' } },
+                cutout: '70%'
+            }
+        });
+    }
+
+    // Carregar dados do dashboard
+    async function loadDashboardData() {
+        try {
+            showLoading(true, 'Carregando dados do dashboard...');
+
+            // Simular carregamento de dados
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            // Atualizar cards de estatísticas
+            document.getElementById('totalClients').textContent = '247';
+            document.getElementById('todayAppointments').textContent = '18';
+            document.getElementById('monthlyRevenue').textContent = 'R$ 24.560,00';
+            document.getElementById('attendanceRate').textContent = '92%';
+
+            // Atualizar tabela de próximos agendamentos
+            const appointments = [
+                { patient: 'Maria Silva', professional: 'Dr. Silva', datetime: '18/10/2023 09:00', procedure: 'Consulta de Rotina', status: 'Confirmado' },
+                { patient: 'João Santos', professional: 'Dra. Oliveira', datetime: '18/10/2023 10:30', procedure: 'Avaliação', status: 'Pendente' },
+                { patient: 'Ana Oliveira', professional: 'Dr. Santos', datetime: '18/10/2023 11:15', procedure: 'Retorno', status: 'Confirmado' },
+                { patient: 'Carlos Pereira', professional: 'Dra. Costa', datetime: '18/10/2023 14:00', procedure: 'Consulta de Acompanhamento', status: 'Confirmado' },
+                { patient: 'Fernanda Lima', professional: 'Dr. Silva', datetime: '18/10/2023 15:30', procedure: 'Primeira Consulta', status: 'Pendente' }
+            ];
+
+            const tbody = document.getElementById('upcomingAppointments');
+            tbody.innerHTML = appointments.map(appt => {
+                const initials = (appt.patient || '')
+                    .split(' ')
+                    .filter(Boolean)
+                    .map(p => p[0])
+                    .slice(0, 2)
+                    .join('')
+                    .toUpperCase();
+                const statusClass = appt.status === 'Confirmado'
+                    ? 'bg-green-50 text-green-700 border border-green-200'
+                    : appt.status === 'Pendente'
+                        ? 'bg-yellow-50 text-yellow-700 border border-yellow-200'
+                        : 'bg-red-50 text-red-700 border border-red-200';
+                return `
+                <tr class="transition-colors">
+                    <td class="px-4 py-2 whitespace-nowrap">
+                        <div class="flex items-center gap-2">
+                            <div class="upcoming-avatar" aria-hidden="true">${initials || 'P'}</div>
+                            <div class="font-medium text-gray-900">${appt.patient}</div>
+                        </div>
+                    </td>
+                    <td class="px-4 py-2 whitespace-nowrap text-gray-700">${appt.professional}</td>
+                    <td class="px-4 py-2 whitespace-nowrap text-gray-700">${appt.datetime}</td>
+                    <td class="px-4 py-2 whitespace-nowrap text-gray-700">${appt.procedure}</td>
+                    <td class="px-4 py-2 whitespace-nowrap">
+                        <span class="px-2 py-0.5 inline-flex items-center text-xs leading-5 font-medium rounded-full ${statusClass}">
+                            ${appt.status}
+                        </span>
+                    </td>
+                    <td class="px-4 py-2 whitespace-nowrap text-right">
+                        <button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium border border-[#f0b354] text-[#041a31] hover:bg-[#fff4de]" title="Ver">
+                            <i class="bi bi-eye"></i>
+                            Ver
+                        </button>
+                    </td>
+                </tr>`;
+            }).join('');
+
+        } catch (error) {
+            console.error('Erro ao carregar dados do dashboard:', error);
+            showError('Erro', 'Não foi possível carregar os dados do dashboard. Por favor, tente novamente.');
+        } finally {
+            showLoading(false);
+        }
+    }
+
+    // Função para mostrar/ocultar o loading
+    function showLoading(show = true, message = 'Carregando...') {
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const loadingText = document.getElementById('loadingText');
+
+        if (loadingOverlay && loadingText) {
+            loadingText.textContent = message;
+            loadingOverlay.classList.toggle('hidden', !show);
+            loadingOverlay.classList.toggle('flex', show);
+        }
+    }
+
+    // Função para mostrar mensagem de erro
+    function showError(title, message, showRetry = true) {
+        const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+        const errorTitle = document.getElementById('errorModalTitle');
+        const errorMessage = document.getElementById('errorModalMessage');
+        const retryButton = document.getElementById('errorModalRetry');
+
+        if (errorTitle) errorTitle.textContent = title;
+        if (errorMessage) errorMessage.textContent = message;
+        if (retryButton) retryButton.style.display = showRetry ? 'block' : 'none';
+
+        errorModal.show();
+    }
+
+    // Inicialização da página
+    document.addEventListener('DOMContentLoaded', function() {
+        // O menu lateral é carregado automaticamente por js/sidebar.js
+        // Inicializar gráficos
+        initCharts();
+        // Carregar dados do dashboard
+        loadDashboardData();
+        // Configurar o botão de tentar novamente
+        const retryButton = document.getElementById('errorModalRetry');
+        if (retryButton) {
+            retryButton.addEventListener('click', function() {
+                loadDashboardData();
+                const errorModal = bootstrap.Modal.getInstance(document.getElementById('errorModal'));
+                if (errorModal) errorModal.hide();
+            });
+        }
+    });
     </script>
 </body>
 </html>
