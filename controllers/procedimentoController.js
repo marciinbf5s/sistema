@@ -119,7 +119,7 @@ const procedimentoController = {
             const { id } = req.params;
             
             // Verifica se existem agendamentos para este procedimento
-            const agendamentos = await prisma.agendamento.findMany({
+            const agendamentos = await prisma.agendamentos.findMany({
                 where: { procedimentoId: parseInt(id) }
             });
             

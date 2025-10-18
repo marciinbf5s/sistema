@@ -252,8 +252,8 @@ const verificarDisponibilidade = async (req, res) => {
                     endTime: { lte: dataFimAjustada }
                 }
             ],
-            NOT: {
-                status: 'CANCELADO' // Não considerar agendamentos cancelados
+            status: {
+                not: 'CANCELADO' // Não considerar agendamentos cancelados
             }
         };
 
@@ -316,8 +316,8 @@ const listarMeusAgendamentos = async (req, res) => {
                     { cliente: { usuarioId: userId } },
                     { profissional: { usuarioId: userId } }
                 ],
-                NOT: {
-                    status: 'CANCELADO' // Não mostrar agendamentos cancelados
+                status: {
+                    not: 'CANCELADO' // Não mostrar agendamentos cancelados
                 }
             },
             include: {
@@ -832,8 +832,8 @@ const buscarAgendamentosPorPeriodo = async (req, res) => {
                     gte: dataInicioAjustada,
                     lte: dataFimAjustada
                 },
-                NOT: {
-                    status: 'CANCELADO' // Não incluir agendamentos cancelados
+                status: {
+                    not: 'CANCELADO' // Não incluir agendamentos cancelados
                 }
             },
             orderBy: {

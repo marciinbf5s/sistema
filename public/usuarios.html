@@ -413,7 +413,7 @@
                                     <label for="userPassword" class="form-label">Senha</label>
                                     <div class="input-group">
                                         <input type="password" class="form-control" id="userPassword">
-                                        <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                        <button class="btn btn-outline-secondary" type="button" id="togglePasswordUser">
                                             <i class="bi bi-eye"></i>
                                         </button>
                                     </div>
@@ -450,7 +450,7 @@
                 </form>
                 <script>
                     // Toggle para mostrar/esconder senha
-                    document.getElementById('togglePassword').addEventListener('click', function() {
+                    document.getElementById('togglePasswordUser').addEventListener('click', function() {
                         const passwordInput = document.getElementById('userPassword');
                         const type = passwordInput.type === 'password' ? 'text' : 'password';
                         passwordInput.type = type;
@@ -461,6 +461,16 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal Adicionar/Editar Procedimento -->
+    <div class="modal fade" id="procedimentoModal" tabindex="-1" aria-labelledby="procedimentoModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="procedimentoModalLabel">Adicionar Novo Procedimento</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+
 
     <!-- Modal de Visualização de Usuário -->
     <div class="modal fade" id="viewUserModal" tabindex="-1" aria-hidden="true">
@@ -1004,9 +1014,15 @@
                     document.getElementById('addUserModalLabel').textContent = 'Adicionar Novo Usuário';
                     // Limpar o ID do usuário (para indicar que é um novo usuário)
                     document.getElementById('userId').value = '';
+                    console.log('=== ANTES DE MOSTRAR MODAL ===');
+                    console.log('userName antes modal.show():', document.getElementById('userName').value);
+
                     // Mostrar o modal
                     const modal = new bootstrap.Modal(document.getElementById('addUserModal'));
                     modal.show();
+
+                    console.log('=== DEPOIS DE MOSTRAR MODAL ===');
+                    console.log('userName após modal.show():', document.getElementById('userName').value);
                 });
             }
             
@@ -1125,16 +1141,64 @@
                     // Verificar se a resposta tem a estrutura esperada
                     const user = response.data || response;
                     console.log('Dados do usuário recebidos para edição:', user);
-                    
+
                     if (!user.id && !user._id) {
                         throw new Error('Dados do usuário inválidos na resposta');
                     }
-                    
+
                     // Preencher o formulário com os dados do usuário
-                    document.getElementById('userId').value = user.id || user._id || '';
-                    document.getElementById('userName').value = user.name || '';
-                    document.getElementById('userEmail').value = user.email || '';
-                    document.getElementById('userProfile').value = user.role || 'USER';
+                    const userIdValue = user.id || user._id || '';
+                    const userNameValue = user.name || user.nome || '';
+                    const userEmailValue = user.email || '';
+
+                    console.log('=== INÍCIO DO PREENCHIMENTO DO FORMULÁRIO ===');
+                    console.log('User data received:', user);
+                    console.log('Extracted values:', {
+                        userIdValue: userIdValue,
+                        userNameValue: userNameValue,
+                        userEmailValue: userEmailValue
+                    });
+
+                    const userIdField = document.getElementById('userId');
+                    const userNameField = document.getElementById('userName');
+                    const userEmailField = document.getElementById('userEmail');
+
+                    console.log('Campos encontrados:', {
+                        userIdField: !!userIdField,
+                        userNameField: !!userNameField,
+                        userEmailField: !!userEmailField
+                    });
+
+                    userIdField.value = userIdValue;
+                    userNameField.value = userNameValue;
+                    userEmailField.value = userEmailValue;
+
+                    console.log('Campo userName após preenchimento:', {
+                        element: !!userNameField,
+                        value: userNameField ? userNameField.value : 'elemento não encontrado',
+                        expectedValue: userNameValue
+                    });
+
+                    // Normalizar o valor do perfil para maiúsculo e padronizar
+                    const rawRole = user.role || user.perfil || '';
+                    let normalizedRole = rawRole.toUpperCase();
+
+                    // Mapeamento de valores possíveis da API para valores do select
+                    const roleMapping = {
+                        'ADMIN': 'ADMIN',
+                        'ADMINISTRADOR': 'ADMIN',
+                        'USER': 'USER',
+                        'USUARIO': 'USER',
+                        'PROFESSIONAL': 'USER', // fallback para profissional
+                        'PROFISSIONAL': 'USER'
+                    };
+
+                    normalizedRole = roleMapping[normalizedRole] || 'USER';
+
+                    console.log('Role original:', rawRole);
+                    console.log('Role normalizado:', normalizedRole);
+
+                    document.getElementById('userProfile').value = normalizedRole;
                     
                     // Ajustar o status para garantir que corresponda ao valor do select
                     const statusSelect = document.getElementById('userStatus');
@@ -1545,59 +1609,48 @@
             const confirmPassword = document.getElementById('userConfirmPassword').value;
             const role = document.getElementById('userProfile').value;
             const status = document.getElementById('userStatus').value;
-            
-            console.log('Valores do formulário:', { 
-                id, 
-                nome, 
-                email, 
-                role, 
+
+            console.log('=== INÍCIO DO SAVE USER ===');
+            console.log('Valores do formulário:', {
+                id,
+                nome,
+                email,
+                role,
                 status,
                 hasPassword: !!password,
                 passwordLength: password ? password.length : 0
             });
-            
+
             // Validações
             if (!nome) {
                 showError('Erro de Validação', 'O nome é obrigatório.');
                 return;
             }
-            
+
             if (!email) {
                 showError('Erro de Validação', 'O e-mail é obrigatório.');
                 return;
             }
-            
+
             if (!id && !password) {
                 showError('Erro de Validação', 'A senha é obrigatória para novo usuário.');
                 return;
             }
-            
+
             if (password && password.length < 6) {
                 showError('Erro de Validação', 'A senha deve ter no mínimo 6 caracteres.');
                 return;
             }
-            
+
             if (password && password !== confirmPassword) {
                 showError('Erro de Validação', 'As senhas não conferem.');
                 return;
             }
-            
+
             try {
                 // Garantir que o status seja uma string e esteja em maiúsculas
                 const userStatus = status ? String(status).toUpperCase() : 'ATIVO';
-                
-                // Criar objeto com os dados do usuário
-                const userData = new FormData();
-                userData.append('name', nome);
-                userData.append('email', email);
-                userData.append('role', role);
-                userData.append('status', userStatus);
-                
-                // Se for um novo usuário ou se a senha foi alterada
-                if (password) {
-                    userData.append('password', password);
-                }
-                
+
                 console.log('=== DADOS DO FORMULÁRIO ===');
                 console.log('ID do usuário:', id);
                 console.log('Nome:', nome);
@@ -1605,11 +1658,11 @@
                 console.log('Perfil:', role);
                 console.log('Status (antes):', status);
                 console.log('Status (processado):', userStatus);
-                
+
                 let response;
                 let method;
                 let url = '/api/usuarios';
-                
+
                 if (id) {
                     // Atualizar usuário existente
                     method = 'PUT';
@@ -1617,49 +1670,78 @@
                 } else {
                     method = 'POST';
                 }
-                
+
                 console.log('Enviando requisição para:', url);
                 console.log('Método:', method);
-                console.log('Dados do usuário:', Object.fromEntries(userData));
-                
+
+                // Criar objeto JSON para envio
+                const jsonData = {
+                    name: nome,
+                    email: email,
+                    role: role,
+                    status: userStatus
+                };
+
+                // Adicionar senha apenas se foi fornecida
+                if (password && password.trim() !== '') {
+                    jsonData.password = password;
+                    console.log('Senha será incluída na atualização');
+                } else {
+                    console.log('Senha não será incluída na atualização');
+                }
+
+                console.log('Dados JSON que serão enviados:', JSON.stringify(jsonData, null, 2));
+
                 try {
-                    // Usar FormData diretamente sem converter para JSON
+                    // Usar fetchWithAuth que já configura corretamente os headers JSON
                     response = await fetchWithAuth(url, {
                         method,
-                        body: userData // Envia o FormData diretamente
+                        body: JSON.stringify(jsonData)
                     });
-                    
-                    console.log('Resposta da API:', {
-                        status: response.status,
-                        statusText: response.statusText,
-                        ok: response.ok,
-                        headers: Object.fromEntries(response.headers.entries())
-                    });
-                    
-                    const responseData = await response.json().catch(() => ({}));
+
+                    console.log('=== RESPOSTA BRUTA DA API ===');
+                    console.log('Resposta da API recebida:', response);
+                    console.log('Tipo da resposta:', typeof response);
+
+                    // fetchWithAuth já retorna o JSON processado ou lança erro
+                    // Se chegamos aqui, significa que foi sucesso
+                    const responseData = response;
+                    console.log('=== DADOS PROCESSADOS ===');
                     console.log('Dados da resposta:', responseData);
-                    
-                    if (!response.ok) {
-                        console.error('Erro na resposta da API:', responseData);
-                        throw new Error(responseData.message || `Erro ao salvar usuário: ${response.status} ${response.statusText}`);
-                    }
-                    
                     console.log('Usuário salvo com sucesso:', responseData);
-                    
+
+                    // Verificação adicional: comparar dados enviados com dados recebidos
+                    console.log('=== COMPARAÇÃO ===');
+                    console.log('Dados enviados - Nome:', jsonData.name);
+                    console.log('Dados recebidos - Nome:', responseData.name);
+                    console.log('Nomes são iguais?', jsonData.name === responseData.name);
+
+                    // Verificação adicional no frontend
+                    if (jsonData.name !== responseData.name) {
+                        console.warn('⚠️ ATENÇÃO: Nome enviado diferente do nome recebido!');
+                        console.warn('Isso pode indicar problema na API');
+                    } else {
+                        console.log('✅ Nomes consistentes entre envio e recebimento');
+                    }
+
                     // Fechar o modal
                     const modal = bootstrap.Modal.getInstance(document.getElementById('addUserModal'));
                     if (modal) {
                         modal.hide();
                     }
-                    
+
                     // Mostrar mensagem de sucesso
                     showSuccess('Usuário salvo com sucesso!');
-                    
+
                     // Recarregar a lista de usuários
                     await loadUsers();
-                    
+
                     console.log('Lista de usuários recarregada após salvar');
-                    
+
+                    // Forçar atualização da tabela mesmo se os dados forem os mesmos
+                    console.log('Forçando atualização da tabela...');
+                    renderUsersTable();
+
                     if (!id) {
                         document.getElementById('userForm').reset();
                     }
@@ -1667,10 +1749,11 @@
                     console.error('Erro ao processar a resposta:', error);
                     throw error;
                 }
-                
+
             } catch (error) {
                 console.error('Erro ao salvar usuário:', error);
                 const errorMessage = error.message || 'Ocorreu um erro ao salvar o usuário';
+                showError('Erro', errorMessage);
             }
         }
         

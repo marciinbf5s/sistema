@@ -92,15 +92,11 @@ const professionalController = {
             if (req.body.especialidades) {
                 // Se for string, converte para array separando por vírgula
                 if (typeof req.body.especialidades === 'string') {
-                    profissionalData.especialidades = {
-                        set: req.body.especialidades.split(',').map(e => e.trim()).filter(e => e)
-                    };
+                    profissionalData.especialidades = req.body.especialidades.split(',').map(e => e.trim()).filter(e => e);
                 }
                 // Se já for array, usa diretamente
                 else if (Array.isArray(req.body.especialidades)) {
-                    profissionalData.especialidades = {
-                        set: req.body.especialidades
-                    };
+                    profissionalData.especialidades = req.body.especialidades;
                 }
             }
 
@@ -345,12 +341,12 @@ const professionalController = {
             // Verifica se o email já está em uso por outro profissional
             if (email && email !== professional.email) {
                 const emailInUse = await prisma.profissional.findFirst({
-                    where: { 
+                    where: {
                         email,
-                        NOT: { id: parseInt(id) }
+                        id: { not: parseInt(id) }
                     }
                 });
-                
+
                 if (emailInUse) {
                     return res.status(400).json({ error: 'Email já está em uso' });
                 }
@@ -359,9 +355,9 @@ const professionalController = {
             // Verifica se o status fornecido é válido
             const statusValidos = ['ATIVO', 'INATIVO', 'PENDENTE', 'BLOQUEADO'];
             const novoStatus = status ? status.toUpperCase() : professional.status;
-            
+
             if (status && !statusValidos.includes(novoStatus)) {
-                return res.status(400).json({ 
+                return res.status(400).json({
                     success: false,
                     error: 'STATUS_INVALIDO',
                     message: 'Status inválido',
@@ -374,11 +370,11 @@ const professionalController = {
             // Verifica se há agendamentos futuros ao tentar inativar
             if (novoStatus === 'INATIVO' && professional.status !== 'INATIVO') {
                 try {
-                    const agendamentosFuturos = await prisma.agendamento.findMany({
+                    const agendamentosFuturos = await prisma.agendamentos.findMany({
                         where: {
                             profissionalId: parseInt(id),
                             startTime: { gte: new Date() },
-                            status: { not: 'CANCELLED' }
+                            status: { not: 'CANCELADO' }
                         },
                         select: {
                             id: true,
@@ -451,21 +447,6 @@ const professionalController = {
                     where: { id: parseInt(id) },
                     data: updateData,
                     include: {
-                        agendamentos: {
-                            where: {
-                                startTime: { gte: new Date() },
-                                status: { not: 'CANCELLED' }
-                            },
-                            select: {
-                                id: true,
-                                startTime: true,
-                                status: true
-                            },
-                            orderBy: {
-                                startTime: 'asc'
-                            },
-                            take: 5
-                        },
                         usuario: {
                             select: {
                                 id: true,
@@ -617,50 +598,100 @@ const professionalController = {
         try {
             const { id } = req.params;
             
+            // Validação básica do ID
+            if (!id || isNaN(parseInt(id))) {
+                return res.status(400).json({ 
+                    success: false,
+                    error: 'ID_INVALIDO',
+                    message: 'ID do profissional inválido'
+                });
+            }
+
+            // Primeiro, busca apenas os dados básicos do profissional
             const professional = await prisma.profissional.findUnique({
                 where: { id: parseInt(id) },
                 include: {
                     usuario: {
                         select: {
                             id: true,
-                            name: true,
-                            email: true
+                            email: true,
+                            role: true
                         }
-                    },
-                    agendamentos: {
-                        include: {
-                            procedimento: true,
-                            convenio: true,
-                            cliente: true
-                        },
-                        orderBy: { startTime: 'desc' },
-                        take: 10
                     }
                 }
             });
             
             if (!professional) {
-                return res.status(404).json({ error: 'Profissional não encontrado' });
+                return res.status(404).json({ 
+                    success: false,
+                    error: 'NAO_ENCONTRADO',
+                    message: 'Profissional não encontrado'
+                });
             }
             
             // Verifica se o usuário tem permissão para visualizar
-            if (req.user.role !== 'ADMIN' && professional.usuarioId !== req.user.id) {
-                console.log('Acesso negado - Usuário não autorizado:', { 
+            const isAdmin = req.user.role === 'ADMIN';
+            const isOwner = professional.usuarioId === req.user.id;
+            
+            if (!isAdmin && !isOwner) {
+                console.log('Acesso negado - Permissão insuficiente:', { 
                     userId: req.user.id, 
                     userRole: req.user.role,
                     professionalUserId: professional.usuarioId 
                 });
                 return res.status(403).json({ 
-                    error: 'Acesso negado',
-                    message: 'Você não tem permissão para acessar este recurso'
+                    success: false,
+                    error: 'ACESSO_NEGADO',
+                    message: 'Você não tem permissão para acessar este profissional'
+                });
+            }
+
+            // Se o usuário tiver permissão, busca os dados adicionais
+            try {
+                // Busca os agendamentos em uma consulta separada para evitar problemas de relacionamento
+                const agendamentos = await prisma.agendamentos.findMany({
+                    where: { profissionalId: parseInt(id) },
+                    include: {
+                        procedimentos: true,
+                        convenios: true,
+                        clientes: true
+                    },
+                    orderBy: { startTime: 'desc' },
+                    take: 10
+                });
+
+                // Monta o objeto de resposta
+                const response = {
+                    ...professional,
+                    agendamentos
+                };
+                
+                return res.json({
+                    success: true,
+                    data: response
+                });
+                
+            } catch (dbError) {
+                console.error('Erro ao buscar agendamentos do profissional:', dbError);
+                // Retorna os dados do profissional mesmo se houver erro nos agendamentos
+                return res.json({
+                    success: true,
+                    data: {
+                        ...professional,
+                        agendamentos: []
+                    },
+                    warning: 'Não foi possível carregar os agendamentos deste profissional'
                 });
             }
             
-            return res.json(professional);
-            
         } catch (error) {
             console.error('Erro ao buscar profissional:', error);
-            return res.status(500).json({ error: 'Erro ao buscar profissional' });
+            return res.status(500).json({ 
+                success: false,
+                error: 'ERRO_INTERNO',
+                message: 'Ocorreu um erro ao buscar o profissional',
+                details: process.env.NODE_ENV === 'development' ? error.message : undefined
+            });
         }
     },
 
@@ -736,11 +767,11 @@ const professionalController = {
             // Se estiver inativando, verifica agendamentos futuros
             if (statusFormatado === 'INATIVO' && professional.status !== 'INATIVO') {
                 const now = new Date();
-                const agendamentosFuturos = await prisma.agendamento.findMany({
+                const agendamentosFuturos = await prisma.agendamentos.findMany({
                     where: {
                         profissionalId: parseInt(id),
                         startTime: { gte: now },
-                        status: { not: 'CANCELLED' }
+                        status: { not: 'CANCELADO' }
                     },
                     select: {
                         id: true,
@@ -888,11 +919,11 @@ const professionalController = {
             console.log('Novo status solicitado:', updateData.status);
             
             if (updateData.status && updateData.status.toUpperCase() === 'INACTIVE' && professional.status !== 'INACTIVE') {
-                const agendamentosFuturos = await prisma.agendamento.findFirst({
+                const agendamentosFuturos = await prisma.agendamentos.findFirst({
                     where: {
                         profissionalId: parseInt(id),
                         startTime: { gte: new Date() },
-                        status: { not: 'CANCELLED' }
+                        status: { not: 'CANCELADO' }
                     }
                 });
                 

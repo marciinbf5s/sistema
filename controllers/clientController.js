@@ -85,8 +85,7 @@ const clientController = {
                 console.log('Buscando clientes...');
                 const clients = await prisma.cliente.findMany({
                     where: { usuarioId: req.user.id },
-                    orderBy: { nome: 'asc' },
-                    take: 50
+                    orderBy: { nome: 'asc' }
                 });
                 
                 console.log(`Encontrados ${clients.length} clientes`);
@@ -109,8 +108,8 @@ const clientController = {
                     status: client.status,
                     observacoes: client.observacoes,
                     usuarioId: client.usuarioId,
-                    criadoEm: client.createdAt ? new Date(client.createdAt).toISOString() : null,
-                    atualizadoEm: client.updatedAt ? new Date(client.updatedAt).toISOString() : null
+                    criadoEm: client.criadoEm ? new Date(client.criadoEm).toISOString() : null,
+                    atualizadoEm: client.atualizadoEm ? new Date(client.atualizadoEm).toISOString() : null
                 }));
                 
                 return res.json(formattedClients);
@@ -148,6 +147,7 @@ const clientController = {
             });
         }
     },
+    
     /**
      * Lista todos os clientes (apenas admin)
      */
@@ -342,57 +342,91 @@ const clientController = {
         try {
             const { id } = req.params;
             
-            // Validate ID
+            // Validar ID
             const clientId = parseInt(id);
             if (isNaN(clientId)) {
-                return res.status(400).json({ error: 'ID do cliente inválido' });
+                return res.status(400).json({ 
+                    success: false,
+                    error: 'ID do cliente inválido' 
+                });
             }
+
+            console.log(`[API] Buscando cliente ID: ${clientId} para usuário: ${req.user?.id}`);
             
-            // Get client with related data
+            // Buscar cliente
             const client = await prisma.cliente.findUnique({
-                where: { id: clientId },
-                include: {
-                    agendamentos: {
-                        include: {
-                            procedimento: true,
-                            convenio: true
-                        },
-                        orderBy: {
-                            startTime: 'desc'
-                        },
-                        take: 5 // Últimos 5 agendamentos
-                    }
-                }
+                where: { id: clientId }
             });
-            
+
             if (!client) {
+                console.log(`[API] Cliente ${clientId} não encontrado`);
                 return res.status(404).json({ 
                     success: false,
                     error: 'Cliente não encontrado' 
                 });
             }
-            
-            // Skip permission check for now to test the endpoint
-            // TODO: Re-enable permission check after confirming the endpoint works
-            /*
+
+            // Verificar permissão
             if (client.usuarioId !== req.user?.id && req.user?.role !== 'ADMIN') {
+                console.log(`[AUTH] Acesso negado para usuário ${req.user?.id} ao cliente ${clientId}`);
                 return res.status(403).json({ 
                     success: false,
-                    error: 'Você não tem permissão para acessar este cliente' 
+                    error: 'Acesso negado' 
                 });
             }
-            */
+
+            // Formatar datas de forma segura
+            const safeFormatDate = (date) => {
+                if (!date) return null;
+                try {
+                    const d = new Date(date);
+                    return isNaN(d.getTime()) ? null : d.toISOString().split('T')[0];
+                } catch (e) {
+                    console.warn('[API] Erro ao formatar data:', e);
+                    return null;
+                }
+            };
+
+            // Montar resposta
+            const response = {
+                id: client.id,
+                nome: client.nome,
+                email: client.email,
+                telefone: client.telefone,
+                cpf: client.cpf,
+                rua: client.rua,
+                numero: client.numero,
+                complemento: client.complemento,
+                bairro: client.bairro,
+                cidade: client.cidade,
+                estado: client.estado,
+                cep: client.cep,
+                observacoes: client.observacoes,
+                dataNascimento: safeFormatDate(client.dataNascimento),
+                status: client.status,
+                usuarioId: client.usuarioId,
+                criadoEm: safeFormatDate(client.criadoEm),
+                atualizadoEm: safeFormatDate(client.atualizadoEm)
+            };
             
-            res.json({
+            console.log(`[API] Dados do cliente ${clientId} preparados para envio`);
+            
+            return res.json({
                 success: true,
-                data: client
+                data: response
             });
             
         } catch (error) {
-            console.error('Erro ao buscar cliente:', error);
-            res.status(500).json({ 
+            console.error('[ERRO] Falha ao buscar cliente:', {
+                message: error.message,
+                stack: error.stack,
+                code: error.code
+            });
+            
+            return res.status(500).json({ 
                 success: false,
-                error: 'Erro interno ao buscar cliente' 
+                error: 'Erro ao buscar cliente',
+                details: process.env.NODE_ENV === 'development' ? error.message : undefined
             });
         }
     }

@@ -798,30 +798,28 @@
         // Função para salvar um procedimento (criar ou atualizar)
         async function saveProcedimento(e) {
             e.preventDefault();
-            
+
             const id = document.getElementById('procedimentoId').value;
-            const procedimentoData = {
-                name: document.getElementById('procedimentoNome').value,
-                descricao: document.getElementById('procedimentoDescricao').value,
-                durationMins: parseInt(document.getElementById('procedimentoDuracao').value) || 0,
-                defaultPrice: parseFloat(document.getElementById('procedimentoValor').value) || 0,
-                ativo: document.getElementById('procedimentoAtivo').checked
-            };
-            
+            const nome = document.getElementById('procedimentoNome').value;
+            const descricao = document.getElementById('procedimentoDescricao').value;
+            const duracaoMinutos = parseInt(document.getElementById('procedimentoDuracao').value) || 0;
+            const valorPadrao = parseFloat(document.getElementById('procedimentoValor').value) || 0;
+            const ativo = document.getElementById('procedimentoAtivo').checked;
+
             // Validação básica
-            if (!procedimentoData.name) {
+            if (!nome) {
                 showError('Erro de validação', 'O nome do procedimento é obrigatório');
                 return;
             }
-            
+
             if (isNaN(duracaoMinutos) || duracaoMinutos <= 0) {
                 showError('Erro de validação', 'A duração deve ser um número maior que zero');
                 return;
             }
-            
+
             try {
                 showLoading('Salvando procedimento...');
-                
+
                 const procedimentoData = {
                     nome,
                     descricao: descricao || null,

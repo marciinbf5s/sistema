@@ -778,16 +778,31 @@
             }
         }
 
-        // Função para carregar profissionais da API
+        // Função para carregar profissionais da API com suporte a paginação
         async function loadProfissionais() {
             try {
-                console.log('Iniciando carregamento de profissionais...');
-                // Fazendo a requisição para a API
-                const response = await fetchWithAuth('/api/profissionais/my-professionals?limit=100&page=1');
-                console.log('Resposta da API:', response);
+                console.log(`Carregando profissionais - Página ${currentPage}...`);
                 
-                if (response && response.data) {
-                    console.log('Total de profissionais recebidos:', response.data.length);
+                // Limpar a lista atual de profissionais
+                profissionais = [];
+                
+                // Fazendo a requisição para a API com os parâmetros de paginação
+                console.log(`Enviando requisição para: /api/profissionais/my-professionals?limit=${itemsPerPage}&page=${currentPage}`);
+                const response = await fetchWithAuth(`/api/profissionais/my-professionals?limit=${itemsPerPage}&page=${currentPage}`);
+                console.log('Resposta completa da API:', response);
+                
+                if (response) {
+                    // Verifica se a resposta tem o formato esperado
+                    const data = response.data || response;
+                    const total = response.meta?.total || response.pagination?.total || (Array.isArray(data) ? data.length : 0);
+                    const lastPage = response.meta?.last_page || response.pagination?.last_page || 1;
+                    
+                    console.log(`Total de profissionais recebidos: ${Array.isArray(data) ? data.length : 'dados inválidos'}`);
+                    console.log('Metadados de paginação:', { total, lastPage });
+                    
+                    if (!data || !Array.isArray(data)) {
+                        throw new Error('Formato de dados inválido na resposta da API');
+                    }
                     
                     // Mapeia os dados recebidos para o formato esperado
                     profissionais = response.data.map(profissional => ({
@@ -811,28 +826,46 @@
                     
                     console.log('Profissionais mapeados:', profissionais);
                     
-                    // Atualiza a interface do usuário
+                    // Atualiza os controles de paginação com base nos metadados da resposta
+                    if (response.meta) {
+                        updatePagination(response.meta.total, response.meta.last_page);
+                    } else if (response.pagination) {
+                        // Tenta outro formato de resposta comum para metadados de paginação
+                        updatePagination(response.pagination.total, response.pagination.last_page);
+                    } else {
+                        // Fallback para paginação no cliente se os metadados não estiverem disponíveis
+                        updatePagination(profissionais.length, Math.ceil(profissionais.length / itemsPerPage));
+                    }
+                    
+                    // Atualiza a interface do usuário por último
                     renderProfissionaisTable();
-                    updatePagination();
                 } else {
                     console.error('Resposta da API inválida ou sem dados:', response);
                     throw new Error('Não foi possível carregar os profissionais. Tente novamente mais tarde.');
                 }
             } catch (error) {
                 console.error('Erro ao carregar profissionais:', error);
+                showError('Erro', 'Não foi possível carregar a lista de profissionais. ' + (error.message || ''));
+                
+                // Em caso de erro, tenta renderizar com o que tem
+                renderProfissionaisTable();
+                updatePagination(0, 0);
             }
         }
         
         // Função para renderizar a tabela de profissionais
         function renderProfissionaisTable() {
             const tbody = document.getElementById('profissionaisTableBody');
-            if (!tbody) return;
+            if (!tbody) {
+                console.error('Elemento tbody não encontrado');
+                return;
+            }
             
             tbody.innerHTML = '';
             
             try {
                 // Verificar se existem profissionais para exibir
-                if (!profissionais || profissionais.length === 0) {
+                if (!profissionais || !Array.isArray(profissionais) || profissionais.length === 0) {
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
                         <td colspan="5" class="text-center py-3">
@@ -843,21 +876,19 @@
                     return;
                 }
 
-                // Mostrar todos os profissionais sem filtrar por status
-                filteredProfissionais = [...profissionais]; // Cria uma cópia do array de profissionais
-                const totalFilteredProfissionais = filteredProfissionais.length;
-                console.log(`Total de profissionais encontrados: ${totalFilteredProfissionais}`);
+                // Se não tivermos filtros ativos, usa todos os profissionais
+                filteredProfissionais = [...profissionais];
                 
-                // Calcular índices para a paginação
-                const startIndex = (currentPage - 1) * itemsPerPage;
-                const endIndex = startIndex + itemsPerPage;
-                const paginatedProfissionais = filteredProfissionais.slice(startIndex, endIndex);
+                // Se estivermos usando paginação no servidor, não precisamos fatiar o array
+                // pois já recebemos apenas os itens da página atual
+                const profissionaisParaExibir = filteredProfissionais;
                 
-                // Atualizar contadores na interface
-                updatePagination();
+                console.log(`Exibindo ${profissionaisParaExibir.length} profissionais na página ${currentPage}`);
                 
-                // Exibir apenas os profissionais da página atual
-                paginatedProfissionais.forEach(profissional => {
+                // Exibir os profissionais da página atual
+                profissionaisParaExibir.forEach(profissional => {
+                    if (!profissional) return; // Pular itens inválidos
+                    
                     const tr = document.createElement('tr');
                     
                     // Formatar dados para exibição
@@ -1475,10 +1506,13 @@
         }
         
         // Função para atualizar a exibição dos profissionais com paginação
-        function updatePagination() {
-            const totalProfissionais = filteredProfissionais ? filteredProfissionais.length : 0;
-            const totalPages = Math.ceil(totalProfissionais / itemsPerPage);
-            const paginationContainer = document.querySelector('.pagination');
+        function updatePagination(totalItems = 0, totalPagesFromApi = null) {
+            const totalProfissionais = totalItems || (filteredProfissionais ? filteredProfissionais.length : 0);
+            const totalPages = totalPagesFromApi || Math.ceil(totalProfissionais / itemsPerPage);
+            // Atualizar para selecionar o elemento ul dentro do nav
+            const paginationContainer = document.querySelector('nav[aria-label="Navegação de páginas"] ul.pagination');
+            
+            console.log('Elemento de paginação encontrado:', paginationContainer);
             
             // Atualizar o texto de exibição com a contagem de profissionais
             const showingFromEl = document.getElementById('showingFrom');
@@ -1501,7 +1535,9 @@
                 // Botão Anterior
                 paginationHTML += `
                     <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
-                        <a class="page-link" href="#" id="prevPage">Anterior</a>
+                        <a class="page-link" href="#" id="prevPage" ${currentPage === 1 ? 'tabindex="-1" aria-disabled="true"' : ''}>
+                            <i class="bi bi-chevron-left"></i> Anterior
+                        </a>
                     </li>
                 `;
                 
@@ -1509,14 +1545,40 @@
                 let startPage = Math.max(1, currentPage - 2);
                 let endPage = Math.min(totalPages, startPage + 4);
                 
+                // Ajustar o início se estivermos perto do final
                 if (endPage - startPage < 4 && totalPages > 4) {
                     startPage = Math.max(1, endPage - 4);
                 }
                 
+                // Primeira página
+                if (startPage > 1) {
+                    paginationHTML += `
+                        <li class="page-item">
+                            <a class="page-link page-number" href="#" data-page="1">1</a>
+                        </li>
+                    `;
+                    if (startPage > 2) {
+                        paginationHTML += '<li class="page-item disabled"><span class="page-link">...</span></li>';
+                    }
+                }
+                
+                // Páginas do meio
                 for (let i = startPage; i <= endPage; i++) {
                     paginationHTML += `
-                        <li class="page-item ${i === currentPage ? 'active' : ''}">
+                        <li class="page-item ${i === currentPage ? 'active' : ''}" ${i === currentPage ? 'aria-current="page"' : ''}>
                             <a class="page-link page-number" href="#" data-page="${i}">${i}</a>
+                        </li>
+                    `;
+                }
+                
+                // Última página
+                if (endPage < totalPages) {
+                    if (endPage < totalPages - 1) {
+                        paginationHTML += '<li class="page-item disabled"><span class="page-link">...</span></li>';
+                    }
+                    paginationHTML += `
+                        <li class="page-item">
+                            <a class="page-link page-number" href="#" data-page="${totalPages}">${totalPages}</a>
                         </li>
                     `;
                 }
@@ -1524,43 +1586,48 @@
                 // Botão Próximo
                 paginationHTML += `
                     <li class="page-item ${currentPage >= totalPages ? 'disabled' : ''}">
-                        <a class="page-link" href="#" id="nextPage">Próximo</a>
+                        <a class="page-link" href="#" id="nextPage" ${currentPage >= totalPages ? 'tabindex="-1" aria-disabled="true"' : ''}>
+                            Próximo <i class="bi bi-chevron-right"></i>
+                        </a>
                     </li>
                 `;
                 
+                console.log('Atualizando HTML da paginação:', paginationHTML);
                 paginationContainer.innerHTML = paginationHTML;
                 paginationContainer.style.display = totalPages > 1 ? 'flex' : 'none';
                 
                 // Adicionar eventos aos botões de paginação
-                document.getElementById('prevPage')?.addEventListener('click', (e) => {
+                document.getElementById('prevPage')?.addEventListener('click', async (e) => {
                     e.preventDefault();
                     if (currentPage > 1) {
                         currentPage--;
-                        renderProfissionaisTable();
+                        await loadProfissionais();
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                     }
                 });
                 
-                document.getElementById('nextPage')?.addEventListener('click', (e) => {
+                document.getElementById('nextPage')?.addEventListener('click', async (e) => {
                     e.preventDefault();
                     if (currentPage < totalPages) {
                         currentPage++;
-                        renderProfissionaisTable();
+                        await loadProfissionais();
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                     }
                 });
                 
                 document.querySelectorAll('.page-number').forEach(link => {
-                    link.addEventListener('click', (e) => {
+                    link.addEventListener('click', async (e) => {
                         e.preventDefault();
                         const page = parseInt(e.target.getAttribute('data-page'));
                         if (page !== currentPage) {
                             currentPage = page;
-                            renderProfissionaisTable();
+                            await loadProfissionais();
                             window.scrollTo({ top: 0, behavior: 'smooth' });
                         }
                     });
                 });
+            } else {
+                console.error('Elemento de paginação não encontrado no DOM');
             }
         }
         
@@ -1814,8 +1881,11 @@
                 const telefone = document.getElementById('profissionalPhone').value.trim();
                 const celular = document.getElementById('profissionalCellPhone').value.trim();
                 const cpfInput = document.getElementById('profissionalCpf');
-                const cpf = cpfInput.value.trim();
-                const cpfApenasNumeros = cpf.replace(/\D/g, '');
+                let cpf = cpfInput ? cpfInput.value.trim() : '';
+                // Remove formatação e valida CPF
+                cpf = cpf.replace(/\D/g, '');
+                // Se o CPF estiver vazio, não envia o campo
+                const cpfToSend = cpf || undefined;
                 const rg = document.getElementById('profissionalRg').value.trim();
                 const dataNascimento = document.getElementById('profissionalBirthDate').value;
                 const especialidade = document.getElementById('profissionalSpecialty').value.trim();
@@ -1833,21 +1903,17 @@
                 // Obtém o status selecionado do formulário
                 const status = document.getElementById('profissionalStatus').value || 'ATIVO';
                 
-                // Mapeia os status para inglês (apenas para o backend)
-                const statusToEnglish = {
-                    'ATIVO': 'ACTIVE',
-                    'INATIVO': 'INACTIVE',
-                    'PENDENTE': 'PENDING',
-                    'BLOQUEADO': 'BLOCKED'
-                };
+                // Valores de status aceitos pela API
+                const statusValidos = ['ATIVO', 'INATIVO', 'PENDENTE', 'BLOQUEADO'];
                 
-                // Mapeia os status para português (apenas para o frontend)
-                const statusToPortuguese = {
-                    'ACTIVE': 'ATIVO',
-                    'INACTIVE': 'INATIVO',
-                    'PENDING': 'PENDENTE',
-                    'BLOCKED': 'BLOQUEADO'
-                };
+                // Garante que o status seja um valor válido
+                const statusFormatado = statusValidos.includes(status) ? status : 'ATIVO';
+                
+                // Remove qualquer formatação do status e garante que esteja em maiúsculas
+                const statusFormatadoUpper = statusFormatado.trim().toUpperCase();
+                
+                // Usa o status em português diretamente, que é o que o backend espera
+                const statusParaEnviar = statusFormatadoUpper;
                 
                 // Validação básica
                 if (!nome) {
@@ -1861,28 +1927,29 @@
                     throw new Error('Por favor, insira um e-mail válido.');
                 }
             
-                const profissionalData = {
-                    nome,
-                    email: email || null,
-                    telefone: telefone || null,
-                    celular: celular || null,
-                    cpf: cpfApenasNumeros || null,
-                    rg: rg || null,
-                    dataNascimento: dataNascimento || null,
-                    especialidade: especialidade || null,
-                    registro: registro || null,
-                    especialidades: especialidades.length > 0 ? especialidades : null,
-                    rua: rua || null,
-                    numero: numero || null,
-                    complemento: complemento || null,
-                    bairro: bairro || null,
-                    cidade: cidade || null,
-                    estado: estado || null,
-                    cep: cep || null,
-                    observacoes: observacoes || null,
-                    status: status || 'ATIVO'
-                };
-                
+                // Build the update data object with only the fields that have values
+                const profissionalData = { status: statusParaEnviar };
+
+                // Only include fields that have values
+                if (nome) profissionalData.nome = nome.trim();
+                if (email) profissionalData.email = email.trim();
+                if (telefone) profissionalData.telefone = telefone.replace(/\D/g, '');
+                if (celular) profissionalData.celular = celular;
+                if (cpf) profissionalData.cpf = cpf.replace(/\D/g, '');
+                if (rg) profissionalData.rg = rg.replace(/\D/g, '');
+                if (dataNascimento) profissionalData.dataNascimento = dataNascimento;
+                if (especialidade) profissionalData.especialidade = especialidade;
+                if (registro) profissionalData.registro = registro;
+                if (especialidades.length > 0) profissionalData.especialidades = especialidades;
+                if (rua) profissionalData.rua = rua;
+                if (numero) profissionalData.numero = numero;
+                if (complemento) profissionalData.complemento = complemento;
+                if (bairro) profissionalData.bairro = bairro;
+                if (cidade) profissionalData.cidade = cidade;
+                if (estado) profissionalData.estado = estado;
+                if (cep) profissionalData.cep = cep.replace(/\D/g, '');
+                if (observacoes) profissionalData.observacoes = observacoes;
+
                 console.log('Dados do profissional a serem enviados:', JSON.stringify(profissionalData, null, 2));
                 
                 // Verifica se apenas o status está sendo alterado
@@ -1891,85 +1958,94 @@
                 let isOnlyStatusChanged = true;
                 
                 // Verifica se apenas o status foi alterado
-                formData.forEach((value, key) => {
-                    if (key !== 'status' && key !== 'profissionalStatus' && value && value !== '') {
-                        isOnlyStatusChanged = false;
-                    }
-                });
+                const statusField = document.getElementById('profissionalStatus');
+                const currentStatus = statusField ? statusField.value : null;
                 
-                // Se apenas o status foi alterado, usa PATCH para /status
-                if (id && isOnlyStatusChanged) {
-                    const status = document.getElementById('profissionalStatus').value;
-                    const method = 'PATCH';
-                    const url = `/api/profissionais/${id}/status`;
+                // Se houver ID (edição) e o status for o único campo alterado
+                if (id && currentStatus && Object.keys(profissionalData).length === 1 && profissionalData.status) {
+                    console.log('Atualizando apenas o status via PATCH:', { status: currentStatus });
                     
-                    console.log('Atualizando apenas o status via PATCH:', { status: status });
-                    
-                    const response = await fetchWithAuth(url, {
-                        method: method,
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ status: status })
-                    });
-                    
-                    // A função fetchWithAuth já faz o parse do JSON e tratamento de erros
-                    // Então se chegou aqui, a requisição foi bem-sucedida
-                    
-                    // Atualiza a interface
-                    await showSuccess('Status do profissional atualizado com sucesso!');
-                    await loadProfissionais();
-                    
-                    // Fecha o modal
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('addProfissionalModal'));
-                    if (modal) {
-                        modal.hide();
+                    try {
+                        await fetchWithAuth(`/api/profissionais/${id}/status`, {
+                            method: 'PATCH',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ status: currentStatus })
+                        });
+                        
+                        await showSuccess('Status do profissional atualizado com sucesso!');
+                        await loadProfissionais();
+                        
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('addProfissionalModal'));
+                        if (modal) {
+                            modal.hide();
+                        }
+                        return;
+                    } catch (error) {
+                        console.error('Erro ao atualizar status:', error);
+                        throw error;
                     }
-                    
-                    return;
                 }
                 
                 // Se não for apenas atualização de status, prossegue com PUT normal
                 const httpMethod = id ? 'PUT' : 'POST';
                 const apiUrl = id ? `/api/profissionais/${id}` : '/api/profissionais';
                 
-                console.log('Método HTTP:', httpMethod, 'URL:', apiUrl, 'Dados:', profissionalData);
+                console.log('=== DADOS DO FORMULÁRIO ===');
+                console.log('Método HTTP:', httpMethod);
+                console.log('URL:', apiUrl);
+                console.log('Dados a serem enviados:', JSON.stringify(profissionalData, null, 2));
                 
-                const requestOptions = {
-                    method: httpMethod,
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${getAuthToken()}`
-                    },
-                    body: JSON.stringify(profissionalData)
-                };
-                
-                console.log(`Enviando requisição ${httpMethod} para ${apiUrl}`, requestOptions);
-                
-                let response;
                 try {
-                    response = await fetch(apiUrl, requestOptions);
+                    console.log('Enviando requisição...');
+                    const options = {
+                        method: httpMethod,
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'Authorization': `Bearer ${getAuthToken()}`
+                        },
+                        body: JSON.stringify(profissionalData)
+                    };
+                    console.log('Opções da requisição:', options);
                     
-                    if (!response) {
-                        throw new Error('Não foi possível completar a requisição: resposta vazia');
-                    }
+                    const response = await fetch(apiUrl, options);
+                    console.log('=== RESPOSTA DA API ===');
+                    console.log('Status:', response.status);
                     
-                    console.log('Resposta da API recebida. Status:', response.status);
-                    
-                    // Processar a resposta da API
                     let responseData;
                     const contentType = response.headers.get('content-type');
                     
                     if (contentType && contentType.includes('application/json')) {
                         responseData = await response.json();
+                        console.log('Dados da resposta:', responseData);
                     } else {
                         const text = await response.text();
                         responseData = text ? { message: text } : {};
+                        console.log('Resposta não-JSON:', text);
                     }
                     
                     if (!response.ok) {
-                        throw new Error(responseData.message || 'Erro ao processar a requisição');
+                        let errorMessage = 'Erro ao processar a requisição';
+                        
+                        if (response.status === 400 || response.status === 422) {
+                            if (responseData.errors) {
+                                // Formato de validação do Laravel
+                                errorMessage = Object.entries(responseData.errors)
+                                    .map(([field, errors]) => `- ${field}: ${Array.isArray(errors) ? errors.join(', ') : errors}`)
+                                    .join('\n');
+                            } else if (responseData.message) {
+                                errorMessage = responseData.message;
+                            }
+                        }
+                        
+                        console.error('Erro na resposta:', errorMessage);
+                        throw new Error(errorMessage);
                     }
+                    
+                    // Se chegou aqui, a requisição foi bem-sucedida
+                    console.log('Profissional salvo com sucesso!');
                     
                     // Se chegou aqui, a requisição foi bem-sucedida
                     if (id) {
@@ -2001,13 +2077,27 @@
                     await loadProfissionais();
                     resetProfissionalForm();
                     
-                    return responseData;
+                    return response;
                     
                 } catch (error) {
                     console.error('Erro na requisição:', error);
+                    let errorMessage = 'Erro ao salvar o profissional';
+                    
+                    if (error && error.message) {
+                        errorMessage = error.message;
+                        
+                        // Verifica se é um erro de validação
+                        if (error.validationErrors) {
+                            errorMessage = 'Erros de validação:\n' + 
+                                Object.entries(error.validationErrors)
+                                    .map(([field, errors]) => `- ${field}: ${errors.join(', ')}`)
+                                    .join('\n');
+                        }
+                    }
+                    
+                    showError('Erro', errorMessage);
                     throw error;
                 }
-                
             } catch (error) {
                 console.error('Erro ao salvar profissional:', error);
                 let errorMessage = 'Ocorreu um erro ao salvar o profissional';

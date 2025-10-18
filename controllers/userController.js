@@ -144,12 +144,18 @@ const userController = {
     async updateUser(req, res) {
         try {
             const { id } = req.params;
-            const { name, email, password, role, status } = req.body;
 
             console.log('=== INÍCIO DA ATUALIZAÇÃO ===');
+            console.log('Method:', req.method);
+            console.log('URL:', req.url);
+            console.log('Content-Type:', req.headers['content-type']);
+            console.log('Body type:', typeof req.body);
+            console.log('Body is array:', Array.isArray(req.body));
+            console.log('Body:', req.body);
             console.log('Dados brutos recebidos (req.body):', JSON.stringify(req.body, null, 2));
-            console.log('Headers:', JSON.stringify(req.headers, null, 2));
-            
+
+            const { name, email, password, role, status } = req.body;
+
             console.log('Dados recebidos para atualização:', {
                 id,
                 name,
@@ -161,26 +167,43 @@ const userController = {
                 rawBody: JSON.stringify(req.body)
             });
 
+            // Verificar se os campos obrigatórios foram enviados
+            if (!name || name.trim() === '') {
+                console.log('ERRO: Campo name está vazio!');
+                return res.status(400).json({ error: 'Campo nome é obrigatório' });
+            }
+
+            if (!email || email.trim() === '') {
+                console.log('ERRO: Campo email está vazio!');
+                return res.status(400).json({ error: 'Campo email é obrigatório' });
+            }
+
             // Garantir que o status seja uma string e esteja em maiúsculas
             const normalizedStatus = status ? String(status).toUpperCase() : 'ATIVO';
-            
-            const updateData = { 
-                name, 
-                email, 
-                role, 
+
+            const updateData = {
+                name: name.trim(),
+                email: email.trim().toLowerCase(),
+                role,
                 status: normalizedStatus
             };
 
             console.log('Dados que serão atualizados:', JSON.stringify(updateData, null, 2));
+            console.log('Query que será executada:');
+            console.log(`UPDATE User SET name='${name.trim()}', email='${email.trim().toLowerCase()}', role='${role}', status='${normalizedStatus}' WHERE id=${id}`);
 
             // Se uma nova senha for fornecida, criptografa
-            if (password) {
+            if (password && password.trim() !== '') {
                 updateData.password = await bcrypt.hash(password, 10);
+                console.log('Senha será atualizada (hash gerado)');
             }
 
-            const user = await prisma.user.update({
+            console.log('=== ANTES DO UPDATE ===');
+            console.log('Verificando usuário atual no banco ANTES do update...');
+
+            // Verificar dados atuais ANTES do update
+            const currentUser = await prisma.user.findUnique({
                 where: { id: parseInt(id) },
-                data: updateData,
                 select: {
                     id: true,
                     name: true,
@@ -191,19 +214,82 @@ const userController = {
                 }
             });
 
-            res.json(user);
+            console.log('Dados ATUAIS no banco:', JSON.stringify(currentUser, null, 2));
+            console.log('Dados que serão ENVIADOS:', JSON.stringify(updateData, null, 2));
+
+            console.log('Executando update no Prisma...');
+
+            let updatedUser;
+            try {
+                updatedUser = await prisma.user.update({
+                    where: { id: parseInt(id) },
+                    data: updateData,
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        role: true,
+                        status: true,
+                        updatedAt: true
+                    }
+                });
+
+                console.log('=== UPDATE EXECUTADO COM SUCESSO ===');
+                console.log('Usuário retornado do banco APÓS update:', JSON.stringify(updatedUser, null, 2));
+
+                // Verificar se os dados realmente foram alterados no banco
+                const verifyUser = await prisma.user.findUnique({
+                    where: { id: parseInt(id) },
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        role: true,
+                        status: true,
+                        updatedAt: true
+                    }
+                });
+
+                console.log('=== VERIFICAÇÃO FINAL NO BANCO ===');
+                console.log('Dados atuais no banco APÓS update:', JSON.stringify(verifyUser, null, 2));
+
+                // Comparar dados
+                console.log('=== COMPARAÇÃO DETALHADA ===');
+                console.log('Nome ANTES:', currentUser.name);
+                console.log('Nome ENVIADO:', updateData.name);
+                console.log('Nome APÓS:', verifyUser.name);
+                console.log('Nome foi alterado?', currentUser.name !== verifyUser.name);
+
+                if (currentUser.name === verifyUser.name) {
+                    console.error('🚨 PROBLEMA: Nome não foi alterado no banco!');
+                    console.error('Dados atuais:', currentUser.name);
+                    console.error('Dados enviados:', updateData.name);
+                    console.error('Dados após update:', verifyUser.name);
+                } else {
+                    console.log('✅ SUCESSO: Nome foi alterado no banco');
+                }
+
+            } catch (updateError) {
+                console.error('🚨 ERRO DURANTE O UPDATE:', updateError);
+                console.error('Erro completo:', JSON.stringify(updateError, null, 2));
+                throw updateError;
+            }
+
+            console.log('=== FINAL ===');
+            console.log('Enviando resposta para o frontend:', JSON.stringify(updatedUser, null, 2));
+            res.json(updatedUser);
 
         } catch (error) {
-            console.error('Erro ao atualizar usuário:', error);
-            
+            console.error('Erro geral ao atualizar usuário:', error);
+
             if (error.code === 'P2025') {
                 return res.status(404).json({ error: 'Usuário não encontrado' });
             }
-            
+
             if (error.code === 'P2002') {
                 return res.status(400).json({ error: 'Este email já está em uso' });
             }
-            
+
             res.status(500).json({ error: error.message });
         }
     },

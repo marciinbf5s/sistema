@@ -388,6 +388,45 @@
             font-weight: 700 !important;
             border-bottom: 1px solid rgba(240, 179, 84, 0.35) !important;
         }
+
+        /* Estilo da lista de agendamentos com barra de rolagem personalizada */
+        #appointmentsList {
+            max-height: 65vh;
+            overflow-y: auto;
+            padding-right: 8px;
+            scrollbar-width: thin;
+            scrollbar-color: #f0b354 #f8f9fa;
+        }
+
+        /* Estilo da barra de rolagem para WebKit (Chrome, Safari, Edge) */
+        #appointmentsList::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        #appointmentsList::-webkit-scrollbar-track {
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+        
+        #appointmentsList::-webkit-scrollbar-thumb {
+            background-color: #f0b354;
+            border-radius: 4px;
+        }
+        
+        #appointmentsList::-webkit-scrollbar-thumb:hover {
+            background-color: #d9a24a;
+        }
+        
+        /* Estilo da barra de rolagem para Firefox */
+        #appointmentsList {
+            scrollbar-width: thin;
+            scrollbar-color: #f0b354 #f8f9fa;
+        }
+
+        /* Espaçamento entre os itens da lista */
+        .appointment-item {
+            margin-bottom: 0.5rem;
+        }
     </style>
 </head>
 <body>
@@ -556,13 +595,35 @@
                                 <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
                                     <h1 class="h5 mb-0 fw-normal text-dark">Agenda de Atendimentos</h1>
                                     <div class="d-flex gap-2">
-                                        <button class="btn btn-sm btn-outline-secondary" id="prevDay">
+                                        <button class="btn btn-sm btn-outline-secondary" id="prevDay" title="Dia anterior">
                                             <i class="bi bi-chevron-left"></i>
                                         </button>
-                                        <button class="btn btn-sm btn-outline-primary text-dark" id="todayBtn">Hoje</button>
-                                        <button class="btn btn-sm btn-outline-secondary" id="nextDay">
+                                        <div id="dateDisplayContainer" class="d-flex align-items-center px-3 border rounded bg-white">
+                                            <span id="currentDateDisplay" class="fw-medium">Hoje</span>
+                                        </div>
+                                        <button class="btn btn-sm btn-outline-secondary border" id="nextDay" title="Próximo dia">
                                             <i class="bi bi-chevron-right"></i>
                                         </button>
+                                        <button class="btn btn-sm btn-outline-primary border" id="todayBtn" title="Ir para hoje">
+                                            <i class="bi bi-calendar-check"></i>
+                                        </button>
+                                        <style>
+                                            #dateDisplayContainer {
+                                                min-width: 100px;
+                                                height: 31.6px;
+                                                display: flex;
+                                                align-items: center;
+                                                justify-content: center;
+                                                background-color: #f8f9fa;
+                                                border: 1px solid #dee2e6 !important;
+                                            }
+                                            .btn-outline-secondary {
+                                                border-color: #dee2e6;
+                                            }
+                                            .btn-outline-secondary:hover {
+                                                background-color: #f8f9fa;
+                                            }
+                                        </style>
                                     </div>
                                 </div>
                             </div>
@@ -580,7 +641,23 @@
                                             </tr>
                                         </thead>
                                         <tbody id="appointmentsTableBody">
-                                            <!-- Dados serão preenchidos via JavaScript -->
+                                            <tr id="loadingRow">
+                                                <td colspan="6" class="text-center py-5 d-none">
+                                                    <div class="d-flex justify-content-center">
+                                                        <div class="spinner-border text-primary" role="status">
+                                                            <span class="visually-hidden">Carregando...</span>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr id="emptyAppointmentsRow" class="d-none">
+                                                <td colspan="6" class="text-center py-5">
+                                                    <div class="d-flex flex-column align-items-center">
+                                                        <i class="bi bi-calendar-x text-muted mb-2" style="font-size: 2rem;"></i>
+                                                        <p class="text-muted mb-0">Nenhum agendamento encontrado para esta data.</p>
+                                                    </div>
+                                                </td>
+                                            </tr>
                                         </tbody>
                                     </table>
                                 </div>
@@ -643,7 +720,7 @@
                             </div>
                             <div class="col-md-4">
                                 <label for="duracao" class="form-label">Duração (min) <span class="text-danger">*</span></label>
-                                <input type="number" class="form-control" id="duracao" name="duracao" min="1" value="60" required>
+                                <input type="number" class="form-control" id="duracao" name="duracao" min="15" step="15" value="60" required>
                             </div>
                             <div class="col-md-6">
                                 <label for="valorCobrado" class="form-label">Valor Cobrado (R$) <span class="text-danger">*</span></label>
@@ -1010,17 +1087,6 @@
             if (!professionalsById || Object.keys(professionalsById).length === 0) {
                 console.log('Construindo mapa de profissionais...');
                 buildProfessionalsMapFromSelect();
-                
-                // Se ainda estiver vazio, tenta carregar os profissionais
-                if (Object.keys(professionalsById).length === 0) {
-                    console.log('Nenhum profissional encontrado no mapa, tentando carregar...');
-                    loadProfissionais().then(() => {
-                        // Atualiza a lista de agendamentos após carregar os profissionais
-                        const selectedDate = getSelectedDate();
-                        loadAppointmentsForDate(selectedDate);
-                    });
-                    return 'Carregando...';
-                }
             }
             
             console.log(`Buscando profissional com ID: ${key}`);
@@ -1202,91 +1268,98 @@
             return filtered;
         }
         
-        // Função para atualizar a tabela com a data selecionada
-        function updateTableForDate(date) {
-            currentListDate = new Date(date);
-            loadAppointmentsForDate(currentListDate).then(appointments => {
-                const filtered = filterAppointmentsByDate(currentListDate, appointments);
-                updateAppointmentsTable(filtered);
+        // Função para formatar a data no formato DD/MM/AAAA
+        function formatDisplayDate(date) {
+            const targetDate = new Date(date);
+            
+            // Formata como DD/MM/AAAA
+            return targetDate.toLocaleDateString('pt-BR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
             });
+        }
+        
+        // Função para verificar se uma data é hoje
+        function isToday(date) {
+            const today = new Date();
+            return date.toDateString() === today.toDateString();
+        }
+        
+        // Função para atualizar a exibição da data
+        function updateDateDisplay(date) {
+            const dateDisplay = document.getElementById('currentDateDisplay');
+            const dateContainer = document.getElementById('dateDisplayContainer');
+            
+            if (dateDisplay && dateContainer) {
+                // Adiciona estilo se for hoje
+                if (isToday(date)) {
+                    dateContainer.style.backgroundColor = '#e9ecef';
+                    dateContainer.style.borderColor = '#0d6efd';
+                    dateDisplay.style.color = '#0d6efd';
+                } else {
+                    dateContainer.style.backgroundColor = '#fff';
+                    dateContainer.style.borderColor = '#dee2e6';
+                    dateDisplay.style.color = '#212529';
+                }
+                
+                dateDisplay.textContent = formatDisplayDate(date);
+            }
+        }
+        
+        // Função para mostrar/ocultar o indicador de carregamento
+        function showLoading(show = true) {
+            const loadingElement = document.getElementById('loadingRow');
+            if (loadingElement) {
+                loadingElement.style.display = show ? 'table-row' : 'none';
+            }
         }
         
         // Configurar os botões de navegação
         document.addEventListener('DOMContentLoaded', function() {
+            // Função para navegar para um dia específico
+            async function goToDate(date, showLoadingIndicator = true) {
+                currentListDate = new Date(date);
+                await updateTableForDate(currentListDate, showLoadingIndicator);
+                updateDateDisplay(currentListDate);
+            }
+            
             // Botão Anterior
-            document.getElementById('prevDay').addEventListener('click', function() {
-                currentListDate.setDate(currentListDate.getDate() - 1);
-                updateTableForDate(currentListDate);
+            document.getElementById('prevDay').addEventListener('click', async function() {
+                const newDate = new Date(currentListDate);
+                newDate.setDate(newDate.getDate() - 1);
+                await goToDate(newDate, true);
             });
             
             // Botão Hoje
-            document.getElementById('todayBtn').addEventListener('click', function() {
-                updateTableForDate(new Date());
+            document.getElementById('todayBtn').addEventListener('click', async function() {
+                await goToDate(new Date(), true);
             });
             
             // Botão Próximo
-            document.getElementById('nextDay').addEventListener('click', function() {
-                currentListDate.setDate(currentListDate.getDate() + 1);
-                updateTableForDate(currentListDate);
+            document.getElementById('nextDay').addEventListener('click', async function() {
+                const newDate = new Date(currentListDate);
+                newDate.setDate(newDate.getDate() + 1);
+                await goToDate(newDate, true);
             });
             
-            // Inicializa a tabela com a data atual
-            updateTableForDate(new Date());
+            // Inicializa a tabela com a data atual (sem mostrar o spinner inicial)
+            goToDate(new Date(), false);
+            
+            // Configura o evento de mudança de aba
+            const listTab = document.getElementById('list-tab');
+            if (listTab) {
+                listTab.addEventListener('shown.bs.tab', async function() {
+                    // Se a tabela já foi carregada alguma vez, não mostra o spinner
+                    const tbody = document.getElementById('appointmentsTableBody');
+                    if (tbody && tbody.querySelector('tr:not(#emptyAppointmentsRow):not(#loadingRow)')) {
+                        return;
+                    }
+                    // Se não há itens carregados, força o recarregamento com spinner
+                    await goToDate(currentListDate, true);
+                });
+            }
         });
-        
-        function updateAppointmentsTable(appointments) {
-            const tbody = document.getElementById('appointmentsTableBody');
-            
-            if (!tbody) return;
-            
-            tbody.innerHTML = '';
-            
-            appointments.forEach(appt => {
-                const row = document.createElement('tr');
-                const statusClass = `status-${appt.status}`;
-                const professional = appt.profissional || appt.professional || appt.profissionalNome || appt.nomeProfissional || '';
-                
-                row.innerHTML = `
-                    <td>${formatDate(appt.dataHora)} ${formatTime(appt.dataHora)}</td>
-                    <td>${appt.cliente}</td>
-                    <td>${
-                        (appt.profissional || appt.professional || appt.profissionalNome || appt.nomeProfissional ||
-                         getProfessionalNameById(appt.profissionalId || appt.profissional_id || appt.professionalId || appt.professional_id)) || ''
-                    }</td>
-                    <td>${appt.procedimento}</td>
-                    <td><span class="status-badge ${statusClass}">${getStatusText(appt.status)}</span></td>
-                    <td class="text-end">
-                        <div class="action-buttons justify-content-end">
-                            <button class="btn btn-sm btn-outline-success" 
-                                    onclick="finalizeAppointment(${appt.id})" 
-                                    ${appt.status === 'finalizado' ? 'disabled' : ''}
-                                    data-bs-toggle="tooltip" 
-                                    data-bs-placement="top" 
-                                    title="Finalizar">
-                                <i class="bi bi-check-lg"></i>
-                            </button>
-                            <button class="btn btn-sm btn-outline-primary" 
-                                    onclick="editAppointment(${appt.id})"
-                                    data-bs-toggle="tooltip" 
-                                    data-bs-placement="top" 
-                                    title="Editar">
-                                <i class="bi bi-pencil"></i>
-                            </button>
-                            <button class="btn btn-sm btn-outline-danger" 
-                                    onclick="cancelAppointment(${appt.id})" 
-                                    ${appt.status === 'finalizado' ? 'disabled' : ''}
-                                    data-bs-toggle="tooltip" 
-                                    data-bs-placement="top" 
-                                    title="Cancelar">
-                                <i class="bi bi-x-lg"></i>
-                            </button>
-                        </div>
-                    </td>
-                `;
-                
-                tbody.appendChild(row);
-            });
-        }
         
         // Variáveis de paginação
         let currentPage = 1;
@@ -1418,24 +1491,62 @@
         }
         
         // Atualizar a função updateTableForDate para suportar paginação
-        function updateTableForDate(date) {
-            currentListDate = new Date(date);
-            const filtered = filterAppointmentsByDate(currentListDate);
+        async function clearTable() {
+            const tbody = document.getElementById('appointmentsTableBody');
+            if (!tbody) return;
             
-            // Resetar para a primeira página ao mudar de data
-            currentPage = 1;
+            // Remove todos os itens da tabela, exceto as linhas de loading e mensagem vazia
+            const rows = tbody.querySelectorAll('tr:not(#emptyAppointmentsRow):not(#loadingRow)');
+            rows.forEach(row => row.remove());
             
-            // Atualizar a paginação
-            updatePagination(filtered.length);
+            // Esconde a mensagem de vazio
+            const emptyRow = document.getElementById('emptyAppointmentsRow');
+            if (emptyRow) emptyRow.classList.add('d-none');
+        }
+        
+        async function updateTableForDate(date, showLoadingIndicator = true) {
+            const tbody = document.getElementById('appointmentsTableBody');
+            const emptyRow = document.getElementById('emptyAppointmentsRow');
+            const listTab = document.getElementById('list-tab');
             
-            // Obter apenas os itens da página atual
-            const paginatedItems = getPaginatedItems(filtered);
+            // Só faz algo se estivermos na aba de lista
+            if (!listTab || !listTab.classList.contains('active')) return;
             
-            // Atualizar a tabela com os itens da página atual
-            updateAppointmentsTable(paginatedItems);
-            
-            // Rolar para o topo da tabela
-            document.querySelector('#list-tab-pane .table-responsive')?.scrollIntoView({ behavior: 'smooth' });
+            try {
+                currentListDate = new Date(date);
+                
+                // Limpa a tabela antes de começar o carregamento
+                await clearTable();
+                
+                // Mostra o spinner de carregamento apenas se solicitado
+                if (showLoadingIndicator) {
+                    showLoading(true);
+                }
+                
+                // Carregar os agendamentos da API para a data selecionada
+                const appointments = await loadAppointmentsForDate(currentListDate);
+                
+                // Resetar para a primeira página ao mudar de data
+                currentPage = 1;
+                
+                // Atualizar a tabela diretamente com todos os agendamentos
+                updateAppointmentsTable(appointments);
+                
+                // Atualizar a paginação
+                updatePagination(appointments.length);
+                
+                // Rolar para o topo da tabela
+                document.querySelector('#list-tab-pane .table-responsive')?.scrollIntoView({ behavior: 'smooth' });
+                
+            } catch (error) {
+                console.error('Erro ao carregar agendamentos:', error);
+                showToast('Erro ao carregar agendamentos para a data selecionada', true);
+                // Força a exibição da mensagem de lista vazia em caso de erro
+                updateAppointmentsTable([]);
+            } finally {
+                // Garante que o spinner seja escondido mesmo em caso de erro
+                showLoading(false);
+            }
         }
         
         // As funções reais para carregar clientes/procedimentos via API estão definidas mais abaixo
@@ -1474,13 +1585,45 @@
     });
 }
 
+function showLoading(show = true) {
+    const loadingRow = document.getElementById('loadingRow');
+    if (loadingRow) {
+        const loadingCell = loadingRow.querySelector('td');
+        if (show) {
+            loadingRow.classList.remove('d-none');
+            loadingCell.classList.remove('d-none');
+        } else {
+            loadingRow.classList.add('d-none');
+            loadingCell.classList.add('d-none');
+        }
+    }
+}
+
 function updateAppointmentsTable(appointments) {
     const tbody = document.getElementById('appointmentsTableBody');
-            
-    if (!tbody) return;
-            
-    tbody.innerHTML = '';
-            
+    const emptyRow = document.getElementById('emptyAppointmentsRow');
+    const listTab = document.getElementById('list-tab');
+    
+    // Só faz algo se estivermos na aba de lista
+    if (!listTab || !listTab.classList.contains('active') || !tbody) return;
+    
+    // Remove todos os itens da tabela, exceto as linhas de loading e mensagem vazia
+    const rows = tbody.querySelectorAll('tr:not(#emptyAppointmentsRow):not(#loadingRow)');
+    rows.forEach(row => row.remove());
+    
+    // Esconde o loading
+    showLoading(false);
+    
+    // Se não houver agendamentos, mostra a mensagem e retorna
+    if (!appointments || appointments.length === 0) {
+        if (emptyRow) emptyRow.classList.remove('d-none');
+        return;
+    }
+    
+    // Esconde a mensagem de vazio
+    if (emptyRow) emptyRow.classList.add('d-none');
+    
+    // Adiciona os agendamentos à tabela
     appointments.forEach(appt => {
         const row = document.createElement('tr');
         const statusClass = `status-${appt.status}`;
@@ -2589,6 +2732,58 @@ async function submitAgendamentoForm(form, isEdit = false) {
             return true;
         }
         
+        // Função original comentada
+        /*
+        async function verificarDisponibilidade(profissionalId, startTime, endTime, agendamentoId = null) {
+            try {
+                console.log('Verificando disponibilidade para:', {
+                    profissionalId,
+                    startTime,
+                    endTime,
+                    agendamentoId: agendamentoId || 'Novo agendamento'
+                });
+
+                if (!profissionalId) {
+                    console.log('Nenhum profissional selecionado, considerando horário disponível');
+                    return true;
+                }
+
+                const url = `/api/agendamentos/verificar-disponibilidade?` +
+                           `profissionalId=${profissionalId}&` +
+                           `dataInicio=${encodeURIComponent(startTime)}&` +
+                           `dataFim=${encodeURIComponent(endTime)}`;
+
+                console.log('Enviando parâmetros de disponibilidade:', url);
+
+                const response = await fetchWithAuth(url, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response) {
+                    console.error('Resposta inválida ao verificar disponibilidade');
+                    return false;
+                }
+
+                const result = await response.json();
+                
+                if (response.status === 200 && result.success === true) {
+                    console.log('Disponibilidade verificada:', result.disponivel);
+                    return result.disponivel === true;
+                }
+                
+                console.error('Erro ao verificar disponibilidade:', result?.error || 'Erro desconhecido');
+                return false;
+                
+            } catch (error) {
+                console.error('Erro na verificação de disponibilidade:', error);
+                return false;
+            }
+        }
+        */
         
         // Função para carregar agendamentos
         async function loadAppointmentsForDate(date) {
@@ -2668,45 +2863,20 @@ async function submitAgendamentoForm(form, isEdit = false) {
                         const duracao = ag.duracao || ag.procedimento?.duracao || 30;
                         
                         // Extrair informações do profissional
-                        console.log('Objeto profissional bruto:', ag.profissional);
-                        console.log('IDs disponíveis:', {
-                            profissionalId: ag.profissionalId,
-                            profissional_id: ag.profissional_id,
-                            professionalId: ag.professionalId,
-                            professional_id: ag.professional_id
-                        });
-                        
                         let profissionalId = ag.profissionalId || ag.profissional_id || ag.professionalId || ag.professional_id || null;
                         let profissionalNome = 'Não informado';
                         
                         // Primeiro tenta pegar do objeto profissional aninhado
                         if (ag.profissional) {
-                            console.log('Objeto profissional encontrado, tipo:', typeof ag.profissional);
-                            console.log('Chaves do objeto profissional:', Object.keys(ag.profissional));
-                            
                             profissionalId = ag.profissional.id || ag.profissional._id || profissionalId;
                             profissionalNome = ag.profissional.nome || ag.profissional.name || 
                                              ag.profissionalNome || ag.nomeProfissional || 'Não informado';
-                            
-                            console.log('Após extração do objeto profissional:', { profissionalId, profissionalNome });
-                        } else {
-                            console.log('Nenhum objeto profissional encontrado no agendamento');
                         }
                         
                         // Se ainda não encontrou, tenta buscar pelo ID no mapa de profissionais
                         if (profissionalId && (!profissionalNome || profissionalNome === 'Não informado')) {
-                            console.log('Tentando buscar profissional por ID:', profissionalId);
-                            console.log('Mapa de profissionais:', professionalsById);
-                            
                             const nome = getProfessionalNameById(profissionalId);
-                            console.log('Nome do profissional encontrado pelo ID:', nome);
-                            
-                            if (nome) {
-                                profissionalNome = nome;
-                                console.log('Nome do profissional atualizado para:', profissionalNome);
-                            } else {
-                                console.log('Não foi possível encontrar o nome do profissional pelo ID');
-                            }
+                            if (nome) profissionalNome = nome;
                         }
                         
                         console.log(`Agendamento ${ag.id}:`, {
@@ -2761,10 +2931,199 @@ async function submitAgendamentoForm(form, isEdit = false) {
             return true;
         }
 
+        // Função para verificar e atualizar status dos agendamentos
+        async function verificarEAtualizarStatus() {
+            try {
+                console.log('Iniciando verificação de status dos agendamentos...');
+                const agora = new Date();
+                
+                // Formatar data para YYYY-MM-DD (mesmo formato usado em loadAppointmentsForDate)
+                const year = agora.getFullYear();
+                const month = String(agora.getMonth() + 1).padStart(2, '0');
+                const day = String(agora.getDate()).padStart(2, '0');
+                const dateStr = `${year}-${month}-${day}`;
+                
+                console.log('Buscando agendamentos para a data:', dateStr);
+                const response = await fetchWithAuth(`/api/agendamentos?data=${dateStr}`);
+                
+                if (!response || !response.ok) {
+                    console.error('Erro ao buscar agendamentos:', response?.statusText);
+                    return;
+                }
+                
+                const body = await response.json();
+                console.log('Resposta da API de agendamentos:', body);
+                
+                // Processar resposta da API da mesma forma que em loadAppointmentsForDate
+                let agendamentos = [];
+                if (Array.isArray(body)) {
+                    agendamentos = body;
+                } else if (body && Array.isArray(body.data)) {
+                    agendamentos = body.data;
+                }
+                
+                console.log(`${agendamentos.length} agendamentos encontrados para verificação`);
+                
+                // Mapear para o formato esperado
+                const agendamentosMapeados = agendamentos.map(ag => {
+                    if (!ag.data || !ag.horaInicio) {
+                        console.log('Agendamento sem data ou hora:', ag);
+                        return null;
+                    }
+                    
+                    try {
+                        // Obter data e hora diretamente do banco de dados
+                        const [y, m, d] = ag.data.split('-').map(Number);
+                        const [hh, mm] = ag.horaInicio.split(':');
+                        
+                        // Criar a data local diretamente sem ajustes de fuso horário
+                        const dataHoraAgendamento = new Date(y, m - 1, d, hh, mm || 0, 0, 0);
+                        
+                        // Calcular horário de término (início + duração em minutos)
+                        const duracaoMinutos = ag.duracao || 30; // Default 30 minutos se não informado
+                        const dataHoraTermino = new Date(dataHoraAgendamento.getTime() + (duracaoMinutos * 60000));
+                        
+                        // Extrair informações do profissional
+                        let profissionalId = ag.profissionalId || ag.profissional_id || ag.profissional?.id || ag.profissional?._id || null;
+                        
+                        return {
+                            id: ag.id,
+                            data: ag.data,
+                            horaInicio: ag.horaInicio,
+                            duracao: duracaoMinutos,
+                            status: (ag.status || 'AGENDADO').toUpperCase(),
+                            dataHora: dataHoraAgendamento,
+                            dataHoraTermino: dataHoraTermino,
+                            profissionalId: profissionalId,
+                            clienteId: ag.clienteId || ag.cliente_id || ag.cliente?.id || ag.cliente?._id || null,
+                            procedimentoId: ag.procedimentoId || ag.procedimento_id || ag.procedimento?.id || ag.procedimento?._id || null
+                        };
+                    } catch (e) {
+                        console.error('Erro ao processar agendamento:', ag, e);
+                        return null;
+                    }
+                }).filter(Boolean);
+                
+                console.log(`${agendamentosMapeados.length} agendamentos processados`);
+                
+                // 1. Verificar agendamentos que devem iniciar (AGENDADO -> EM_ANDAMENTO)
+                const agendamentosParaIniciar = agendamentosMapeados.filter(ag => {
+                    // Pular agendamentos já finalizados ou cancelados
+                    if (ag.status !== 'AGENDADO') {
+                        return false;
+                    }
+                    
+                    // Verificar se o horário do agendamento já passou
+                    return agora >= ag.dataHora && agora < ag.dataHoraTermino;
+                });
+                
+                console.log(`${agendamentosParaIniciar.length} agendamentos para iniciar`);
+                
+                // 2. Verificar agendamentos que devem ser finalizados (EM_ANDAMENTO -> FINALIZADO)
+                const agendamentosParaFinalizar = agendamentosMapeados.filter(ag => {
+                    // Pular agendamentos que não estão em andamento
+                    if (ag.status !== 'EM_ANDAMENTO') {
+                        return false;
+                    }
+                    
+                    // Verificar se o horário de término já passou
+                    return agora >= ag.dataHoraTermino;
+                });
+                
+                console.log(`${agendamentosParaFinalizar.length} agendamentos para finalizar`);
+                
+                // Função auxiliar para atualizar o status de um agendamento
+                async function atualizarStatusAgendamento(agendamento, novoStatus) {
+                    try {
+                        console.log(`Atualizando agendamento ${agendamento.id} para ${novoStatus}...`);
+                        
+                        // Preparar os dados para atualização
+                        const updateData = {
+                            status: novoStatus,
+                            data: agendamento.data,
+                            horaInicio: agendamento.horaInicio
+                        };
+                        
+                        // Incluir apenas os campos que existem no objeto
+                        if (agendamento.profissionalId) updateData.profissionalId = agendamento.profissionalId;
+                        if (agendamento.clienteId) updateData.clienteId = agendamento.clienteId;
+                        if (agendamento.procedimentoId) updateData.procedimentoId = agendamento.procedimentoId;
+                        
+                        const response = await fetchWithAuth(`/api/agendamentos/${agendamento.id}`, {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(updateData)
+                        });
+                        
+                        if (!response.ok) {
+                            const error = await response.text();
+                            throw new Error(`HTTP ${response.status}: ${error}`);
+                        }
+                        
+                        const result = await response.json();
+                        console.log('Resposta da API:', result);
+                        
+                        // Atualizar a interface do usuário
+                        if (result && result.success) {
+                            // Atualizar o item na lista
+                            const itemElement = document.querySelector(`[data-id="${agendamento.id}"]`);
+                            if (itemElement) {
+                                const statusElement = itemElement.querySelector('.badge');
+                                if (statusElement) {
+                                    if (novoStatus === 'EM_ANDAMENTO') {
+                                        statusElement.className = 'badge bg-warning text-dark';
+                                        statusElement.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>EM ANDAMENTO';
+                                    } else if (novoStatus === 'FINALIZADO') {
+                                        statusElement.className = 'badge bg-success text-white';
+                                        statusElement.innerHTML = '<i class="bi bi-check-circle me-1"></i>FINALIZADO';
+                                    }
+                                    itemElement.setAttribute('data-status', novoStatus);
+                                }
+                            }
+                            
+                            // Atualizar o calendário
+                            const calendarDay = document.querySelector(`[data-date="${agendamento.data}"]`);
+                            if (calendarDay) {
+                                calendarDay.classList.add('has-appointments');
+                            }
+                            
+                            console.log(`Agendamento ${agendamento.id} atualizado para ${novoStatus}`);
+                            return true;
+                        }
+                        
+                        return false;
+                        
+                    } catch (error) {
+                        console.error(`Erro ao atualizar agendamento ${agendamento.id} para ${novoStatus}:`, error);
+                        return false;
+                    }
+                }
+                
+                // 3. Processar agendamentos para iniciar
+                for (const ag of agendamentosParaIniciar) {
+                    await atualizarStatusAgendamento(ag, 'EM_ANDAMENTO');
+                }
+                
+                // 4. Processar agendamentos para finalizar
+                for (const ag of agendamentosParaFinalizar) {
+                    await atualizarStatusAgendamento(ag, 'FINALIZADO');
+                }
+                
+            } catch (error) {
+                console.error('Erro na verificação de status dos agendamentos:', error);
+            }
+        }
+
         // Inicialização da página
         document.addEventListener('DOMContentLoaded', function() {
-            if (!checkAuth()) return;
+            console.log('Página carregada, inicializando...');
             
+            if (!checkAuth()) {
+                console.log('Usuário não autenticado, redirecionando...');
+                return;
+            }
+            
+            console.log('Inicializando tooltips...');
             // Inicializar tooltips
             var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
             tooltipTriggerList.map(function (tooltipTriggerEl) {
@@ -2776,27 +3135,50 @@ async function submitAgendamentoForm(form, isEdit = false) {
             
             // Inicializar a barra lateral
             if (window.initSidebar) {
+                console.log('Inicializando barra lateral...');
                 window.initSidebar();
             }
             
+            console.log('Configurando eventos...');
             // Configurar eventos
             setupEventListeners();
             
             // Carregar dados iniciais
-            loadInitialData();
-            
-            // Inicializar o calendário
-            renderCalendar();
-            
-            // Configurar o formulário
-            const form = document.getElementById('agendamentoForm');
-            if (form) {
-                form.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    const isEdit = !!document.getElementById('agendamentoId').value;
-                    await submitAgendamentoForm(form, isEdit);
-                });
-            }
+            console.log('Carregando dados iniciais...');
+            loadInitialData().then(() => {
+                console.log('Dados iniciais carregados com sucesso');
+                
+                // Inicializar o calendário após carregar os dados
+                console.log('Renderizando calendário...');
+                renderCalendar();
+                
+                // Configurar o formulário
+                console.log('Configurando formulário...');
+                const form = document.getElementById('agendamentoForm');
+                if (form) {
+                    form.addEventListener('submit', async (e) => {
+                        e.preventDefault();
+                        const isEdit = !!document.getElementById('agendamentoId').value;
+                        await submitAgendamentoForm(form, isEdit);
+                    });
+                }
+                
+                // Verificar status dos agendamentos a cada minuto
+                console.log('Configurando verificação periódica de status...');
+                setInterval(verificarEAtualizarStatus, 60000); // 60 segundos
+                
+                // Verificar imediatamente após um curto atraso
+                console.log('Agendando verificação inicial de status...');
+                setTimeout(() => {
+                    console.log('Executando verificação inicial de status...');
+                    verificarEAtualizarStatus().catch(error => {
+                        console.error('Erro na verificação inicial de status:', error);
+                    });
+                }, 3000); // Aguarda 3 segundos para garantir que tudo esteja carregado
+                
+            }).catch(error => {
+                console.error('Erro ao carregar dados iniciais:', error);
+            });
         });
     </script>
 </body>
