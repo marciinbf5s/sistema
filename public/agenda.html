@@ -720,7 +720,7 @@
                             </div>
                             <div class="col-md-4">
                                 <label for="duracao" class="form-label">Duração (min) <span class="text-danger">*</span></label>
-                                <input type="number" class="form-control" id="duracao" name="duracao" min="15" step="15" value="60" required>
+                                <input type="number" class="form-control" id="duracao" name="duracao" min="1" step="1" value="60" required>
                             </div>
                             <div class="col-md-6">
                                 <label for="valorCobrado" class="form-label">Valor Cobrado (R$) <span class="text-danger">*</span></label>
@@ -879,13 +879,33 @@
                 const form = document.getElementById('agendamentoForm');
                 form.reset();
                 
-                // Definir data e hora atuais
-                const now = new Date();
-                const formattedDate = now.toISOString().split('T')[0];
-                const formattedTime = now.getHours().toString().padStart(2, '0') + ':' + 
-                                   now.getMinutes().toString().padStart(2, '0');
+                // Limpar o ID do agendamento
+                document.getElementById('agendamentoId').value = '';
                 
-                // Preencher os campos de data e hora
+                // Obter a data e hora atuais
+                const now = new Date();
+                
+                // Ajustar para o fuso horário de Brasília (UTC-3)
+                const offsetBrasil = -3; // UTC-3 para Brasília
+                const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+                const brasilNow = new Date(utc + (3600000 * offsetBrasil));
+                
+                // Formatar a data para o input type="date" (YYYY-MM-DD)
+                const year = brasilNow.getFullYear();
+                const month = String(brasilNow.getMonth() + 1).padStart(2, '0');
+                const day = String(brasilNow.getDate()).padStart(2, '0');
+                const formattedDate = `${year}-${month}-${day}`;
+                
+                // Obter horas e minutos atuais exatos
+                const hours = brasilNow.getHours();
+                const minutes = brasilNow.getMinutes();
+                
+                // Formatar a hora para o input type="time" (HH:MM) com os minutos exatos
+                const formattedHours = String(hours).padStart(2, '0');
+                const formattedMinutes = String(minutes).padStart(2, '0');
+                const formattedTime = `${formattedHours}:${formattedMinutes}`;
+                
+                // Definir os valores nos campos do formulário
                 document.getElementById('data').value = formattedDate;
                 document.getElementById('horaInicio').value = formattedTime;
                 
@@ -1114,12 +1134,15 @@
         
         function formatTime(date) {
             if (!date) return '';
+            
+            // Criar objeto Date a partir da string/objeto de data
             const d = new Date(date);
             if (isNaN(d.getTime())) return '';
             
-            // Usar os métodos locais já que já ajustamos o fuso horário
-            const hours = d.getHours().toString().padStart(2, '0');
-            const minutes = d.getMinutes().toString().padStart(2, '0');
+            // Obter horas e minutos sem ajuste de fuso horário
+            // Usando getUTCHours e getUTCMinutes para evitar ajuste de fuso
+            const hours = String(d.getUTCHours()).padStart(2, '0');
+            const minutes = String(d.getUTCMinutes()).padStart(2, '0');
             
             return `${hours}:${minutes}`;
         }
@@ -1772,14 +1795,44 @@ window.editAppointment = async function(id) {
         fillSelect('procedimentoId', agendamento.procedimentoId);
         fillSelect('profissionalId', agendamento.profissionalId);
                 
-        // Preencher data e hora
+        // Preencher data e hora exatamente como estão no banco de dados
         if (startDate) {
-            // Ajustar para o fuso horário local
-            const localDate = new Date(startDate.getTime() - (startDate.getTimezoneOffset() * 60000));
-            document.getElementById('data').value = localDate.toISOString().split('T')[0];
-            document.getElementById('horaInicio').value = 
-                String(startDate.getHours()).padStart(2, '0') + ':' + 
-                String(startDate.getMinutes()).padStart(2, '0');
+            console.log('Data/hora original do banco de dados (ISO):', startDate.toISOString());
+            console.log('Data/hora local do navegador:', startDate.toString());
+            
+            // Usar os métodos UTC para evitar conversão de fuso horário
+            const year = startDate.getUTCFullYear();
+            const month = String(startDate.getUTCMonth() + 1).padStart(2, '0');
+            const day = String(startDate.getUTCDate()).padStart(2, '0');
+            const hours = String(startDate.getUTCHours()).padStart(2, '0');
+            const minutes = String(startDate.getUTCMinutes()).padStart(2, '0');
+            
+            // Formatar a data (YYYY-MM-DD) e hora (HH:MM)
+            const formattedDate = `${year}-${month}-${day}`;
+            const formattedTime = `${hours}:${minutes}`;
+            
+            // Definir os valores nos campos do formulário
+            document.getElementById('data').value = formattedDate;
+            document.getElementById('horaInicio').value = formattedTime;
+            
+            console.log('Data/hora formatada para o formulário:', { 
+                formattedDate, 
+                formattedTime,
+                timestamp: startDate.getTime(),
+                timezoneOffset: startDate.getTimezoneOffset()
+            });
+            
+            // Verificar se há algum evento alterando os valores após a definição
+            const dataInput = document.getElementById('data');
+            const horaInput = document.getElementById('horaInicio');
+            
+            dataInput.addEventListener('change', (e) => {
+                console.log('Evento change no campo data:', e.target.value);
+            });
+            
+            horaInput.addEventListener('change', (e) => {
+                console.log('Evento change no campo hora:', e.target.value);
+            });
         }
                 
         // Preencher demais campos
@@ -1788,14 +1841,40 @@ window.editAppointment = async function(id) {
         document.getElementById('observacoes').value = agendamento.observacoes || '';
                 
         // Disparar eventos de mudança para atualizar campos dependentes
-        ['data', 'horaInicio', 'procedimentoId'].forEach(field => {
+        const fieldsToUpdate = ['data', 'horaInicio', 'procedimentoId'];
+        console.log('Disparando eventos de mudança para campos:', fieldsToUpdate);
+        
+        fieldsToUpdate.forEach(field => {
             const el = document.getElementById(field);
             if (el) {
+                console.log(`Valor de ${field} antes do evento change:`, el.value);
                 try {
-                    el.dispatchEvent(new Event('change'));
+                    // Criar um novo evento personalizado para evitar comportamentos indesejados
+                    const event = new Event('change', { bubbles: true });
+                    
+                    // Adicionar um ouvinte de evento para capturar alterações
+                    const originalValue = el.value;
+                    const tempListener = () => {
+                        console.log(`Campo ${field} alterado de '${originalValue}' para '${el.value}'`);
+                        el.removeEventListener('change', tempListener);
+                    };
+                    el.addEventListener('change', tempListener);
+                    
+                    // Disparar o evento
+                    el.dispatchEvent(event);
+                    
+                    // Verificar se o valor foi alterado pelo evento
+                    if (el.value !== originalValue) {
+                        console.warn(`ATENÇÃO: O valor de ${field} foi alterado pelo evento change!`);
+                    }
                 } catch(e) {
                     console.warn(`Erro ao disparar evento change em ${field}:`, e);
                 }
+                
+                // Verificar novamente após um pequeno atraso
+                setTimeout(() => {
+                    console.log(`Valor de ${field} após eventos:`, el.value);
+                }, 100);
             }
         });
 
@@ -2836,8 +2915,13 @@ async function submitAgendamentoForm(form, isEdit = false) {
                         const [y, m, d] = ag.data.split('-').map(Number);
                         const [hh, mm] = ag.horaInicio.split(':');
                         
-                        // Criar a data local diretamente sem ajustes de fuso horário
-                        const localDate = new Date(y, m - 1, d, hh, mm || 0, 0, 0);
+                        // Criar a data no fuso horário local (já que o banco retorna no fuso correto)
+                        // Usar a string ISO para evitar problemas de fuso horário
+                        const dateStr = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}T${String(hh).padStart(2, '0')}:${String(mm || '00').padStart(2, '0')}:00`;
+                        const localDate = new Date(dateStr);
+                        
+                        // Garantir que a data seja tratada como horário local
+                        const localTime = new Date(localDate.getTime() - (localDate.getTimezoneOffset() * 60000));
                         
                         // Debug: Verificar estrutura do objeto ag
                         console.log('Processando agendamento - Estrutura completa:', ag);
@@ -2931,226 +3015,194 @@ async function submitAgendamentoForm(form, isEdit = false) {
             return true;
         }
 
-        // Função para verificar e atualizar status dos agendamentos
-        async function verificarEAtualizarStatus() {
+        // Função para verificar e atualizar status dos agendamentos para EM_ANDAMENTO
+        async function verificarAgendamentosEmAndamento() {
+            console.log('Verificando agendamentos em andamento...', new Date().toLocaleTimeString());
+            const agora = new Date();
+            
             try {
-                console.log('Iniciando verificação de status dos agendamentos...');
-                const agora = new Date();
+                // Obter todos os agendamentos do dia atual
+                const hoje = new Date();
+                // Ajustar para o fuso horário local
+                const offset = hoje.getTimezoneOffset();
+                hoje.setMinutes(hoje.getMinutes() - offset);
                 
-                // Formatar data para YYYY-MM-DD (mesmo formato usado em loadAppointmentsForDate)
-                const year = agora.getFullYear();
-                const month = String(agora.getMonth() + 1).padStart(2, '0');
-                const day = String(agora.getDate()).padStart(2, '0');
-                const dateStr = `${year}-${month}-${day}`;
+                const dataFormatada = hoje.toISOString().split('T')[0];
+                console.log('Buscando agendamentos para a data (local):', dataFormatada);
                 
-                console.log('Buscando agendamentos para a data:', dateStr);
-                const response = await fetchWithAuth(`/api/agendamentos?data=${dateStr}`);
+                // Buscar agendamentos do dia atual
+                const response = await fetchWithAuth(`/api/agendamentos?data=${dataFormatada}`);
                 
-                if (!response || !response.ok) {
-                    console.error('Erro ao buscar agendamentos:', response?.statusText);
+                // Também buscar agendamentos do dia anterior que ainda não foram finalizados
+                const ontem = new Date(hoje);
+                ontem.setDate(ontem.getDate() - 1);
+                const dataOntem = ontem.toISOString().split('T')[0];
+                console.log('Buscando também agendamentos de ontem (para garantir):', dataOntem);
+                
+                const responseOntem = await fetchWithAuth(`/api/agendamentos?data=${dataOntem}`);
+                
+                if (!response) {
+                    console.log('Nenhuma resposta da API de agendamentos');
                     return;
                 }
                 
-                const body = await response.json();
-                console.log('Resposta da API de agendamentos:', body);
-                
-                // Processar resposta da API da mesma forma que em loadAppointmentsForDate
                 let agendamentos = [];
-                if (Array.isArray(body)) {
-                    agendamentos = body;
-                } else if (body && Array.isArray(body.data)) {
-                    agendamentos = body.data;
+                
+                // Processar resposta do dia atual
+                if (response && response.ok) {
+                    const body = await response.json();
+                    console.log('Resposta da API (hoje):', body);
+                    
+                    if (Array.isArray(body)) {
+                        agendamentos = [...agendamentos, ...body];
+                    } else if (body && Array.isArray(body.data)) {
+                        agendamentos = [...agendamentos, ...body.data];
+                    }
                 }
                 
-                console.log(`${agendamentos.length} agendamentos encontrados para verificação`);
+                // Processar resposta de ontem
+                if (responseOntem && responseOntem.ok) {
+                    const bodyOntem = await responseOntem.json();
+                    console.log('Resposta da API (ontem):', bodyOntem);
+                    
+                    if (Array.isArray(bodyOntem)) {
+                        agendamentos = [...agendamentos, ...bodyOntem];
+                    } else if (bodyOntem && Array.isArray(bodyOntem.data)) {
+                        agendamentos = [...agendamentos, ...bodyOntem.data];
+                    }
+                }
                 
-                // Mapear para o formato esperado
-                const agendamentosMapeados = agendamentos.map(ag => {
-                    if (!ag.data || !ag.horaInicio) {
-                        console.log('Agendamento sem data ou hora:', ag);
-                        return null;
+                console.log(`Total de agendamentos encontrados: ${agendamentos.length}`);
+                
+                // Filtrar apenas agendamentos que ainda não foram concluídos
+                agendamentos = agendamentos.filter(ag => 
+                    !['FINALIZADO', 'CANCELADO', 'FALTOU', 'CONCLUIDO'].includes(ag.status)
+                );
+                
+                console.log(`Agendamentos ativos: ${agendamentos.length}`);
+                
+                // Verificar cada agendamento
+                for (const ag of agendamentos) {
+                    console.log('Verificando agendamento:', ag.id, '- Status atual:', ag.status, '- Hora:', ag.horaInicio);
+                    
+                    // Pular se já estiver em andamento, finalizado, cancelado ou faltou
+                    if (['EM_ANDAMENTO', 'FINALIZADO', 'CANCELADO', 'FALTOU', 'CONCLUIDO'].includes(ag.status)) {
+                        console.log(`Agendamento ${ag.id} já está com status ${ag.status}, pulando...`);
+                        continue;
                     }
                     
-                    try {
-                        // Obter data e hora diretamente do banco de dados
-                        const [y, m, d] = ag.data.split('-').map(Number);
-                        const [hh, mm] = ag.horaInicio.split(':');
-                        
-                        // Criar a data local diretamente sem ajustes de fuso horário
-                        const dataHoraAgendamento = new Date(y, m - 1, d, hh, mm || 0, 0, 0);
-                        
-                        // Calcular horário de término (início + duração em minutos)
-                        const duracaoMinutos = ag.duracao || 30; // Default 30 minutos se não informado
-                        const dataHoraTermino = new Date(dataHoraAgendamento.getTime() + (duracaoMinutos * 60000));
-                        
-                        // Extrair informações do profissional
-                        let profissionalId = ag.profissionalId || ag.profissional_id || ag.profissional?.id || ag.profissional?._id || null;
-                        
-                        return {
-                            id: ag.id,
-                            data: ag.data,
-                            horaInicio: ag.horaInicio,
-                            duracao: duracaoMinutos,
-                            status: (ag.status || 'AGENDADO').toUpperCase(),
-                            dataHora: dataHoraAgendamento,
-                            dataHoraTermino: dataHoraTermino,
-                            profissionalId: profissionalId,
-                            clienteId: ag.clienteId || ag.cliente_id || ag.cliente?.id || ag.cliente?._id || null,
-                            procedimentoId: ag.procedimentoId || ag.procedimento_id || ag.procedimento?.id || ag.procedimento?._id || null
-                        };
-                    } catch (e) {
-                        console.error('Erro ao processar agendamento:', ag, e);
-                        return null;
-                    }
-                }).filter(Boolean);
-                
-                console.log(`${agendamentosMapeados.length} agendamentos processados`);
-                
-                // 1. Verificar agendamentos que devem iniciar (AGENDADO -> EM_ANDAMENTO)
-                const agendamentosParaIniciar = agendamentosMapeados.filter(ag => {
-                    // Pular agendamentos já finalizados ou cancelados
-                    if (ag.status !== 'AGENDADO') {
-                        return false;
-                    }
+                    // Obter data/hora do agendamento
+                    const [ano, mes, dia] = ag.data.split('-').map(Number);
+                    const [hora, minuto] = ag.horaInicio.split(':').map(Number);
+                    const dataHoraAgendamento = new Date(ano, mes - 1, dia, hora, minuto);
                     
-                    // Verificar se o horário do agendamento já passou
-                    return agora >= ag.dataHora && agora < ag.dataHoraTermino;
-                });
-                
-                console.log(`${agendamentosParaIniciar.length} agendamentos para iniciar`);
-                
-                // 2. Verificar agendamentos que devem ser finalizados (EM_ANDAMENTO -> FINALIZADO)
-                const agendamentosParaFinalizar = agendamentosMapeados.filter(ag => {
-                    // Pular agendamentos que não estão em andamento
-                    if (ag.status !== 'EM_ANDAMENTO') {
-                        return false;
-                    }
+                    console.log('Agendamento:', {
+                        id: ag.id,
+                        data: ag.data,
+                        horaInicio: ag.horaInicio,
+                        dataHoraAgendamento: dataHoraAgendamento,
+                        agora: agora,
+                        deveAtualizar: agora >= dataHoraAgendamento
+                    });
                     
-                    // Verificar se o horário de término já passou
-                    return agora >= ag.dataHoraTermino;
-                });
-                
-                console.log(`${agendamentosParaFinalizar.length} agendamentos para finalizar`);
-                
-                // Função auxiliar para atualizar o status de um agendamento
-                async function atualizarStatusAgendamento(agendamento, novoStatus) {
-                    try {
-                        console.log(`Atualizando agendamento ${agendamento.id} para ${novoStatus}...`);
-                        
-                        // Preparar os dados para atualização
-                        const updateData = {
-                            status: novoStatus,
-                            data: agendamento.data,
-                            horaInicio: agendamento.horaInicio
-                        };
-                        
-                        // Incluir apenas os campos que existem no objeto
-                        if (agendamento.profissionalId) updateData.profissionalId = agendamento.profissionalId;
-                        if (agendamento.clienteId) updateData.clienteId = agendamento.clienteId;
-                        if (agendamento.procedimentoId) updateData.procedimentoId = agendamento.procedimentoId;
-                        
-                        const response = await fetchWithAuth(`/api/agendamentos/${agendamento.id}`, {
-                            method: 'PATCH',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(updateData)
-                        });
-                        
-                        if (!response.ok) {
-                            const error = await response.text();
-                            throw new Error(`HTTP ${response.status}: ${error}`);
-                        }
-                        
-                        const result = await response.json();
-                        console.log('Resposta da API:', result);
-                        
-                        // Atualizar a interface do usuário
-                        if (result && result.success) {
-                            // Atualizar o item na lista
-                            const itemElement = document.querySelector(`[data-id="${agendamento.id}"]`);
-                            if (itemElement) {
-                                const statusElement = itemElement.querySelector('.badge');
-                                if (statusElement) {
-                                    if (novoStatus === 'EM_ANDAMENTO') {
-                                        statusElement.className = 'badge bg-warning text-dark';
-                                        statusElement.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>EM ANDAMENTO';
-                                    } else if (novoStatus === 'FINALIZADO') {
-                                        statusElement.className = 'badge bg-success text-white';
-                                        statusElement.innerHTML = '<i class="bi bi-check-circle me-1"></i>FINALIZADO';
-                                    }
-                                    itemElement.setAttribute('data-status', novoStatus);
-                                }
+                    // Se o horário do agendamento já passou e ainda não começou
+                    if (agora >= dataHoraAgendamento) {
+                        console.log(`Atualizando agendamento ${ag.id} para EM_ANDAMENTO`);
+                        // Atualizar status para EM_ANDAMENTO
+                        try {
+                            console.log(`Enviando requisição PATCH para /api/agendamentos/${ag.id}/status`);
+                            const updateResponse = await fetchWithAuth(`/api/agendamentos/${ag.id}/status`, {
+                                method: 'PATCH',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({ status: 'EM_ANDAMENTO' })
+                            });
+                            
+                            if (!updateResponse) {
+                                console.error('Nenhuma resposta ao tentar atualizar o status');
+                                return;
                             }
                             
-                            // Atualizar o calendário
-                            const calendarDay = document.querySelector(`[data-date="${agendamento.data}"]`);
-                            if (calendarDay) {
-                                calendarDay.classList.add('has-appointments');
+                            console.log('Resposta da atualização:', {
+                                status: updateResponse.status,
+                                statusText: updateResponse.statusText,
+                                ok: updateResponse.ok
+                            });
+                            
+                            const updateResult = await updateResponse.json().catch(e => {
+                                console.error('Erro ao fazer parse da resposta:', e);
+                                return null;
+                            });
+                            
+                            console.log('Resultado da atualização:', updateResult);
+                            
+                            console.log(`Status do agendamento ${ag.id} atualizado para EM_ANDAMENTO`);
+                            
+                            // Atualizar o status diretamente no DOM para feedback imediato
+                            const statusElement = document.querySelector(`[data-agendamento-id="${ag.id}"] .status-badge`);
+                            if (statusElement) {
+                                statusElement.textContent = 'EM_ANDAMENTO';
+                                statusElement.className = 'badge bg-warning text-dark status-badge status-EM_ANDAMENTO';
+                                console.log(`Interface atualizada para o agendamento ${ag.id}`);
                             }
                             
-                            console.log(`Agendamento ${agendamento.id} atualizado para ${novoStatus}`);
-                            return true;
+                            // Recarregar a lista de agendamentos para garantir consistência
+                            if (window.currentListDate) {
+                                console.log('Recarregando lista de agendamentos...');
+                                loadAppointmentsForDate(window.currentListDate);
+                                
+                                // Forçar atualização da interface
+                                const event = new CustomEvent('agendamentoAtualizado', { detail: { id: ag.id, status: 'EM_ANDAMENTO' } });
+                                document.dispatchEvent(event);
+                            }
+                        } catch (error) {
+                            console.error('Erro ao atualizar status do agendamento:', error);
                         }
-                        
-                        return false;
-                        
-                    } catch (error) {
-                        console.error(`Erro ao atualizar agendamento ${agendamento.id} para ${novoStatus}:`, error);
-                        return false;
                     }
                 }
-                
-                // 3. Processar agendamentos para iniciar
-                for (const ag of agendamentosParaIniciar) {
-                    await atualizarStatusAgendamento(ag, 'EM_ANDAMENTO');
-                }
-                
-                // 4. Processar agendamentos para finalizar
-                for (const ag of agendamentosParaFinalizar) {
-                    await atualizarStatusAgendamento(ag, 'FINALIZADO');
-                }
-                
             } catch (error) {
-                console.error('Erro na verificação de status dos agendamentos:', error);
+                console.error('Erro ao verificar agendamentos em andamento:', error);
             }
         }
 
         // Inicialização da página
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('Página carregada, inicializando...');
-            
-            if (!checkAuth()) {
-                console.log('Usuário não autenticado, redirecionando...');
-                return;
-            }
-            
-            console.log('Inicializando tooltips...');
-            // Inicializar tooltips
-            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-            tooltipTriggerList.map(function (tooltipTriggerEl) {
-                return new bootstrap.Tooltip(tooltipTriggerEl, {
-                    trigger: 'hover',
-                    delay: {show: 300, hide: 100}
-                });
-            });
-            
-            // Inicializar a barra lateral
-            if (window.initSidebar) {
-                console.log('Inicializando barra lateral...');
-                window.initSidebar();
-            }
-            
-            console.log('Configurando eventos...');
-            // Configurar eventos
-            setupEventListeners();
-            
-            // Carregar dados iniciais
-            console.log('Carregando dados iniciais...');
-            loadInitialData().then(() => {
-                console.log('Dados iniciais carregados com sucesso');
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                console.log('Página carregada, inicializando...');
                 
-                // Inicializar o calendário após carregar os dados
-                console.log('Renderizando calendário...');
+                if (!checkAuth()) {
+                    console.log('Usuário não autenticado, redirecionando...');
+                    return;
+                }
+                
+                console.log('Inicializando tooltips...');
+                // Inicializar tooltips
+                var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                tooltipTriggerList.map(function (tooltipTriggerEl) {
+                    return new bootstrap.Tooltip(tooltipTriggerEl, {
+                        trigger: 'hover',
+                        delay: {show: 300, hide: 100}
+                    });
+                });
+                
+                // Inicializar a barra lateral
+                if (window.initSidebar) {
+                    console.log('Inicializando barra lateral...');
+                    window.initSidebar();
+                }
+                
+                console.log('Configurando eventos...');
+                // Configurar eventos
+                setupEventListeners();
+                
+                // Carregar dados iniciais
+                console.log('Carregando dados iniciais...');
+                await loadInitialData();
+                
+                // Inicializar o calendário
                 renderCalendar();
+                updateSelectedDate();
                 
                 // Configurar o formulário
                 console.log('Configurando formulário...');
@@ -3163,22 +3215,14 @@ async function submitAgendamentoForm(form, isEdit = false) {
                     });
                 }
                 
-                // Verificar status dos agendamentos a cada minuto
-                console.log('Configurando verificação periódica de status...');
-                setInterval(verificarEAtualizarStatus, 60000); // 60 segundos
+                // Iniciar verificação de agendamentos em andamento (verifica a cada minuto)
+                setInterval(verificarAgendamentosEmAndamento, 60000);
+                // Executar uma verificação imediatamente após um pequeno atraso
+                setTimeout(verificarAgendamentosEmAndamento, 2000);
                 
-                // Verificar imediatamente após um curto atraso
-                console.log('Agendando verificação inicial de status...');
-                setTimeout(() => {
-                    console.log('Executando verificação inicial de status...');
-                    verificarEAtualizarStatus().catch(error => {
-                        console.error('Erro na verificação inicial de status:', error);
-                    });
-                }, 3000); // Aguarda 3 segundos para garantir que tudo esteja carregado
-                
-            }).catch(error => {
-                console.error('Erro ao carregar dados iniciais:', error);
-            });
+            } catch (error) {
+                console.error('Erro ao inicializar a página:', error);
+            }
         });
     </script>
 </body>

@@ -1,7 +1,9 @@
 const { PrismaClient } = require("@prisma/client");
 
 // Cria uma nova instância do Prisma Client
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({
+    log: ['warn', 'error'] // Desabilita logs de consulta, mantendo apenas avisos e erros
+});
 
 /**
  * Estabelece conexão com o banco de dados usando o Prisma Client

@@ -1,6 +1,6 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient({
-  log: ['query', 'info', 'warn', 'error'],
+  log: ['warn', 'error'],
   errorFormat: 'pretty'
 });
 
@@ -50,12 +50,6 @@ process.on('beforeExit', async () => {
  */
 const criarAgendamento = async (req, res) => {
     try {
-        console.log('Recebendo criarAgendamento - headers:', {
-            host: req.headers.host,
-            origin: req.headers.origin,
-            authorization: req.headers.authorization ? '[REDACTED]' : undefined
-        });
-        console.log('Recebendo criarAgendamento - body:', req.body);
 
         const { 
             clienteId, 
@@ -70,15 +64,16 @@ const criarAgendamento = async (req, res) => {
             horaInicio: horaInicioRaw
         } = req.body;
 
-        // Função para converter a string recebida para Date sem alterar o valor
-        // Nota: aqui NÃO ajustamos/subtraímos o timezone — vamos armazenar o instante que o cliente enviou.
-        // Se o cliente enviar uma string com timezone (ex: '...Z' ou '+03:00'), ela será interpretada com esse timezone.
-        // Se enviar sem timezone, será interpretada pelo Node como local do servidor.
+        // Função para converter a string recebida para Date e ajustar o fuso horário
+        // Subtrai 3 horas para compensar a diferença de fuso horário com o banco de dados (Neon - EUA)
         const ajustarData = (dataString) => {
             if (!dataString) return null;
             const data = new Date(dataString);
             if (isNaN(data.getTime())) return null;
-            return data;
+            
+            // Subtrai 3 horas (3 * 60 * 60 * 1000 milissegundos)
+            const dataAjustada = new Date(data.getTime() - (3 * 60 * 60 * 1000));
+            return dataAjustada;
         };
 
         // Validações básicas e mensagens claras para o cliente
@@ -140,7 +135,6 @@ const criarAgendamento = async (req, res) => {
                 console.error('Erro ao buscar procedimento para validação:', errFind);
             }
 
-            console.log('Validando procedimento recebido:', { procedimentoIdNum, encontrado: !!procedimentoEncontrado, procedimento: procedimentoEncontrado ? { id: procedimentoEncontrado.id, name: procedimentoEncontrado.name || procedimentoEncontrado.nome } : null });
 
             if (!procedimentoEncontrado) {
                 return res.status(400).json({ success: false, error: 'Procedimento não encontrado', procedimentoId: procedimentoIdNum });
@@ -175,7 +169,6 @@ const criarAgendamento = async (req, res) => {
                 procedimentoNome: procedimentoEncontrado.name || procedimentoEncontrado.nome || (agendamento.procedimentos ? (agendamento.procedimentos.name || agendamento.procedimentos.nome) : null)
             };
 
-            console.log('Agendamento criado com sucesso:', { id: agendamento.id, procedimentoId: procedimentoIdNum, procedimentoNome: agendamentoComCampos.procedimentoNome, data: agendamentoComCampos.data, horaInicio: agendamentoComCampos.horaInicio });
             return res.status(201).json({ success: true, data: agendamentoComCampos });
         } catch (prismaError) {
             console.error('Prisma error ao criar agendamento:', prismaError);
@@ -226,12 +219,6 @@ const verificarDisponibilidade = async (req, res) => {
         const dataInicioAjustada = parseDate(dataInicio);
         const dataFimAjustada = parseDate(dataFim);
         
-        console.log('Verificando disponibilidade:', {
-            profissionalId,
-            dataInicio: dataInicioAjustada.toISOString(),
-            dataFim: dataFimAjustada.toISOString(),
-            agendamentoId: req.query.agendamentoId || null
-        });
 
         // Construir o objeto de consulta base
         const whereClause = {
@@ -271,7 +258,6 @@ const verificarDisponibilidade = async (req, res) => {
             if (!isNaN(agendamentoId) && agendamentoId > 0) {
                 whereClause.NOT = whereClause.NOT || {};
                 whereClause.NOT.id = agendamentoId;
-                console.log('Excluindo agendamento atual da verificação:', agendamentoId);
             }
         }
 
@@ -574,9 +560,7 @@ const cancelarAgendamento = async (req, res) => {
 /**
  * Lista todos os agendamentos (apenas para administradores)
  */
-const listarAgendamentos = async (req, res) => {
-    console.log('Recebida requisição para listar agendamentos com query:', req.query);
-    
+const listarAgendamentos = async (req, res) => {    
     try {
         const { data, start, end } = req.query;
 
@@ -591,12 +575,6 @@ const listarAgendamentos = async (req, res) => {
                     throw new Error('Parâmetros start/end inválidos');
                 }
 
-                console.log('Período de busca recebido diretamente (start/end):', {
-                    inicio: startOfDay.toISOString(),
-                    fim: endOfDay.toISOString(),
-                    inicioLocal: startOfDay.toString(),
-                    fimLocal: endOfDay.toString()
-                });
             } else if (data) {
                 // Espera data no formato YYYY-MM-DD (representando o dia no fuso do usuário)
                 const parts = data.split('-');
@@ -612,15 +590,7 @@ const listarAgendamentos = async (req, res) => {
                 startOfDay = new Date(year, month, day, 0, 0, 0, 0);
                 endOfDay = new Date(year, month, day, 23, 59, 59, 999);
 
-                console.log('Período de busca construído a partir de data:', {
-                    data,
-                    inicio: startOfDay.toISOString(),
-                    fim: endOfDay.toISOString(),
-                    inicioLocal: startOfDay.toString(),
-                    fimLocal: endOfDay.toString()
-                });
             } else {
-                console.error('Erro: Parâmetro "data" ou "start"/"end" não fornecido');
                 return res.status(400).json({ 
                     success: false,
                     error: 'Parâmetro "data" ou "start"/"end" é obrigatório' 
@@ -636,7 +606,6 @@ const listarAgendamentos = async (req, res) => {
         }
 
         try {
-            console.log('Iniciando consulta ao banco de dados...');
             const agendamentos = await prisma.agendamentos.findMany({
                 where: {
                     startTime: {
@@ -677,7 +646,6 @@ const listarAgendamentos = async (req, res) => {
                 }
             });
 
-            console.log(`Encontrados ${agendamentos.length} agendamentos`);
 
             // Se não houver agendamentos, retornar array vazio
             if (!agendamentos || agendamentos.length === 0) {
@@ -747,30 +715,17 @@ const listarAgendamentos = async (req, res) => {
                 }
             }).filter(Boolean); // Remove entradas nulas
 
-            console.log('Agendamentos formatados com sucesso');
             return res.json({
                 success: true,
                 data: agendamentosFormatados
             });
 
         } catch (dbError) {
-            console.error('Erro na consulta ao banco de dados:', {
-                message: dbError.message,
-                stack: dbError.stack,
-                query: {
-                    startTime: startOfDay,
-                    endTime: endOfDay
-                }
-            });
+            console.error('Erro na consulta ao banco de dados:', dbError.message);
             throw dbError;
         }
     } catch (error) {
-        console.error('Erro ao listar agendamentos:', {
-            message: error.message,
-            stack: error.stack,
-            query: req.query,
-            timestamp: new Date().toISOString()
-        });
+        console.error('Erro ao listar agendamentos:', error.message);
         
         return res.status(500).json({ 
             success: false,
@@ -795,8 +750,8 @@ const buscarAgendamentosPorPeriodo = async (req, res) => {
             });
         }
         
-        // Função para validar e ajustar data
-        const ajustarData = (dataString) => {
+        // Função para validar data
+        const validarData = (dataString) => {
             if (!dataString) return null;
             
             const data = new Date(dataString);
@@ -804,13 +759,12 @@ const buscarAgendamentosPorPeriodo = async (req, res) => {
                 throw new Error('Data inválida fornecida');
             }
             
-            // Ajusta para o fuso horário local sem alterar o horário
-            return new Date(data.getTime() - (data.getTimezoneOffset() * 60000));
+            return data;
         };
         
-        // Validar e ajustar as datas
-        const dataInicioAjustada = ajustarData(dataInicio);
-        const dataFimAjustada = ajustarData(dataFim);
+        // Validar as datas
+        const dataInicioAjustada = validarData(dataInicio);
+        const dataFimAjustada = validarData(dataFim);
         
         if (!dataInicioAjustada || !dataFimAjustada) {
             return res.status(400).json({
